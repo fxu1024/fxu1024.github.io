@@ -14,8 +14,8 @@ parent: CDP Base
 
 ## rendered manifests contain a resource that already exists
 
----    
-DESCRIPTION: {: .label .label-green } 
+DESCRIPTION: 
+{: .label .label-green } 
 
 - failed to activate CDE service
 
@@ -24,12 +24,13 @@ DESCRIPTION: {: .label .label-green }
 Sep 7, 2021, 9:40:30 AM:LogError:dex-base, version 1.10.0 installation failed, dex-base installation failed, rendered manifests contain a resource that already exists. Unable to continue with install: existing resource conflict: namespace: , name: pvccde-dex-base-dex-base-configs-manager, existing_kind: rbac.authorization.k8s.io/v1, Kind=ClusterRole, new_kind: rbac.authorization.k8s.io/v1, Kind=ClusterRole
 ```
 --- 
-CAUSE CONFIRMED: {: .label .label-green }
+  CAUSE CONFIRMED: 
+  {: .label .label-red }
 
 - Deleting from the CDE UI does not delete the backend database. 
-
----  
-SOLUTION: {: .label .label-green } 
+ 
+SOLUTION: 
+{: .label .label-yellow } 
    
 ```bash
 kubectl exec -it cdp-embedded-db-0 -n cp -- bash
