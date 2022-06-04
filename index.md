@@ -10,9 +10,9 @@ permalink: /
 
 ---
 
-[CDP Base]({{ site.baseurl }}{% link docs/base/0_base.md %}){: .btn .btn-blue .fs-5 .mb-4 .mb-md-0 .mr-2 }
+[CDP Base]({{ site.baseurl }}{% link docs/base/base.md %}){: .btn .btn-blue .fs-5 .mb-4 .mb-md-0 .mr-2 }
 
-[CDP Data Services]({{ site.baseurl }}{% link docs/ds/0_ds.md %}){: .btn .btn-blue .fs-5 .mb-4 .mb-md-0 .mr-2 }
+[CDP Data Services]({{ site.baseurl }}{% link docs/ds/ds.md %}){: .btn .btn-blue .fs-5 .mb-4 .mb-md-0 .mr-2 }
 
 
 
