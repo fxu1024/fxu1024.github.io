@@ -6,7 +6,7 @@ has_children: true
 parent: Data Service
 ---
 
-# Issue List
+# DS Issues
 {: .no_toc }
 
 - TOC
