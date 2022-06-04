@@ -2,7 +2,7 @@
 layout: default
 title: how to build work node
 nav_order: 2
-parent: operations
+parent: Operations
 grand_parent: Data Service
 ---
 

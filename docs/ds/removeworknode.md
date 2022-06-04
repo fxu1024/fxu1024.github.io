@@ -2,7 +2,7 @@
 layout: default
 title: how to remove work node
 nav_order: 1
-parent: operations
+parent: Operations
 grand_parent: Data Service
 ---
 
