@@ -4,7 +4,6 @@ title: Issues
 nav_order: 3
 has_children: true
 parent: Data Service
-grand_parent: CDP Private Cloud
 ---
 
 # Issue List
