@@ -1,7 +1,10 @@
 ---
 layout: default
 title: Issues
+nav_order: 3
+has_children: true
 parent: Data Service
+grand_parent: CDP Private Cloud
 ---
 
 # Issue List
@@ -56,7 +59,7 @@ Process install-cp (id=1546338729) on host ip-10-113-204-13.se.fuse.cloudera.com
 + ./install-cdp.sh -n cp
 + popd
 + pushd logs
-+ python /opt/cloudera/cm-agent/service/ecs/get_creds.py https://console-cp.apps.ip-10-113-204-13.se.fuse.cloudera.com
++ python /opt/cloudera/cm-agent/service/ecs/get_creds.py https://console-cp.apps.ecs-ycloud.sme-feng.athens.cloudera.com
 Traceback (most recent call last):
   File "/opt/cloudera/cm-agent/service/ecs/get_creds.py", line 64, in <module>
     result = generate_initial_access_and_private_keys(sys.argv[1])
@@ -80,7 +83,7 @@ requests.exceptions.ConnectionError: ('Connection aborted.', gaierror(-2, 'Name 
 CAUSE CONFIRMED: 
 {: .label .label-red }
 
-- need to define wildcard DNS entry "*.apps.ip-10-113-204-13.se.fuse.cloudera.com"
+- need to define wildcard DNS entry `*.apps.ecs-ycloud.sme-feng.athens.cloudera.com`
 
 ---  
 SOLUTION: 
@@ -98,7 +101,7 @@ conf-dir=/etc/dnsmasq.d" > /etc/dnsmasq.conf
 systemctl restart dnsmasq
 ```
 
-## n. template
+## n. issue template
 
 --- 
 DESCRIPTION: 
