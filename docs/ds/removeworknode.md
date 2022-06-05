@@ -23,16 +23,16 @@ grand_parent: Data Service
 |Whether to enable TLS |Yes|
 |Auto-TLS |No, using manual TLS|
 
-|IP addresss |hostname |description|
-|10.113.207.140	|feng-base.sme-feng.athens.cloudera.com |CDP Base cluster only a single node|
-|10.113.207.141	|feng-ws1.sme-feng.athens.cloudera.com |ECS master node 1|
-|10.113.207.142	|feng-ws2.sme-feng.athens.cloudera.com |ECS master node 2|
-|10.113.207.143	|feng-ws3.sme-feng.athens.cloudera.com |ECS master node 3|
-|10.113.207.144	|feng-ws4.sme-feng.athens.cloudera.com |ECS worker node 1|
-|10.113.207.145	|feng-ws5.sme-feng.athens.cloudera.com |ECS worker node 2|
-|10.113.207.146	|feng-ws6.sme-feng.athens.cloudera.com |ECS worker node 3|
+|IP addresss |hostname |description|
+|10.113.207.140	|feng-base.sme-feng.athens.cloudera.com |CDP Base cluster only a single node|
+|10.113.207.141	|feng-ws1.sme-feng.athens.cloudera.com |ECS master node 1|
+|10.113.207.142	|feng-ws2.sme-feng.athens.cloudera.com |ECS master node 2|
+|10.113.207.143	|feng-ws3.sme-feng.athens.cloudera.com |ECS master node 3|
+|10.113.207.144	|feng-ws4.sme-feng.athens.cloudera.com |ECS worker node 1|
+|10.113.207.145	|feng-ws5.sme-feng.athens.cloudera.com |ECS worker node 2|
+|10.113.207.146	|feng-ws6.sme-feng.athens.cloudera.com |ECS worker node 3|
 
-## 2. let's check if node feng-ws6.sme-feng.athens.cloudera.com is going down.
+## 2. Check if node feng-ws6.sme-feng.athens.cloudera.com is going down.
 
 - error 1: Failed to receive heartbeat from agent feng-ws6
 
@@ -81,7 +81,7 @@ kubectl get node
 
 
 
-## 4. Remove the node From a Cluster
+## 4. Remove node From ECS Cluster
 
 - In the Cloudera Manager Admin Console, go to Hosts > All Hosts. Select the hosts to delete.
 
@@ -90,7 +90,7 @@ kubectl get node
 - Leave the selections to decommission roles and skip removing the Cloudera Management Service roles. Click Confirm to proceed with removing the selected hosts.
 
 
-## 5. Remove the node From Cloudera Manager
+## 5. Remove node From Cloudera Manager
 
 - In the Cloudera Manager Admin Console, go to Hosts > All Hosts. Select the hosts to delete.
 

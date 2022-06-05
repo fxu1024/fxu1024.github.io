@@ -23,14 +23,14 @@ grand_parent: Data Service
 |Whether to enable TLS |Yes|
 |Auto-TLS |No, using manual TLS|
 
-|IP addresss |hostname |description|
-|10.113.207.140	|feng-base.sme-feng.athens.cloudera.com |CDP Base cluster only a single node|
-|10.113.207.141	|feng-ws1.sme-feng.athens.cloudera.com |ECS master node 1|
-|10.113.207.142	|feng-ws2.sme-feng.athens.cloudera.com |ECS master node 2|
-|10.113.207.143	|feng-ws3.sme-feng.athens.cloudera.com |ECS master node 3|
-|10.113.207.144	|feng-ws4.sme-feng.athens.cloudera.com |ECS worker node 1|
-|10.113.207.145	|feng-ws5.sme-feng.athens.cloudera.com |ECS worker node 2|
-|10.113.207.146	|feng-ws6.sme-feng.athens.cloudera.com |ECS worker node 3|
+|IP addresss |hostname |description|
+|10.113.207.140	|feng-base.sme-feng.athens.cloudera.com |CDP Base cluster only a single node|
+|10.113.207.141	|feng-ws1.sme-feng.athens.cloudera.com |ECS master node 1|
+|10.113.207.142	|feng-ws2.sme-feng.athens.cloudera.com |ECS master node 2|
+|10.113.207.143	|feng-ws3.sme-feng.athens.cloudera.com |ECS master node 3|
+|10.113.207.144	|feng-ws4.sme-feng.athens.cloudera.com |ECS worker node 1|
+|10.113.207.145	|feng-ws5.sme-feng.athens.cloudera.com |ECS worker node 2|
+|10.113.207.146	|feng-ws6.sme-feng.athens.cloudera.com |ECS worker node 3|
 
 ## 2. Create new work node
 
@@ -133,8 +133,8 @@ sed -i 's/4096/65536/' /etc/security/limits.d/20-nproc.conf
 
 ## 4. Configuring TLS Authentication of CM Agent to the CM Server
 
-**_NOTE:_**  
 - You can skip this section if you are using Auto-TLS which will automatically generate TLS certificates.
+
 - Each new host needs to have a private key and a Cert Signing Request (CSR) created. 
 Those CSRs must get signed by the CA on Cloudera Manager if you used ClouderaDeploy playbook initially, if not still need new csrs & a new key for the host, but you will have their own process to get the csr signed. Otherwise you could use self-signed certs, thats not covered here and is least desirable option
 
@@ -162,6 +162,7 @@ openssl x509 -in ${host}.pem -text -noout
 - Copy to the work node (copy the signed cert (.pem), the key file (.key) and the trust store file (chain.pem), dont need to copy the csr file, dont need to copy any jks file)
 ```bash
 scp chain.pem ${host}.pem ${host}.key cloudera@${host}:/tmp
+```
 
 - Open SSH terminal for work node and move the above files to pki dir 
 ```bash
@@ -196,7 +197,6 @@ sed -i 's/^use_tls=0/use_tls=1/' /etc/cloudera-scm-agent/config.ini
 sed -i 's/^# verify_cert_file=/verify_cert_file=\/opt\/cloudera\/security\/pki\/chain.pem/' /etc/cloudera-scm-agent/config.ini
 sed -i 's/^# client_key_file=/client_key_file=\/opt\/cloudera\/security\/pki\/host.key/' /etc/cloudera-scm-agent/config.ini
 sed -i 's/^# client_cert_file=/client_cert_file=\/opt\/cloudera\/security\/pki\/host.pem/' /etc/cloudera-scm-agent/config.ini
-
 systemctl restart cloudera-scm-agent
 systemctl status  cloudera-scm-agent
 ```
@@ -218,7 +218,6 @@ gpgkey = https://archive.cloudera.com/p/cm7/7.5.5/redhat7/yum/RPM-GPG-KEY-cloude
 name = Cloudera Manager
 password = xxx
 username = xxx" > /etc/yum.repos.d/cloudera-manager.repo
-
 yum clean all
 ```
 
