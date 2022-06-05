@@ -98,6 +98,8 @@ feng-ws5.sme-feng.athens.cloudera.com   Ready    <none>                      22d
 
 - Leave the selections to decommission roles and skip removing the Cloudera Management Service roles. Click Confirm to proceed with removing the selected hosts.
 
+![](../../assets/images/ds/removenode04.png)
+
 
 ## 5. Remove node From Cloudera Manager
 
