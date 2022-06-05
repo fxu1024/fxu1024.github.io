@@ -105,9 +105,16 @@ feng-ws5.sme-feng.athens.cloudera.com   Ready    <none>                      22d
 
 - In the Cloudera Manager Admin Console, go to Hosts > All Hosts. Select the hosts to delete.
 
-- Select Actions for Selected > Hosts Decommission.
-
-- Stop the Agent on the host.
+![](../../assets/images/ds/removenode05.png)
 
 - Select Actions for Selected > Remove from Cloudera Manager.
+
+![](../../assets/images/ds/removenode06.png)
+
+- Click Confirm to remove the failed host from Cloudera Manager.
+
+![](../../assets/images/ds/removenode07.png)
+
+
+## 6. If you want to replace this failed node with a new one, you need destroy node feng-ws6, then refer to the steps in the [docs](https://fxu1024.github.io/docs/ds/addworknode/).
 
