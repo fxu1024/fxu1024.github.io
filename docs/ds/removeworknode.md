@@ -32,7 +32,7 @@ grand_parent: Data Service
 |10.113.207.145	|feng-ws5.sme-feng.athens.cloudera.com |ECS worker node 2|
 |10.113.207.146	|feng-ws6.sme-feng.athens.cloudera.com |ECS worker node 3|
 
-## 2. Check if node feng-ws6.sme-feng.athens.cloudera.com is going down.
+## 2. Check if node feng-ws6.sme-feng.athens.cloudera.com is going down
 
 - error 1: Failed to receive heartbeat from agent feng-ws6
 
@@ -70,22 +70,31 @@ shared-services                        log-router-979c8                         
 
 - Delete node using kubectl commands
 ```bash
-kubectl delete node feng-ws6.sme-feng.athens.cloudera.com
+# kubectl delete node feng-ws6.sme-feng.athens.cloudera.com
+node "feng-ws6.sme-feng.athens.cloudera.com" deleted
 ```
-- Check the status of available nodes and now we don't see feng-ws6
+- Check the status of available nodes and now we don't see feng-ws6 again
 ```bash
-kubectl get node
+# kubectl get node
+NAME                                    STATUS   ROLES                       AGE   VERSION
+feng-ws1.sme-feng.athens.cloudera.com   Ready    control-plane,etcd,master   22d   v1.21.8+rke2r2
+feng-ws2.sme-feng.athens.cloudera.com   Ready    control-plane,etcd,master   22d   v1.21.8+rke2r2
+feng-ws3.sme-feng.athens.cloudera.com   Ready    control-plane,etcd,master   22d   v1.21.8+rke2r2
+feng-ws4.sme-feng.athens.cloudera.com   Ready    <none>                      22d   v1.21.8+rke2r2
+feng-ws5.sme-feng.athens.cloudera.com   Ready    <none>                      22d   v1.21.8+rke2r2
 ```
 - Pods in terminating state can be removed from the apiserver after the failed Node is manually deleted.
-
-
 
 
 ## 4. Remove node From ECS Cluster
 
 - In the Cloudera Manager Admin Console, go to Hosts > All Hosts. Select the hosts to delete.
 
+![](../../assets/images/ds/removenode02.png)
+
 - Select Actions for Selected > Remove From Cluster. The Remove Hosts From Cluster dialog box displays.
+
+![](../../assets/images/ds/removenode03.png)
 
 - Leave the selections to decommission roles and skip removing the Cloudera Management Service roles. Click Confirm to proceed with removing the selected hosts.
 
