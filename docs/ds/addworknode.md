@@ -131,7 +131,6 @@ cat /proc/sys/kernel/random/entropy_avail
 sed -i 's/4096/65536/' /etc/security/limits.d/20-nproc.conf
 ```
 - Install 'iscsi' for longhorn storage
-
 ```bash
 yum -y install iscsi-initiator-utils
 systemctl enable iscsid
@@ -312,7 +311,7 @@ yum clean all
 
 ![](../../assets/images/ds/addnode22.png)
 
-** Note ** Run `unseal vault` after restarting the ECS service
+**_NOTE:_** Run `unseal vault` after restarting the ECS service
 
 ![](../../assets/images/ds/addnode23.png)
 
