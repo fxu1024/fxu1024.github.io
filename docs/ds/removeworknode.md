@@ -1,12 +1,12 @@
 ---
 layout: default
-title: Remove failed work node from existing ECS cluster
+title: Remove failed worker node from the existing ECS cluster
 nav_order: 1
 parent: Operations
 grand_parent: Data Service
 ---
 
-# Remove failed work node from existing ECS cluster
+# Remove failed worker node from the existing ECS cluster
 {: .no_toc }
 
 - TOC
@@ -34,11 +34,11 @@ grand_parent: Data Service
 
 ## 2. Check if node feng-ws6.sme-feng.athens.cloudera.com is going down
 
-- error 1: Failed to receive heartbeat from agent feng-ws6
+- Error 1: Failed to receive heartbeat from agent feng-ws6
 
 ![](../../assets/images/ds/removenode01.png)
 
-- error 2: Node feng-ws6 is not ready
+- Error 2: Node feng-ws6 is not ready
 ```bash
 # kubectl get node
 NAME                                    STATUS     ROLES                       AGE   VERSION
@@ -49,7 +49,7 @@ feng-ws4.sme-feng.athens.cloudera.com   Ready      <none>                      2
 feng-ws5.sme-feng.athens.cloudera.com   Ready      <none>                      22d   v1.21.8+rke2r2
 feng-ws6.sme-feng.athens.cloudera.com   NotReady   <none>                      22d   v1.21.8+rke2r2
 ```
-- error 3: Most of pods on Node feng-ws6  are keeping in terminating state
+- Error 3: Most of pods on Node feng-ws6  are keeping in terminating state
 ```bash
 # kubectl get pods -A -o wide --field-selector spec.nodeName=feng-ws6.sme-feng.athens.cloudera.com
 NAMESPACE                              NAME                                                              READY   STATUS        RESTARTS   AGE    IP               NODE                                    NOMINATED NODE   READINESS GATES
@@ -116,5 +116,7 @@ feng-ws5.sme-feng.athens.cloudera.com   Ready    <none>                      22d
 ![](../../assets/images/ds/removenode07.png)
 
 
-## 6. If you want to replace this failed node with a new one, you need destroy node feng-ws6, then refer to the steps in the [docs](https://fxu1024.github.io/docs/ds/addworknode/).
+## 6. Destroy node feng-ws6
+
+- If you want to replace this failed node with a new one, you need to destroy node feng-ws6, then see the steps in the [docs](https://fxu1024.github.io/docs/ds/addworknode/).
 

@@ -1,12 +1,12 @@
 ---
 layout: default
-title: Add new work node to existing ECS cluster
+title: Add new worker node to the existing ECS cluster
 nav_order: 3
 parent: Operations
 grand_parent: Data Service
 ---
 
-# Add new work node to existing ECS cluster
+# Add new worker node to the existing ECS cluster
 {: .no_toc }
 
 - TOC
@@ -32,7 +32,7 @@ grand_parent: Data Service
 |10.113.207.145	|feng-ws5.sme-feng.athens.cloudera.com |ECS worker node 2|
 |10.113.207.146	|feng-ws6.sme-feng.athens.cloudera.com |ECS worker node 3|
 
-## 2. Create new work node
+## 2. Create new worker node
 
 - Ensure that ECS master node is up and running. Create a new virtual machine with CentOS-7.9 as base image with the same ip address. Use below commands on openstack plateform.
 ```bash
@@ -46,14 +46,14 @@ openstack server create \
   --user-data files/user-data.sh \
   feng-ws6
 ```
-We will use this machine as new worker node. 
+We will use this machine as the new worker node. 
 
 - Open SSH terminal for new worker node and set the same hostname as your failed node. 
 ```bash
 hostnamectl set-hostname feng-ws6.sme-feng.athens.cloudera.com
 ```
 
-- Create a new user to run commands on work node. Give sudo access to this user. Give same username as master node.
+- Create a new user to run commands on worker node. Give sudo access to this user. Give same username as master node.
 ```bash
 useradd cloudera
 echo cloudera > passwd.txt
@@ -64,7 +64,7 @@ sed -i 's/^#PasswordAuthentication/PasswordAuthentication/' /etc/ssh/sshd_config
 systemctl restart sshd
 ```
 
-- Add the work node as a new DNS entry into AD domain.
+- Add the worker node as a new DNS entry into AD domain.
 
 - Modify the resolv.conf file
 ```bash
@@ -138,7 +138,7 @@ sed -i 's/4096/65536/' /etc/security/limits.d/20-nproc.conf
 - Each new host needs to have a private key and a Cert Signing Request (CSR) created. 
 Those CSRs must get signed by the CA on Cloudera Manager if you used ClouderaDeploy playbook initially, if not still need new csrs & a new key for the host, but you will have their own process to get the csr signed. Otherwise you could use self-signed certs, thats not covered here and is least desirable option
 
-- Open SSH terminal for CM server and generate CSR for the new work node
+- Open SSH terminal for CM server and generate CSR for the new worker node
 ```bash
 cd /opt/cloudera/security/pki
 export host=feng-ws6.sme-feng.athens.cloudera.com
@@ -159,12 +159,12 @@ openssl ca -config /ca/intermediate/openssl.cnf -extensions cloudera_req -out ${
 openssl x509 -in ${host}.pem -text -noout
 ```
 
-- Copy to the work node (copy the signed cert (.pem), the key file (.key) and the trust store file (chain.pem), dont need to copy the csr file, dont need to copy any jks file)
+- Copy to the worker node (copy the signed cert (.pem), the key file (.key) and the trust store file (chain.pem), dont need to copy the csr file, dont need to copy any jks file)
 ```bash
 scp chain.pem ${host}.pem ${host}.key cloudera@${host}:/tmp
 ```
 
-- Open SSH terminal for work node and move the above files to pki dir 
+- Open SSH terminal for worker node and move the above files to pki dir 
 ```bash
 export host=feng-ws6.sme-feng.athens.cloudera.com
 mkdir -p /opt/cloudera/security/pki/
@@ -203,9 +203,9 @@ systemctl status  cloudera-scm-agent
 
 ## 5. Add Host to the Existing ECS Cluster
 
-- Open SSH terminal for work node and install java
+- Open SSH terminal for worker node and install java
 ```bash
-yum install java-11-openjdk
+yum -y install java-11-openjdk
 ```
 
 - create the yum repository for Cloudera Manager
@@ -225,30 +225,85 @@ yum clean all
 
 ![](../../assets/images/ds/addnode01.png)
 
-- Select the cluster 'ECS1'. Click Continue.
+- Select the cluster `ECS1`. Click Continue.
+
+![](../../assets/images/ds/addnode02.png)
 
 - On the Specify Hosts page, enter the host name to search for new hosts to add to the cluster. Select the hosts that you want to add. Click Continue.
 
+![](../../assets/images/ds/addnode03.png)
+
 - Select the Repository Location where Cloudera Manager can find the software to install on the new hosts. Click Continue.
+
+![](../../assets/images/ds/addnode04.png)
+
+- Select the Manually manage JDK option because JDK 11 has been installed manually on the host
+
+![](../../assets/images/ds/addnode05.png)
 
 - Enter Login Credentials: Select user `cloudera` that has password-less sudo privileges.
 
-- The Install Agents page displays and Cloudera Manager installs the Agent software on the new hosts.
+![](../../assets/images/ds/addnode06.png)
+
+- The Install Agents page displays and Cloudera Manager installs the Agent software on the new hosts. 
+
+![](../../assets/images/ds/addnode07.png)
+
+- The installation will fail, which is expected behavior, because there is no certificates configured in /etc/cloudera-scm-agent/config.ini.
+
+![](../../assets/images/ds/addnode08.png)
+
+- Follow the following steps to add three certificates.
+
+![](../../assets/images/ds/addnode09.png)
+
+- Click the `Retry Failed Host` button
+
+![](../../assets/images/ds/addnode10.png)
 
 - When the agent installation finishes, click Continue.
 
-- Cloudera Manager begins to install the CDH parcels.
+![](../../assets/images/ds/addnode11.png)
 
-- When the parcel installation finishes, click Continue.
+- Cloudera Manager begins to install the ECS parcels. When the parcel installation finishes, click Continue.
+
+![](../../assets/images/ds/addnode12.png)
 
 - The Host Inspector runs and displays any problems with the hosts. Correct the problems before continuing.
 
+![](../../assets/images/ds/addnode13.png)
+
 - After correcting any problems, click Continue.
 
-- To create a new host template, click the Create... button. The Create New Host Template screen opens.. See Host Templates for details on how you select the role groups that define the roles that should run on a host. After you have created the template, it will appear in the list of host templates from which you can choose.
+- To create a new host template `ecs`, click the Create... button. The Create New Host Template screen opens. See Host Templates for details on how you select the role groups that define the roles that should run on a host. After you have created the template, it will appear in the list of host templates from which you can choose.
+
+![](../../assets/images/ds/addnode14.png)
 
 - Select the host template you want to use.
 
+![](../../assets/images/ds/addnode15.png)
+
 - By default Cloudera Manager will automatically start the roles specified in the host template on your newly added hosts. 
 
+![](../../assets/images/ds/addnode16.png)
+
+![](../../assets/images/ds/addnode17.png)
+
 - When the wizard is finished, you can verify the Agent is connecting properly with the Cloudera Manager Server by clicking the Hosts tab and checking the health status for the new host. If the Health Status is Good and the value for the Last Heartbeat is recent, then the Agent is connecting properly with the Cloudera Manager Server.
+
+![](../../assets/images/ds/addnode18.png)
+
+- The ECS service prompts you to restart the stale service. Please follow the restart steps when the system is idle,
+
+![](../../assets/images/ds/addnode19.png)
+
+![](../../assets/images/ds/addnode20.png)
+
+![](../../assets/images/ds/addnode21.png)
+
+![](../../assets/images/ds/addnode22.png)
+
+- ** Note ** Run `unseal vault` after restarting the ECS service
+
+![](../../assets/images/ds/addnode23.png) 
+

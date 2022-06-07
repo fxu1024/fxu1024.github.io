@@ -17,7 +17,7 @@ parent: Data Service
 ## 1. rendered manifests contain a resource that already exists
 
 --- 
-DESCRIPTION: 
+PROBLEM: 
 {: .label .label-yellow } 
 
 - failed to activate CDE service
@@ -27,13 +27,13 @@ DESCRIPTION:
 Sep 7, 2021, 9:40:30 AM:LogError:dex-base, version 1.10.0 installation failed, dex-base installation failed, rendered manifests contain a resource that already exists. Unable to continue with install: existing resource conflict: namespace: , name: pvccde-dex-base-dex-base-configs-manager, existing_kind: rbac.authorization.k8s.io/v1, Kind=ClusterRole, new_kind: rbac.authorization.k8s.io/v1, Kind=ClusterRole
 ```
 --- 
-CAUSE CONFIRMED: 
+CAUSE: 
 {: .label .label-red }
 
 - Deleting from the CDE UI does not delete records in the backend database. 
 
 ---  
-SOLUTION: 
+RESOLUTION: 
 {: .label .label-green } 
    
 ```bash
@@ -48,7 +48,7 @@ delete from cluster where id = 'cluster-spzq7cvg';
 ## 2. Name or service not known
 
 --- 
-DESCRIPTION: 
+PROBLEM: 
 {: .label .label-yellow } 
 
 - Get errors when installing Control Plane :
@@ -79,13 +79,13 @@ Traceback (most recent call last):
 requests.exceptions.ConnectionError: ('Connection aborted.', gaierror(-2, 'Name or service not known'))
 ```
 --- 
-CAUSE CONFIRMED: 
+CAUSE: 
 {: .label .label-red }
 
 - need to define wildcard DNS entry `*.apps.ecs-ycloud.sme-feng.athens.cloudera.com`
 
 ---  
-SOLUTION: 
+RESOLUTION: 
 {: .label .label-green } 
    
 ```bash
@@ -103,21 +103,28 @@ systemctl restart dnsmasq
 ## n. issue template
 
 --- 
-DESCRIPTION: 
+PROBLEM: 
 {: .label .label-yellow } 
 
 - 
 
 ```console
 ```
+
 --- 
-CAUSE CONFIRMED: 
+ENVIRONMENT: 
+{: .label .label-yellow }
+
+- ECS - All Versions 
+
+--- 
+CAUSE: 
 {: .label .label-red }
 
 - 
 
 ---  
-SOLUTION: 
+RESOLUTION: 
 {: .label .label-green } 
    
 ```bash
