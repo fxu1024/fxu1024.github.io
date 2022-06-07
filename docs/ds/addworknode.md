@@ -130,6 +130,13 @@ cat /proc/sys/kernel/random/entropy_avail
 ```bash
 sed -i 's/4096/65536/' /etc/security/limits.d/20-nproc.conf
 ```
+- Install 'iscsi' for longhorn storage
+
+```bash
+yum -y install iscsi-initiator-utils
+systemctl enable iscsid
+systemctl start iscsid
+```
 
 ## 4. Configuring TLS Authentication of CM Agent to the CM Server
 
@@ -293,7 +300,9 @@ yum clean all
 
 ![](../../assets/images/ds/addnode18.png)
 
-- The ECS service prompts you to restart the stale service. Please follow the restart steps when the system is idle,
+## 6. Restart ECS cluster
+
+- The ECS services prompts you to restart the stale service. Please follow the restart steps when the cluster is idle,
 
 ![](../../assets/images/ds/addnode19.png)
 
@@ -303,7 +312,10 @@ yum clean all
 
 ![](../../assets/images/ds/addnode22.png)
 
-- ** Note ** Run `unseal vault` after restarting the ECS service
+** Note ** Run `unseal vault` after restarting the ECS service
 
-![](../../assets/images/ds/addnode23.png) 
+![](../../assets/images/ds/addnode23.png)
+
+![](../../assets/images/ds/addnode24.png)
+
 
