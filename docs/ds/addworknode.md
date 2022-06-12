@@ -299,7 +299,7 @@ yum clean all
 
 ![](../../assets/images/ds/addnode18.png)
 
-## 6. Restart ECS cluster
+## 6. (Optional) Restart ECS cluster
 
 - The ECS services prompts you to restart the stale service. Please follow the restart steps when the cluster is idle,
 
