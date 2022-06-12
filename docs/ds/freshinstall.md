@@ -281,7 +281,15 @@ Click Continue.
 
 ![](../../assets/images/ds/freshinstall15.png)
 
-After the installation is complete, you can access your Private Cloud Data Services instance from Cloudera Manager > click Open Private Cloud Data Services.
+- After the installation is complete, you can access your Private Cloud Data Services instance from Cloudera Manager > click Open Private Cloud Data Services.
 
 ![](../../assets/images/ds/freshinstall16.png)
+
+- Confirm that all backends of HAProxy are now status UP, it may take several minutes.
+
+![](../../assets/images/ds/freshinstall17.png)
+
+- Confirm that all pods are green in the ECS WebUI >> (All Namespaces) >> Workloads.
+
+![](../../assets/images/ds/freshinstall18.png)
 
