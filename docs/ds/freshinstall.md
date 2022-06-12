@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Fresh install of ECS 1.3.4 HA
+title: Fresh install of ECS 1.3.4 HA Cluster
 nav_order: 1
 parent: Operations
 grand_parent: Data Service
@@ -36,22 +36,22 @@ grand_parent: Data Service
 
 ## 2. Install CDP Private Cloud Base Cluster
 
-- Base Cluster will be deployed by [Cloudera-Deploy playbook](https://github.com/cloudera-labs/cloudera-deploy.git)
+- Base Cluster is deployed by [Cloudera-Deploy playbook](https://github.com/cloudera-labs/cloudera-deploy.git)
 
-- 6 ECS hosts are available, added to Cloudera Manager but not yet bound to any cluster. In this case feng-ws[1-6].sme-feng.athens.cloudera.com
+- 6 ECS hosts are available, added to Cloudera Manager but not yet bound to any cluster. In this case `feng-ws[1-6].sme-feng.athens.cloudera.com`
 
 ![](../../assets/images/ds/adddns00.png)
 
 ## 3. Add DNS records
 
 |hostname|subdomain|Expected roles|DNS ForwardZone|Reverse Zone PTR|
-|Wildcard (hostname = *)|apps.ecs-lb.<domain1>|The string apps is required, ecs-lb is up to user|Virtual app domain wildcard|A Record wildcard (hostsname = *) , Resolves to fixed IP of ha_proxy|N|
-|apps alias|apps.ecs-lb.<domain1>|Virtual app domain Alias|CNAME Alias points to ARecord of ha_proxy. Alternatively can be an ARecord with IP of ha_proxy|N/A|
-|ha_proxy|<domain1>|HA Load balancer|Depends on vendor/software||
-|ecs-master1|<domain1>|ECS Server 1 & Docker server|A Record resolves to IP of ecs-master1|Y|
-|ecs-master2|<domain1>|ECS Server 2 & Docker server|A Record resolves to IP of ecs-master2|Y|
-|ecs-master3|<domain1>|ECS Server 3 & Docker server|A Record resolves to IP of ecs-master3|Y|
-|ecs-agentN|<domain1>|ECS Agent N & Docker server N|A Record resolves to IP of ecs-agentN|Y|
+|Wildcard (hostname = *)|apps.ecs-lb.domain1|The string `apps` is required, `ecs-lb` is up to user|Virtual app domain wildcard , `A Record` wildcard (hostsname = *) , Resolves to fixed IP of ha_proxy|N|
+|`apps alias`|apps.ecs-lb.domain1|Virtual app domain Alias|CNAME Alias points to `A Record` of ha_proxy. Alternatively can be an ARecord with IP of ha_proxy|N/A|
+|ha_proxy|domain1|HA Load balancer|Depends on vendor/software||
+|ecs-master1|domain1|ECS Server 1 & Docker server|`A Record` resolves to IP of ecs-master1|Y|
+|ecs-master2|domain1|ECS Server 2 & Docker server|`A Record` resolves to IP of ecs-master2|Y|
+|ecs-master3|domain1|ECS Server 3 & Docker server|`A Record` resolves to IP of ecs-master3|Y|
+|ecs-agentN|domain1|ECS Agent N & Docker server N|`A Record` resolves to IP of ecs-agentN|Y|
 
 - ecs-lb.sme-feng.athens.cloudera.com is the name of this new subdomain. Full name should not exceed 29 chars.
 
@@ -61,14 +61,15 @@ grand_parent: Data Service
 
 ![](../../assets/images/ds/adddns02.png)
 
-- Define a wildcard "A Record" pointing to the HAProxy host ip address inside "apps" subdomain.
--- Any dns lookups for both apps.ecs-lb.sme-feng.athens.cloudera.com and *.apps.ecs-lb.sme-feng.athens.cloudera.com will resolve to the IP address of HAProxy host.
+- Define a wildcard `A Record` pointing to the HAProxy host ip address inside `apps` subdomain.
+    - Any dns lookups for both apps.ecs-lb.sme-feng.athens.cloudera.com and *.apps.ecs-lb.sme-feng.athens.cloudera.com will resolve to the IP address of HAProxy host.
 
 ![](../../assets/images/ds/adddns03.png)
 
-**_NOTE:_** Properties of the host A Record inside apps subdomain, note host = asterisk char (*) and that PTR is NOT checked as we dont want to create a reverse lookup for this a-record.
+**_NOTE:_** Properties of the host `A Record` inside apps subdomain, note host = asterisk char (*) and that PTR is NOT checked as we dont want to create a reverse lookup for this a-record.
 
 - Run nslookup to check DNS records.
+
 ```bash 
 hosts="apps.ecs-lb.sme-feng.athens.cloudera.com
 *.apps.ecs-lb.sme-feng.athens.cloudera.com
@@ -96,7 +97,8 @@ done
 
 - ssh to the HAProxy host and install/config haproxy.
 
---  Example uses a single instance of HAProxy, configured with round robin balancing and tcp mode (allows for non-terminating https).
+    - Example uses a single instance of HAProxy, configured with round robin balancing and tcp mode (allows for non-terminating https).
+
 ```bash 
 yum install haproxy -y
 
@@ -158,10 +160,11 @@ systemctl restart haproxy
 systemctl status haproxy
 ```
 
-- You can view HAproxy UI http://10.113.207.147:8081/stats
+- You can view [HAproxy UI](http://10.113.207.147:8081/stats)
 
 
 ## 5. Create external databases for ECS Cluster
+
 ```bash
 sudo -u postgres psql << EOF
 CREATE ROLE pvc LOGIN PASSWORD 'changeme';
@@ -216,29 +219,28 @@ You can specify multiple addresses and address ranges by separating them by comm
 
 - In the Assign Roles page, you can customize the roles assignment for your new Private Cloud Containerized cluster.
 
--- 6 docker servers - example "feng-ws[1-6].sme-feng.athens.cloudera.com"
+    - 6 docker servers - example "feng-ws[1-6].sme-feng.athens.cloudera.com"
 
 ![](../../assets/images/ds/freshinstall04.png)
 
--- 3 ECS server - example "feng-ws[1-3].sme-feng.athens.cloudera.com"
+    - 3 ECS server - example "feng-ws[1-3].sme-feng.athens.cloudera.com"
 
 ![](../../assets/images/ds/freshinstall05.png)
 
--- 3 ECS agents - example "feng-ws[4-6].sme-feng.athens.cloudera.com"
+    - 3 ECS agents - example "feng-ws[4-6].sme-feng.athens.cloudera.com"
 
 ![](../../assets/images/ds/freshinstall06.png)
 
--- Click Continue.
+    - Click Continue.
 
 ![](../../assets/images/ds/freshinstall07.png)
 
 - In the Configure Docker Repository page, you must select one of the Docker repository options. Use an embedded Docker Repository - Copies all images (Internet or AirGapped) to the embedded registry. If you select Use an embedded Docker Repository option, then you can download and deploy the Data Services that you need for your cluster.
--- By selecting Default, all the data services will be downloaded and deployed.
--- By selecting Select the optional images:
---- If you switch off the Machine Learning toggle key, then the Machine Learning runtimes will not be installed.
---- If you switch on the Machine Learning toggle key, then the Machine Learning runtimes will be installed.
-
-Click Continue.
+    - By selecting Default, all the data services will be downloaded and deployed.
+    - By selecting Select the optional images:
+        - If you switch off the Machine Learning toggle key, then the Machine Learning runtimes will not be installed.
+        - If you switch on the Machine Learning toggle key, then the Machine Learning runtimes will be installed.
+    - Click Continue.
 
 ![](../../assets/images/ds/freshinstall08.png)
 
@@ -252,12 +254,13 @@ Application Domain: ecs-lb.sme-feng.athens.cloudera.com
 ```
 **_NOTE:_** Application Domain maps to the  pre-defined wildcard DNS record which allows the resolution of *.apps.ecs133.train.athens.cloudera.com to the IP address of the HAProxy host. MUST be done before you proceed. You can verify from command line using nslookup or dig
 
-Click Continue.
+- Click Continue.
 
 ![](../../assets/images/ds/freshinstall09.png)
 
 - In the Configure Databases page, follow the instructions in the wizard to use your external existing databases with CDP Private Cloud.
 Click Continue.
+
 **_NOTE:_** Ensure that you have selected the Use TLS for Connections Between the Control Plane and the Database option if you have plans to use Cloudera Data Warehouse (CDW). Enabling the Private Cloud Base Cluster PostgreSQL database to use an SSL connection to encrypt client-server communication is a requirement for CDW in CDP Private Cloud.
 
 ![](../../assets/images/ds/freshinstall10.png)
@@ -268,8 +271,7 @@ Click Continue.
 
 ![](../../assets/images/ds/freshinstall12.png)
 
-- In the Inspect Cluster page, you can inspect your network performance and hosts. If the inspect tool displays any issues, you can fix those issues and run the inspect tool again.
-Click Continue.
+- In the Inspect Cluster page, you can inspect your network performance and hosts. If the inspect tool displays any issues, you can fix those issues and run the inspect tool again. Click Continue.
 
 ![](../../assets/images/ds/freshinstall13.png)
 
