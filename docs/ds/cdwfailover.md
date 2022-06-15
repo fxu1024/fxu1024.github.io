@@ -1,7 +1,7 @@
 ---
 layout: default
 title: node crash demo 
-nav_order: 2
+nav_order: 4
 parent: Operations
 grand_parent: Data Service
 ---
@@ -34,15 +34,25 @@ grand_parent: Data Service
 
 ## 2. Create a Hive VW and Impala VW
 
-![](../../assets/images/ds/cdwfailover00.png)
-
-![](../../assets/images/ds/cdwfailover01.png)
+- set LDAP auth rules
 
 ![](../../assets/images/ds/cdwfailover02.png)
 
+- Activate DBC
+
+![](../../assets/images/ds/cdwfailover01.png)
+
+- build Hive VW
+
 ![](../../assets/images/ds/cdwfailover03.png)
 
+- build Impala VW
+
 ![](../../assets/images/ds/cdwfailover04.png)
+
+- All VW are green
+
+![](../../assets/images/ds/cdwfailover05.png)
 
 ## 3. get node status
 
