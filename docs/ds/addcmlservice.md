@@ -50,7 +50,7 @@ grand_parent: Data Service
 
 ![](../../assets/images/ds/addcml03.png)
 
-- Get the certificate URL of ML workspace from your browser. It is generally of the form: <workspaceid>.<cluster>.<domain>.com. In this case `https://ml-47e0ade8-e0a.apps.ecs-lb.sme-feng.athens.cloudera.com/`
+- Get the certificate URL of ML workspace from your browser. In this case `https://ml-47e0ade8-e0a.apps.ecs-lb.sme-feng.athens.cloudera.com/`
 
 ![](../../assets/images/ds/addcml04.png)
 
@@ -62,7 +62,7 @@ grand_parent: Data Service
 # openssl req -in ${host}.csr -text -verify
 ```
 
-- Sign CSR with intermediate CA (def password is password)
+- Sign CSR with Root CA (def password is password)
 
 ```bash
 # echo "[default]
@@ -104,19 +104,21 @@ chain.pem                                                                       
 # kubectl create secret tls cml-tls-secret --cert=${host}.crt --key=${host}.key -o yaml --dry-run | kubectl -n cml01 create -f -
 ```
 
-- In Site Administration > Security > Root CA configuration, add the root CA certificate (chain.pem) to the workspace.
+- In Site Administration > Security > Root CA configuration, paste the root CA certificate (chain.pem) to the workspace.
 
 ![](../../assets/images/ds/addcml05.png)
 
 
-## 3. In User Settings > Hadoop Authentication, input your principal and credentials
+## 3. Set Hadoop Authentication credentials
+
+- In User Settings > Hadoop Authentication, input your principal and credentials
 
 ![](../../assets/images/ds/addcml07.png)
 
 ![](../../assets/images/ds/addcml08.png)
 
 
-## 4. demo1: start a python session (disable spark)
+## 4. Demo1: Start a python session (disable spark)
 
 - Create a project `test1` using python template
 
@@ -135,7 +137,7 @@ chain.pem                                                                       
 ![](../../assets/images/ds/addcml11.png)
 
 
-## 5. demo2: start a pyspark session (enable spark)
+## 5. Demo2: Start a pyspark session (enable spark)
 
 - Create a project `test2` using pyspark template
 
@@ -157,7 +159,7 @@ chain.pem                                                                       
 
 ![](../../assets/images/ds/addcml16.png)
 
-## 6. demo3: Run Experiments
+## 6. Demo3: Run Experiments
 
 - Click `Run Experiment` button and choose `fit.py` from the previous project `test1`
 
@@ -175,7 +177,7 @@ chain.pem                                                                       
 
 ![](../../assets/images/ds/addcml20.png)
 
-## 7. demo4: Run Models
+## 7. Demo4: Run Models
 
 - Switch to `Models` module
 
