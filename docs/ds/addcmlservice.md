@@ -202,3 +202,22 @@ chain.pem                                                                       
 - In Models > Predict petal width > Overview, paste the above API Key and click `Test` button
 
 ![](../../assets/images/ds/addcml26.png) 
+
+## 8. Demo5: View lineage for a model deployment in Atlas
+
+- Ensure that lineage.yaml file exists in project `test1`.
+
+![](../../assets/images/ds/addcml27.png)
+
+- Navigate to CM > Clusters > PVC-Base > Atlas > Atlas Web UI
+
+![](../../assets/images/ds/addcml28.png)
+
+- Search for ml_model_deployment. Click the model deployment listed in the right plane.
+
+![](../../assets/images/ds/addcml29.png)
+
+- Click the Lineage tab to see a visualization of lineage information for the particular model deployment and trace it back to the specific data that was used to train the model.
+
+![](../../assets/images/ds/addcml30.png)
+
