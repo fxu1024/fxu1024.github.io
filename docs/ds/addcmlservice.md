@@ -213,7 +213,7 @@ chain.pem                                                                       
 
 ![](../../assets/images/ds/addcml28.png)
 
-- Search for ml_model_deployment. Click the model deployment listed in the right plane.
+- Search for `ml_model_deployment`. Click the model deployment listed in the right plane.
 
 ![](../../assets/images/ds/addcml29.png)
 

@@ -1,0 +1,336 @@
+---
+layout: default
+title: Add Cloudera Data Warehouse service and demo it
+nav_order: 7
+parent: Operations
+grand_parent: Data Service
+---
+
+# Add Cloudera Data Warehouse service and demo it
+{: .no_toc }
+
+- TOC
+{:toc}
+
+---
+
+## 1. Introduction to the test environment
+
+|CDP Runtime version |CDP PvC Base 7.1.7|
+|CM version |Cloudera Manager 7.5.5|
+|ECS version |CDP PvC DataServices 1.3.4|
+|Whether to enable Kerberos |Yes|
+|Whether to enable TLS |Yes|
+|Auto-TLS |No, using manual TLS|
+
+|IP addresss |hostname |description|
+|10.113.207.140	|feng-base.sme-feng.athens.cloudera.com |CDP Base cluster only a single node|
+|10.113.207.141	|feng-ws1.sme-feng.athens.cloudera.com |ECS master node 1|
+|10.113.207.142	|feng-ws2.sme-feng.athens.cloudera.com |ECS master node 2|
+|10.113.207.143	|feng-ws3.sme-feng.athens.cloudera.com |ECS master node 3|
+|10.113.207.144	|feng-ws4.sme-feng.athens.cloudera.com |ECS worker node 1|
+|10.113.207.145	|feng-ws5.sme-feng.athens.cloudera.com |ECS worker node 2|
+|10.113.207.146	|feng-ws6.sme-feng.athens.cloudera.com |ECS worker node 3|
+
+## 2. Provision the virtual warehouses
+
+- Log into the CDP Private Cloud console as the local administrator `admin`
+
+![](../../assets/images/ds/addcdw01.png)
+
+![](../../assets/images/ds/addcdw02.png)
+
+- Configure LDAP authentication for CDW
+    - On the Management Console home page, select Administration>Authentication.
+    - Configure the following settings for LDAP authentication.
+    - Click Test Connection to verify whether the LDAP information you have provided is valid.
+    - Click Save. 
+
+|LDAP URL |ldaps://goes-svc-win01.athens.cloudera.com:3269|
+|CA Certificate for Secure LDAP |Choose file:  <LAB_HOME>/sme_files/athens-ca.pem|
+|LDAP Bind DN |CN=sme-ad-bind,OU=svc accounts,OU=test-sme-demo,DC=athens,DC=cloudera,DC=com|
+|LDAP Bind Password |password|
+|LDAP User Search Base |DC=athens,DC=cloudera,DC=com|
+|LDAP User Search Filter |(&(sAMAccountName={0})(objectClass=person))|
+|LDAP Group Search Base |DC=athens,DC=cloudera,DC=com|
+|LDAP Group Search Filter |(&(member={1})(objectClass=group)(name=field-se))|
+|Sync Groups on Logon |enable|
+
+![](../../assets/images/ds/cdwfailover02.png)
+
+- Recreate external database `db-das` and `db-hue`
+
+```bash
+sudo -u postgres psql << EOF
+DROP DATABASE IF EXISTS "db-das";
+DROP DATABASE IF EXISTS "db-hue";
+CREATE DATABASE "db-das" OWNER pvc  ENCODING 'UTF8';
+CREATE DATABASE "db-hue" OWNER pvc  ENCODING 'UTF8';
+EOF
+```
+
+- Activate the default Database Catalog
+    - In the CDW service, expand the Environments column by clicking the More menu on the left side of the page.
+    - In the Environments column, locate the environment that you want to activate.
+    - When you locate the environment, click the activation icon to launch the Activation Settings dialog box.
+    - In the Activation Settings dialog box.
+        - Specify Delegation Username and Delegation Password to impersonate authorization requests from Hue to the Impala engine.
+        - If you are using an external database on your base cluster and want to use a default Database Catalog, then you must specify custom database name for DAS and Hue in the Pre-created database names for default database catalog field.
+        - enable low resource mode if required.
+    - Click `ACTIVATE`.
+
+![](../../assets/images/ds/cdwfailover01.png)
+
+- build Hive VW
+    - In the Data Warehouse service, click Virtual Warehouses in the left navigation panel.
+    - On the Virtual Warehouses page, click Add New.
+    - In the New Virtual Warehouse dialog box, specify a Virtual Warehouse name, the Type `Hive`, which Database Catalog it queries, and the size.
+    - Configure auto-scaling settings.
+    - Click Create to create the new Virtual Warehouse.
+
+![](../../assets/images/ds/cdwfailover03.png)
+
+- build Impala VW
+
+![](../../assets/images/ds/cdwfailover04.png)
+
+- Both Hive VW an Impala VW are green
+
+![](../../assets/images/ds/addcdw03.png)
+
+## 3. Assign CDW resources to user `feng.xu`
+
+- Log out the CDP Private Cloud console and then login as user `feng.xu`
+
+![](../../assets/images/ds/addcdw06.png)
+
+![](../../assets/images/ds/addcdw07.png)
+
+- User `feng.xu` cannot see any CDW objects because it is not assigned any roles or resources. 
+
+![](../../assets/images/ds/addcdw08.png)
+
+- You have to login as the local administrator `admin` again.
+
+- Navigate to Management Console > Environments, and select environment `default` by clicking on it.
+
+![](../../assets/images/ds/addcdw04.png)
+
+- The Environment Clusters page appears. Click Actions. Click Manage Access in the dropdown list.
+
+![](../../assets/images/ds/addcdw05.png)
+
+- In the Access tab, enter the name of the user in the Select group or user text box.
+
+![](../../assets/images/ds/addcdw09.png)
+
+- The Update Resource Roles window appears. Select the resource role `DWUser`. Click Update Roles.
+
+![](../../assets/images/ds/addcdw10.png)
+
+![](../../assets/images/ds/addcdw11.png)
+
+- User `feng.xu` can access CDW objects now.
+
+![](../../assets/images/ds/addcdw12.png)
+
+
+## 3. Set the Ranger policy for user `feng.xu`
+
+- Log in to Ranger Admin UI. Navigate to the Service Manager > Hadoop_SQL Policies > Access section, and provide `feng.xu` user
+permission to the `all-database, table, column` policy name.
+
+![](../../assets/images/ds/addcdw15.png)
+
+## 4. Submit Hive queries with Hue
+
+- On the Overview page under Virtual Warehouses, click the options menu in the upper right corner of an Hive Virtual Warehouse tile, and select `Open Hue`. There are no entries found under database `default`.
+
+![](../../assets/images/ds/addcdw13.png)
+
+- The Hue query editor is displayed.
+
+![](../../assets/images/ds/addcdw14.png)
+
+- Navigate to `Administrater Server` in the lower left corner of Hue query editor. Click `Step3: Example` to install some data examples.
+
+![](../../assets/images/ds/addcdw17.png)
+
+- Run `Sample: Top salary` in Saved Queries.
+
+![](../../assets/images/ds/addcdw18.png)
+
+- The query returns 28 records successfully.
+
+![](../../assets/images/ds/addcdw19.png)
+
+# 5. Submit Impala queries with Hue
+
+- On the Overview page under Virtual Warehouses, click the options menu in the upper right corner of an Impala Virtual Warehouse tile, and select `Open Hue`.
+
+![](../../assets/images/ds/addcdw20.png)
+
+- Navigate to `Administrater Server` in the lower left corner of Hue query editor. Click `Step3: Example` to install some data examples.
+
+![](../../assets/images/ds/addcdw21.png)
+
+- Run `Sample: Top salary` in Saved Queries and get 28 records successfully.
+
+![](../../assets/images/ds/addcdw22.png)
+
+# 6. Submit Hive queries with Beeline
+
+- click the options menu in the upper right corner of an Hive Virtual Warehouse tile, and select `Copy JDBC URL`. In this case JDBC URL is `jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=true;retries=3`
+
+![](../../assets/images/ds/addcdw23.png)
+
+- Open SSH terminal for CDP Base worker node and run the command: `beeline -u 'jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=false;retries=3' -n feng.xu -p`
+
+```bash
+[centos@feng-base ~]$ beeline -u 'jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=false;retries=3' -n feng.xu -p
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/opt/cloudera/parcels/CDH-7.1.7-1.cdh7.1.7.p78.21656418/jars/log4j-slf4j-impl-2.17.1.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/opt/cloudera/parcels/CDH-7.1.7-1.cdh7.1.7.p78.21656418/jars/slf4j-log4j12-1.7.30.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+WARNING: Use "yarn jar" to launch YARN applications.
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/opt/cloudera/parcels/CDH-7.1.7-1.cdh7.1.7.p78.21656418/jars/log4j-slf4j-impl-2.17.1.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/opt/cloudera/parcels/CDH-7.1.7-1.cdh7.1.7.p78.21656418/jars/slf4j-log4j12-1.7.30.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+Connecting to jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=false;retries=3;user=feng.xu
+Enter password for jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/default: ************
+Connected to: Apache Hive (version 3.1.3000.2021.0.6-b96)
+Driver: Hive JDBC (version 3.1.3000.7.1.7.78-12)
+Transaction isolation: TRANSACTION_REPEATABLE_READ
+Beeline version 3.1.3000.7.1.7.78-12 by Apache Hive
+0: jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-fe> 
+```
+
+- Run `Sample: Salary growth ` in Saved Queries
+
+```bash
+0: jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-fe> use default;
+WARN  : WARNING! Query command could not be redacted.java.lang.IllegalStateException: Error loading from /opt/cloudera/parcels/CDH-7.1.7-1.cdh7.1.7.p78.21656418/bin/../lib/hive/conf/redaction-rules.json: java.io.FileNotFoundException: /opt/cloudera/parcels/CDH-7.1.7-1.cdh7.1.7.p78.21656418/bin/../lib/hive/conf/redaction-rules.json (No such file or directory)
+INFO  : Compiling command(queryId=hive_20220619140148_30871325-40b6-4d35-b947-8f4619dc36e7): use default
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Created Hive schema: Schema(fieldSchemas:null, properties:null)
+INFO  : Completed compiling command(queryId=hive_20220619140148_30871325-40b6-4d35-b947-8f4619dc36e7); Time taken: 0.132 seconds
+INFO  : Executing command(queryId=hive_20220619140148_30871325-40b6-4d35-b947-8f4619dc36e7): use default
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20220619140148_30871325-40b6-4d35-b947-8f4619dc36e7); Time taken: 0.013 seconds
+INFO  : OK
+No rows affected (0.262 seconds)
+0: jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-fe> SELECT s07.description, s07.salary, s08.salary,
+. . . . . . . . . . . . . . . . . . . . . . .>   s08.salary - s07.salary
+. . . . . . . . . . . . . . . . . . . . . . .> FROM
+. . . . . . . . . . . . . . . . . . . . . . .>   sample_07 s07 JOIN sample_08 s08
+. . . . . . . . . . . . . . . . . . . . . . .> ON ( s07.code = s08.code)
+. . . . . . . . . . . . . . . . . . . . . . .> WHERE
+. . . . . . . . . . . . . . . . . . . . . . .>  s07.salary < s08.salary
+. . . . . . . . . . . . . . . . . . . . . . .> ORDER BY s08.salary-s07.salary DESC;
+WARN  : WARNING! Query command could not be redacted.java.lang.IllegalStateException: Error loading from /opt/cloudera/parcels/CDH-7.1.7-1.cdh7.1.7.p78.21656418/bin/../lib/hive/conf/redaction-rules.json: java.io.FileNotFoundException: /opt/cloudera/parcels/CDH-7.1.7-1.cdh7.1.7.p78.21656418/bin/../lib/hive/conf/redaction-rules.json (No such file or directory)
+INFO  : Compiling command(queryId=hive_20220619140217_5217ae0e-7d49-4187-8aad-13938649b91b): SELECT s07.description, s07.salary, s08.salary,
+......
+----------------------------------------------------------------------------------------------
+        VERTICES      MODE        STATUS  TOTAL  COMPLETED  RUNNING  PENDING  FAILED  KILLED
+----------------------------------------------------------------------------------------------
+Map 1 ..........      llap     SUCCEEDED      1          1        0        0       0       0
+Map 2 ..........      llap     SUCCEEDED      1          1        0        0       0       0
+Reducer 3 ......      llap     SUCCEEDED      1          1        0        0       0       0
+----------------------------------------------------------------------------------------------
+VERTICES: 03/03  [==========================>>] 100%  ELAPSED TIME: 1.13 s
+----------------------------------------------------------------------------------------------
++----------------------------------------------------+-------------+-------------+--------+
+|                  s07.description                   | s07.salary  | s08.salary  |  _c3   |
++----------------------------------------------------+-------------+-------------+--------+
+| Dentists, all other specialists                    | 120360      | 142070      | 21710  |
+| Surgeons                                           | 191410      | 206770      | 15360  |
+| Oral and maxillofacial surgeons                    | 178440      | 190420      | 11980  |
+| Natural sciences managers                          | 113170      | 123140      | 9970   |
+| Physicians and surgeons, all other                 | 155150      | 165000      | 9850   |
+| Orthodontists                                      | 185340      | 194930      | 9590   |
+| Internists, general                                | 167270      | 176740      | 9470   |
+| Political scientists                               | 90050       | 99320       | 9270   |
+| Obstetricians and gynecologists                    | 183600      | 192780      | 9180   |
+| Chief executives                                   | 151370      | 160440      | 9070   |
+| Rotary drill operators, oil and gas                | 45560       | 54370       | 8810   |
+| Pediatricians, general                             | 145210      | 153370      | 8160   |
+| Sociologists                                       | 67330       | 75460       | 8130   |
+| Family and general practitioners                   | 153640      | 161490      | 7850   |
+| Medical scientists, except epidemiologists         | 74160       | 81870       | 7710   |
+| Athletes and sports competitors                    | 71920       | 79460       | 7540   |
+```
+
+# 7. Submit Impala queries with Impala Shell
+
+- click the options menu in the upper right corner of an Impala Virtual Warehouse tile, and select `Copy Impala shell command`. In this case JDBC URL is `impala-shell --protocol='hs2-http' --ssl -i "coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com:443" -u  -l`
+
+![](../../assets/images/ds/addcdw24.png)
+
+- Open SSH terminal for CDP Base worker node and run the command: `impala-shell --protocol='hs2-http' --ssl -i "coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com:443" -u feng.xu -l`
+
+```bash
+[centos@feng-base ~]$ impala-shell --protocol='hs2-http' --ssl -i "coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com:443" -u feng.xu -l
+/usr/bin/impala-shell: line 47: warning: setlocale: LC_CTYPE: cannot change locale (UTF-8): No such file or directory
+/usr/bin/impala-shell: line 47: warning: setlocale: LC_CTYPE: cannot change locale (UTF-8): No such file or directory
+Starting Impala Shell using LDAP-based authentication
+SSL is enabled. Impala server certificates will NOT be verified (set --ca_cert to change)
+LDAP password for feng.xu:
+Warning: --connect_timeout_ms is currently ignored with HTTP transport.
+Opened TCP connection to coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com:443
+Connected to coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com:443
+Server version: impalad version 4.1.0-SNAPSHOT RELEASE (build a39038d2c3f87fe87e58f73d13bc3e623403a0ee)
+***********************************************************************************
+Welcome to the Impala shell.
+(Impala Shell v3.4.0-SNAPSHOT (fbac23b) built on Wed Feb  2 19:06:37 UTC 2022)
+
+After running a query, type SUMMARY to see a summary of where time was spent.
+***********************************************************************************
+[coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com:443] default>
+```
+
+- Run `Sample: Salary growth ` in Saved Queries
+
+```bash
+[coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com:443] default> use default;
+Query: use default
+[coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com:443] default> SELECT s07.description, s07.salary, s08.salary,
+                                                                           >   s08.salary - s07.salary
+                                                                           > FROM
+                                                                           >   sample_07 s07 JOIN sample_08 s08
+                                                                           > ON ( s07.code = s08.code)
+                                                                           > WHERE
+                                                                           >  s07.salary < s08.salary
+                                                                           > ORDER BY s08.salary-s07.salary DESC;
+Query: SELECT s07.description, s07.salary, s08.salary,
+  s08.salary - s07.salary
+FROM
+  sample_07 s07 JOIN sample_08 s08
+ON ( s07.code = s08.code)
+WHERE
+ s07.salary < s08.salary
+ORDER BY s08.salary-s07.salary DESC
+Query submitted at: 2022-06-19 14:14:29 (Coordinator: http://coordinator-0:25000)
+Query progress can be monitored at: http://coordinator-0:25000/query_plan?query_id=cf4f894edb3ea4f6:31df12a500000000
++-----------------------------------------------------------------------------------------------------------+--------+--------+-------------------------+
+| description                                                                                               | salary | salary | s08.salary - s07.salary |
++-----------------------------------------------------------------------------------------------------------+--------+--------+-------------------------+
+| Dentists, all other specialists                                                                           | 120360 | 142070 | 21710                   |
+| Surgeons                                                                                                  | 191410 | 206770 | 15360                   |
+| Oral and maxillofacial surgeons                                                                           | 178440 | 190420 | 11980                   |
+| Natural sciences managers                                                                                 | 113170 | 123140 | 9970                    |
+| Physicians and surgeons, all other                                                                        | 155150 | 165000 | 9850                    |
+| Orthodontists                                                                                             | 185340 | 194930 | 9590                    |
+| Internists, general                                                                                       | 167270 | 176740 | 9470                    |
+| Political scientists                                                                                      | 90050  | 99320  | 9270                    |
+| Obstetricians and gynecologists                                                                           | 183600 | 192780 | 9180                    |
+| Chief executives                                                                                          | 151370 | 160440 | 9070                    |
+```
+
+
+
+
+
+
