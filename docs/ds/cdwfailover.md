@@ -1,12 +1,12 @@
 ---
 layout: default
-title: node crash demo 
+title: Node crash demo 
 nav_order: 4
 parent: Operations
 grand_parent: Data Service
 ---
 
-# node crash demo 
+# Node crash demo 
 {: .no_toc }
 
 - TOC

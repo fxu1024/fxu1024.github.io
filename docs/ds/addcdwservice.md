@@ -41,13 +41,13 @@ grand_parent: Data Service
 ![](../../assets/images/ds/addcdw02.png)
 
 - Configure LDAP authentication for CDW
-    - On the Management Console home page, select Administration>Authentication.
-    - Configure the following settings for LDAP authentication.
-    - Click Test Connection to verify whether the LDAP information you have provided is valid.
-    - Click Save. 
+    1. On the Management Console home page, select Administration>Authentication.
+    2. Configure the following settings for LDAP authentication.
+    3. Click Test Connection to verify whether the LDAP information you have provided is valid.
+    4. Click Save. 
 
 |LDAP URL |ldaps://goes-svc-win01.athens.cloudera.com:3269|
-|CA Certificate for Secure LDAP |Choose file:  <LAB_HOME>/sme_files/athens-ca.pem|
+|CA Certificate for Secure LDAP |Choose file:  $LAB_HOME/sme_files/athens-ca.pem|
 |LDAP Bind DN |CN=sme-ad-bind,OU=svc accounts,OU=test-sme-demo,DC=athens,DC=cloudera,DC=com|
 |LDAP Bind Password |password|
 |LDAP User Search Base |DC=athens,DC=cloudera,DC=com|
@@ -70,27 +70,27 @@ EOF
 ```
 
 - Activate the default Database Catalog
-    - In the CDW service, expand the Environments column by clicking the More menu on the left side of the page.
-    - In the Environments column, locate the environment that you want to activate.
-    - When you locate the environment, click the activation icon to launch the Activation Settings dialog box.
-    - In the Activation Settings dialog box.
-        - Specify Delegation Username and Delegation Password to impersonate authorization requests from Hue to the Impala engine.
-        - If you are using an external database on your base cluster and want to use a default Database Catalog, then you must specify custom database name for DAS and Hue in the Pre-created database names for default database catalog field.
-        - enable low resource mode if required.
-    - Click `ACTIVATE`.
+    1. In the CDW service, expand the Environments column by clicking the More menu on the left side of the page.
+    2. In the Environments column, locate the environment that you want to activate.
+    3. When you locate the environment, click the activation icon to launch the Activation Settings dialog box.
+    4. In the Activation Settings dialog box.
+        1. Specify Delegation Username and Delegation Password to impersonate authorization requests from Hue to the Impala engine.
+        2. If you are using an external database on your base cluster and want to use a default Database Catalog, then you must specify custom database name for DAS and Hue in the Pre-created database names for default database catalog field.
+        3. enable low resource mode if required.
+    5. Click `ACTIVATE`.
 
 ![](../../assets/images/ds/cdwfailover01.png)
 
 - build Hive VW
-    - In the Data Warehouse service, click Virtual Warehouses in the left navigation panel.
-    - On the Virtual Warehouses page, click Add New.
-    - In the New Virtual Warehouse dialog box, specify a Virtual Warehouse name, the Type `Hive`, which Database Catalog it queries, and the size.
-    - Configure auto-scaling settings.
-    - Click Create to create the new Virtual Warehouse.
+    1. In the Data Warehouse service, click Virtual Warehouses in the left navigation panel.
+    2. On the Virtual Warehouses page, click Add New.
+    3. In the New Virtual Warehouse dialog box, specify a Virtual Warehouse name, the Type `Hive`, which Database Catalog it queries, and the size.
+    4. Configure auto-scaling settings.
+    5. Click Create to create the new Virtual Warehouse.
 
 ![](../../assets/images/ds/cdwfailover03.png)
 
-- build Impala VW
+- Build Impala VW
 
 ![](../../assets/images/ds/cdwfailover04.png)
 
@@ -98,7 +98,7 @@ EOF
 
 ![](../../assets/images/ds/addcdw03.png)
 
-## 3. Assign CDW resources to user `feng.xu`
+## 3. Assign CDW resources to end user
 
 - Log out the CDP Private Cloud console and then login as user `feng.xu`
 
@@ -135,7 +135,7 @@ EOF
 ![](../../assets/images/ds/addcdw12.png)
 
 
-## 3. Set the Ranger policy for user `feng.xu`
+## 3. Set the Ranger policy for end user
 
 - Log in to Ranger Admin UI. Navigate to the Service Manager > Hadoop_SQL Policies > Access section, and provide `feng.xu` user
 permission to the `all-database, table, column` policy name.
@@ -144,11 +144,11 @@ permission to the `all-database, table, column` policy name.
 
 ## 4. Submit Hive queries with Hue
 
-- On the Overview page under Virtual Warehouses, click the options menu in the upper right corner of an Hive Virtual Warehouse tile, and select `Open Hue`. There are no entries found under database `default`.
+- On the Overview page under Virtual Warehouses, click the options menu in the upper right corner of an Hive Virtual Warehouse tile, and select `Open Hue`.
 
 ![](../../assets/images/ds/addcdw13.png)
 
-- The Hue query editor is displayed.
+- The Hue query editor is displayed. However there are no entries found under database `default`.
 
 ![](../../assets/images/ds/addcdw14.png)
 
@@ -160,7 +160,7 @@ permission to the `all-database, table, column` policy name.
 
 ![](../../assets/images/ds/addcdw18.png)
 
-- The query returns 28 records successfully.
+- The sample query returns 28 records successfully.
 
 ![](../../assets/images/ds/addcdw19.png)
 
@@ -174,7 +174,7 @@ permission to the `all-database, table, column` policy name.
 
 ![](../../assets/images/ds/addcdw21.png)
 
-- Run `Sample: Top salary` in Saved Queries and get 28 records successfully.
+- Run `Sample: Top salary` in Saved Queries and return 28 records successfully.
 
 ![](../../assets/images/ds/addcdw22.png)
 
