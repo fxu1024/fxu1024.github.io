@@ -58,7 +58,7 @@ grand_parent: Data Service
 
 ![](../../assets/images/ds/cdwfailover02.png)
 
-- Recreate external database `db-das` and `db-hue`
+- Recreate external postgres database `db-das` and `db-hue`
 
 ```bash
 sudo -u postgres psql << EOF
@@ -135,14 +135,14 @@ EOF
 ![](../../assets/images/ds/addcdw12.png)
 
 
-## 3. Set the Ranger policy for end user
+## 4. Set the Ranger policy for end user
 
 - Log in to Ranger Admin UI. Navigate to the Service Manager > Hadoop_SQL Policies > Access section, and provide `feng.xu` user
 permission to the `all-database, table, column` policy name.
 
 ![](../../assets/images/ds/addcdw15.png)
 
-## 4. Submit Hive queries with Hue
+## 5. Demo1: Submit Hive queries with Hue
 
 - On the Overview page under Virtual Warehouses, click the options menu in the upper right corner of an Hive Virtual Warehouse tile, and select `Open Hue`.
 
@@ -164,7 +164,7 @@ permission to the `all-database, table, column` policy name.
 
 ![](../../assets/images/ds/addcdw19.png)
 
-# 5. Submit Impala queries with Hue
+# 6. Demo2: Submit Impala queries with Hue
 
 - On the Overview page under Virtual Warehouses, click the options menu in the upper right corner of an Impala Virtual Warehouse tile, and select `Open Hue`.
 
@@ -178,7 +178,7 @@ permission to the `all-database, table, column` policy name.
 
 ![](../../assets/images/ds/addcdw22.png)
 
-# 6. Submit Hive queries with Beeline
+# 7. Demo3: Submit Hive queries with Beeline
 
 - click the options menu in the upper right corner of an Hive Virtual Warehouse tile, and select `Copy JDBC URL`. In this case JDBC URL is `jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=true;retries=3`
 
@@ -263,7 +263,19 @@ VERTICES: 03/03  [==========================>>] 100%  ELAPSED TIME: 1.13 s
 | Athletes and sports competitors                    | 71920       | 79460       | 7540   |
 ```
 
-# 7. Submit Impala queries with Impala Shell
+- (optional) beeline works with ssl enabled.
+
+```bash
+export host=coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com
+export file=pvc134_impala
+rm -f $file.jks $file.pem
+openssl s_client -showcerts -connect $host:443 -servername $host </dev/null 2>/dev/null|openssl x509 -outform PEM > $file.pem
+keytool -import -alias $host -file $file.pem -keystore $file.jks
+beeline -u 'jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=true;retries=3;sslTrustStore=pvc134_hive.jks;trustStorePassword=123456' -n feng.xu -p
+```
+
+
+# 8. Demo4: Submit Impala queries with Impala Shell
 
 - click the options menu in the upper right corner of an Impala Virtual Warehouse tile, and select `Copy Impala shell command`. In this case JDBC URL is `impala-shell --protocol='hs2-http' --ssl -i "coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com:443" -u  -l`
 
@@ -329,8 +341,120 @@ Query progress can be monitored at: http://coordinator-0:25000/query_plan?query_
 | Chief executives                                                                                          | 151370 | 160440 | 9070                    |
 ```
 
+# 9. Demo5: Connect to Hive Virtual Warehouses from DBeaver
+
+- click the options menu in the upper right corner of an Hive Virtual Warehouse tile, and select `Copy JDBC URL`. In this case JDBC URL is `jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=true;retries=3`
+
+- Generate jks file for Hive VW (def keystore password is 123456)
+
+```bash
+export host=hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com
+export file=pvc134_hive
+rm -f $file.jks $file.pem
+openssl s_client -showcerts -connect $host:443 -servername $host </dev/null 2>/dev/null|openssl x509 -outform PEM > $file.pem
+keytool -import -alias $host -file $file.pem -keystore $file.jks
+```
+
+- Start DBeaver and navigate to File > New > DBeaver > Database Connection
+
+![](../../assets/images/ds/addcdw25.png)
+
+- Select Apache Hive JDBC
+
+![](../../assets/images/ds/addcdw26.png)
+
+- Generic JDBC Connection Settings
+
+|JDBC URL: |Automatically updated from other fields| 
+|Host: |hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com|
+|Port: |443|
+|Database: |default|
+|Username: |feng.xu|
+|Password: |your password|
+
+![](../../assets/images/ds/addcdw27.png)
+
+- Click `Edit Driver Settings` and go to tag `Settings`
+
+|Class Name: |Automatically updated from other fields|
+|URL Tempalte: |jdbc:hive2://{host}[:{port}][/{database}];transportMode=http;httpPath=cliservice;ssl=1;retries=3;sslTrustStore=/Users/feng.xu/projects/pvc134_hive.jks;trustStorePassword=123456|
+
+![](../../assets/images/ds/addcdw28.png)
+
+- Switch to tag `Libraries`
+    - Delete the default lib file
+    - Click `Add File` and select `HiveJDBC41.jar`
+    - Click `Find Class` and select `com.cloudera.hive.jdbc41.HS2Driver`
+
+![](../../assets/images/ds/addcdw29.png)
+
+- The final JDBC URL is `jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=1;retries=3;sslTrustStore=/Users/feng.xu/projects/pvc134_hive.jks;trustStorePassword=123456`, Click `Finish`
+
+- Click `Test Connection` and get the corresponding server and Driver version.
+
+![](../../assets/images/ds/addcdw30.png)
+
+- Run sample query in SQL Console
+
+![](../../assets/images/ds/addcdw31.png)
 
 
+# 10. Demo6: Connect to Impala Virtual Warehouses from DBeaver
 
+- click the options menu in the upper right corner of an Impala Virtual Warehouse tile, and select `Copy JDBC URL`. In this case JDBC URL is `jdbc:impala://coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com:443/default;AuthMech=3;transportMode=http;httpPath=cliservice;ssl=1;UID=USERNAME;PWD=PASSWORD`
 
+![](../../assets/images/ds/addcdw32.png)
+
+- Generate keystore file (def keystore password 123456)
+
+```bash
+export host=coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com
+export file=pvc134_impala
+rm -f $file.jks $file.pem
+openssl s_client -showcerts -connect $host:443 -servername $host </dev/null 2>/dev/null|openssl x509 -outform PEM > $file.pem
+keytool -import -alias $host -file $file.pem -keystore $file.jks
+```
+
+- Start DBeaver and navigate to File > New > DBeaver > Database Connection
+
+![](../../assets/images/ds/addcdw25.png)
+
+- Select Cloudera Impala JDBC
+
+![](../../assets/images/ds/addcdw33.png)
+
+- Generic JDBC Connection Settings
+
+|JDBC URL: |Automatically updated from other fields| 
+|Host: |coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com|
+|Port: |443|
+|Database: |default|
+|Username: |feng.xu|
+|Password: |your password|
+
+![](../../assets/images/ds/addcdw34.png)
+
+- Click `Edit Driver Settings` and go to tag `Settings`
+
+|Class Name: |Automatically updated from other fields|
+|URL Tempalte: |jdbc:impala://{host}:{port}/{database};AuthMech=3;transportMode=http;httpPath=cliservice;ssl=1;sslTrustStore=/Users/feng.xu/projects/pvc134_impala.jks;trustStorePassword=123456|
+
+![](../../assets/images/ds/addcdw35.png)
+
+- Switch to tag `Libraries`
+    - Delete the default lib file
+    - Click `Add File` and select `ImpalaJDBC41.jar`
+    - Click `Find Class` and select `com.cloudera.impala.jdbc41.Driver`
+
+![](../../assets/images/ds/addcdw36.png)
+
+- The final JDBC URL is `jdbc:impala://coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com:443/default;AuthMech=3;transportMode=http;httpPath=cliservice;ssl=1;sslTrustStore=/Users/feng.xu/projects/pvc134_impala.jks;trustStorePassword=123456`, Click `Finish`
+
+- Click `Test Connection` and get the corresponding server and Driver version.
+
+![](../../assets/images/ds/addcdw37.png)
+
+- Run sample query in SQL Console
+
+![](../../assets/images/ds/addcdw38.png)
 
