@@ -345,6 +345,8 @@ Query progress can be monitored at: http://coordinator-0:25000/query_plan?query_
 
 - click the options menu in the upper right corner of an Hive Virtual Warehouse tile, and select `Copy JDBC URL`. In this case JDBC URL is `jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=true;retries=3`
 
+![](../../assets/images/ds/addcdw23.png)
+
 - Generate jks file for Hive VW (def keystore password is 123456)
 
 ```bash
