@@ -266,8 +266,8 @@ VERTICES: 03/03  [==========================>>] 100%  ELAPSED TIME: 1.13 s
 - (optional) beeline works with ssl enabled.
 
 ```bash
-export host=coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com
-export file=pvc134_impala
+export host=hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com
+export file=pvc134_hive
 rm -f $file.jks $file.pem
 openssl s_client -showcerts -connect $host:443 -servername $host </dev/null 2>/dev/null|openssl x509 -outform PEM > $file.pem
 keytool -import -alias $host -file $file.pem -keystore $file.jks
@@ -340,6 +340,15 @@ Query progress can be monitored at: http://coordinator-0:25000/query_plan?query_
 | Obstetricians and gynecologists                                                                           | 183600 | 192780 | 9180                    |
 | Chief executives                                                                                          | 151370 | 160440 | 9070                    |
 ```
+
+- (optional) Impala-shell works with ssl enabled. 
+
+**_NOTE:_** Copy client certificate from /var/lib/rancher/rke2/server/tls/client-ca.crt on any ECS hosts.
+
+```bash
+impala-shell --protocol='hs2-http' --ssl --ca_cert client-ca.crt -i "coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com:443" -u feng.xu -l
+```
+
 
 # 9. Demo5: Connect to Hive Virtual Warehouses from DBeaver
 
