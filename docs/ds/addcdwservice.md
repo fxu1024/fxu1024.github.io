@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Add Cloudera Data Warehouse service and demo it
-nav_order: 7
+nav_order: 2
 parent: Operations
 grand_parent: Data Service
 ---
@@ -343,9 +343,15 @@ Query progress can be monitored at: http://coordinator-0:25000/query_plan?query_
 
 # 9. Demo5: Connect to Hive Virtual Warehouses from DBeaver
 
-- click the options menu in the upper right corner of an Hive Virtual Warehouse tile, and select `Copy JDBC URL`. In this case JDBC URL is `jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=true;retries=3`
+- click the options menu in the upper right corner of an Hive Virtual Warehouse tile
 
-![](../../assets/images/ds/addcdw23.png)
+    - select `Download JDBC JAR`. The `HiveJDBC41.jar` and `ImpalaJDBC41.jar` used by DBeaver are recommended to be downloaded from here.
+
+    ![](../../assets/images/ds/addcdw39.png)
+    
+    - select `Copy JDBC URL`. In this case JDBC URL is `jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=true;retries=3`
+
+    ![](../../assets/images/ds/addcdw23.png)
 
 - Generate jks file for Hive VW (def keystore password is 123456)
 
@@ -376,14 +382,14 @@ keytool -import -alias $host -file $file.pem -keystore $file.jks
 
 ![](../../assets/images/ds/addcdw27.png)
 
-- Click `Edit Driver Settings` and go to tag `Settings`
+- Click `Edit Driver Settings` and go to menu `Settings`
 
 |Class Name: |Automatically updated from other fields|
 |URL Tempalte: |jdbc:hive2://{host}[:{port}][/{database}];transportMode=http;httpPath=cliservice;ssl=1;retries=3;sslTrustStore=/Users/feng.xu/projects/pvc134_hive.jks;trustStorePassword=123456|
 
 ![](../../assets/images/ds/addcdw28.png)
 
-- Switch to tag `Libraries`
+- Switch to menu `Libraries`
     - Delete the default lib file
     - Click `Add File` and select `HiveJDBC41.jar`
     - Click `Find Class` and select `com.cloudera.hive.jdbc41.HS2Driver`
@@ -436,14 +442,14 @@ keytool -import -alias $host -file $file.pem -keystore $file.jks
 
 ![](../../assets/images/ds/addcdw34.png)
 
-- Click `Edit Driver Settings` and go to tag `Settings`
+- Click `Edit Driver Settings` and go to menu `Settings`
 
 |Class Name: |Automatically updated from other fields|
 |URL Tempalte: |jdbc:impala://{host}:{port}/{database};AuthMech=3;transportMode=http;httpPath=cliservice;ssl=1;sslTrustStore=/Users/feng.xu/projects/pvc134_impala.jks;trustStorePassword=123456|
 
 ![](../../assets/images/ds/addcdw35.png)
 
-- Switch to tag `Libraries`
+- Switch to menu `Libraries`
     - Delete the default lib file
     - Click `Add File` and select `ImpalaJDBC41.jar`
     - Click `Find Class` and select `com.cloudera.impala.jdbc41.Driver`

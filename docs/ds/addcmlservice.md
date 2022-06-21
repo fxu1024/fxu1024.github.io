@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Add Cloudera Machine Learning service and demo it
-nav_order: 6
+nav_order: 3
 parent: Operations
 grand_parent: Data Service
 ---
@@ -33,6 +33,12 @@ grand_parent: Data Service
 |10.113.207.146	|feng-ws6.sme-feng.athens.cloudera.com |ECS worker node 3|
 
 ## 2. Provision the ML Workspace
+
+- Log into the CDP Private Cloud console as the local administrator `admin`
+
+![](../../assets/images/ds/addcdw01.png)
+
+![](../../assets/images/ds/addcdw02.png)
 
 - Click the `Machince Learning` button.
 
