@@ -571,10 +571,12 @@ INFO  : OK
 10 rows selected (4.1 seconds)
 ```
 
-- (optional) You can register hive udf in the CDP Base cluster as well.
+- (optional) You can register hive udf in the CDP Base cluster as well. CDW can also use existing hive UDFs in CDP Base.
 
 ```bash
 beeline -u 'jdbc:hive2://feng-base.sme-feng.athens.cloudera.com:10000/default;principal=hive/feng-base.sme-feng.athens.cloudera.com@ATHENS.CLOUDERA.COM;ssl=true;sslTrustStore=/opt/cloudera/security/pki/truststore.jks'
+CREATE function myUpper AS 'org.hue.udf.MyUpper' USING JAR  'hdfs:///user/feng.xu/udfs/myudfs.jar'; 
+show functions LIKE '%myUpper%';
 ```
  
 # 12. Demo8: Configure a Cloudera ODBC Driver for Impala Data Source on Linux
@@ -626,7 +628,7 @@ drwxr-xr-x. 2 root root     42 Jun 22 05:34 Setup
 
 - Create setting Files and verify it
 
-**_NOTE:_** Please download `TrustedCerts` from /var/lib/rancher/rke2/server/tls/client-ca.crt on any ECS hosts.
+**_NOTE:_** Please download `TrustedCerts` from `/var/lib/rancher/rke2/server/tls/client-ca.crt` on any ECS hosts.
 
 |HOST |coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com|
 |PORT |443|
@@ -646,7 +648,6 @@ cat > /etc/odbc.ini  << EOF
 
 [ODBC Data Sources]
 ImpalaCDW=Cloudera ODBC Driver for Impala 64-bit on CDW
-ImpalaBase=Cloudera ODBC Driver for Impala 64-bit on CDP Base
 
 [ImpalaCDW]
 Description=Cloudera ODBC Driver for Impala (64-bit) DSN
@@ -664,26 +665,6 @@ SSL=1
 AllowSelfSignedServerCert=1
 CAIssuedCertNamesMismatch=1
 TrustedCerts=/home/centos/client-ca.crt
-TSaslTransportBufSize=1000
-RowsFetchedPerBlock=10000
-SocketTimeout=0
-StringColumnLength=32767
-UseNativeQuery=0
-
-[ImpalaBase]
-Description=Cloudera ODBC Driver for Impala (64-bit) DSN
-Driver=/opt/cloudera/impalaodbc/lib/64/libclouderaimpalaodbc64.so
-HOST=ccycloud-4.feng.root.hwx.site
-PORT=21050
-Database=default
-AuthMech=3
-UseSASL=1
-UID=etl_user
-PWD=cloudera
-SSL=1
-AllowSelfSignedServerCert=1
-CAIssuedCertNamesMismatch=1
-TrustedCerts=/var/lib/cloudera-scm-agent/agent-cert/cm-auto-in_cluster_ca_cert.pem
 TSaslTransportBufSize=1000
 RowsFetchedPerBlock=10000
 SocketTimeout=0
