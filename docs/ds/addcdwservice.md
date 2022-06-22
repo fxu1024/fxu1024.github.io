@@ -343,7 +343,7 @@ Query progress can be monitored at: http://coordinator-0:25000/query_plan?query_
 
 - (optional) Impala-shell works with ssl enabled. 
 
-**_NOTE:_** Copy client certificate from /var/lib/rancher/rke2/server/tls/client-ca.crt on any ECS hosts.
+**_NOTE:_** Please copy client certificate from /var/lib/rancher/rke2/server/tls/client-ca.crt on any ECS hosts.
 
 ```bash
 impala-shell --protocol='hs2-http' --ssl --ca_cert client-ca.crt -i "coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com:443" -u feng.xu -l
@@ -475,3 +475,237 @@ keytool -import -alias $host -file $file.pem -keystore $file.jks
 
 ![](../../assets/images/ds/addcdw38.png)
 
+# 11. Demo7: Register the hive UDF in the Hive Virtual Warehouse
+
+- Upload udf jar file to HDFS
+ 
+```bash
+kinit -kt /var/run/cloudera-scm-agent/process/`ls -l /var/run/cloudera-scm-agent/process/ | grep -i NAMENODE |awk '{print $9}' | sort -n | tail -n 1`/hdfs.keytab hdfs/`hostname -f`@ATHENS.CLOUDERA.COM && klist
+hdfs dfs -mkdir -p /user/feng.xu/udfs
+wget https://github.com/romainr/hadoop-tutorials-examples/raw/master/hive-udf/myudfs.jar
+hdfs dfs -put myudfs.jar /user/feng.xu/udfs
+hdfs dfs -chown -R hive:hadoop /user/feng.xu/udfs
+```
+ 
+- Set up UDF access by three Ranger policy as follows
+ 
+    - hdfs  /user/feng.xu/udfs/
+
+    ![](../../assets/images/ds/addcdw40.png)
+ 
+    - hadoop sql - all - url     
+    - hadoop sql - all - database, udf
+
+    ![](../../assets/images/ds/addcdw41.png)
+
+- Registry hive udf in the Hive Virtual Warehouse and call it.
+     
+```bash
+beeline -u 'jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=false;retries=3' -n feng.xu -p
+ 
+CREATE function myUpper AS 'org.hue.udf.MyUpper' USING JAR  'hdfs:///user/feng.xu/udfs/myudfs.jar'; 
+show functions LIKE '%myUpper%';
+select myUpper(description),description FROM sample_07 limit 10;
+```
+
+```console
+[centos@feng-base ~]$ beeline -u 'jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=false;retries=3' -n feng.xu -p
+Connecting to jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=false;retries=3;user=feng.xu
+Enter password for jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/default: ************
+Connected to: Apache Hive (version 3.1.3000.2021.0.6-b96)
+Driver: Hive JDBC (version 3.1.3000.7.1.7.78-12)
+Transaction isolation: TRANSACTION_REPEATABLE_READ
+Beeline version 3.1.3000.7.1.7.78-12 by Apache Hive
+0: jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-fe> CREATE function myUpper AS 'org.hue.udf.MyUpper' USING JAR  'hdfs:///user/feng.xu/udfs/myudfs.jar';
+WARN  : WARNING! Query command could not be redacted.java.lang.IllegalStateException: Error loading from /opt/cloudera/parcels/CDH-7.1.7-1.cdh7.1.7.p78.21656418/bin/../lib/hive/conf/redaction-rules.json: java.io.FileNotFoundException: /opt/cloudera/parcels/CDH-7.1.7-1.cdh7.1.7.p78.21656418/bin/../lib/hive/conf/redaction-rules.json (No such file or directory)
+INFO  : Compiling command(queryId=hive_20220622032224_6b52d54e-881a-453b-ac0f-e83d10495376): CREATE function myUpper AS 'org.hue.udf.MyUpper' USING JAR  'hdfs:///user/feng.xu/udfs/myudfs.jar'
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Created Hive schema: Schema(fieldSchemas:null, properties:null)
+INFO  : Completed compiling command(queryId=hive_20220622032224_6b52d54e-881a-453b-ac0f-e83d10495376); Time taken: 3.351 seconds
+INFO  : Executing command(queryId=hive_20220622032224_6b52d54e-881a-453b-ac0f-e83d10495376): CREATE function myUpper AS 'org.hue.udf.MyUpper' USING JAR  'hdfs:///user/feng.xu/udfs/myudfs.jar'
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Added [/tmp/eec64eed-2606-468a-98e6-0f3925ef1314_resources/myudfs.jar] to class path
+INFO  : Added resources: [hdfs:///user/feng.xu/udfs/myudfs.jar]
+INFO  : Completed executing command(queryId=hive_20220622032224_6b52d54e-881a-453b-ac0f-e83d10495376); Time taken: 0.675 seconds
+INFO  : OK
+No rows affected (4.494 seconds)
+0: jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-fe> show functions LIKE '%myUpper%';
+WARN  : WARNING! Query command could not be redacted.java.lang.IllegalStateException: Error loading from /opt/cloudera/parcels/CDH-7.1.7-1.cdh7.1.7.p78.21656418/bin/../lib/hive/conf/redaction-rules.json: java.io.FileNotFoundException: /opt/cloudera/parcels/CDH-7.1.7-1.cdh7.1.7.p78.21656418/bin/../lib/hive/conf/redaction-rules.json (No such file or directory)
+INFO  : Compiling command(queryId=hive_20220622032245_2d5faf81-1a95-4ab6-a01f-c64f823b8fc0): show functions LIKE '%myUpper%'
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Created Hive schema: Schema(fieldSchemas:[FieldSchema(name:tab_name, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20220622032245_2d5faf81-1a95-4ab6-a01f-c64f823b8fc0); Time taken: 0.153 seconds
+INFO  : Executing command(queryId=hive_20220622032245_2d5faf81-1a95-4ab6-a01f-c64f823b8fc0): show functions LIKE '%myUpper%'
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20220622032245_2d5faf81-1a95-4ab6-a01f-c64f823b8fc0); Time taken: 0.013 seconds
+INFO  : OK
++------------------+
+|     tab_name     |
++------------------+
+| default.myupper  |
++------------------+
+1 row selected (0.711 seconds)
+0: jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-fe> select myUpper(description),description FROM sample_07 limit 10;
+WARN  : WARNING! Query command could not be redacted.java.lang.IllegalStateException: Error loading from /opt/cloudera/parcels/CDH-7.1.7-1.cdh7.1.7.p78.21656418/bin/../lib/hive/conf/redaction-rules.json: java.io.FileNotFoundException: /opt/cloudera/parcels/CDH-7.1.7-1.cdh7.1.7.p78.21656418/bin/../lib/hive/conf/redaction-rules.json (No such file or directory)
+INFO  : Compiling command(queryId=hive_20220622032252_7f696846-23c6-4b74-ac10-04de84b5a537): select myUpper(description),description FROM sample_07 limit 10
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Created Hive schema: Schema(fieldSchemas:[FieldSchema(name:_c0, type:string, comment:null), FieldSchema(name:description, type:string, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20220622032252_7f696846-23c6-4b74-ac10-04de84b5a537); Time taken: 2.588 seconds
+INFO  : Executing command(queryId=hive_20220622032252_7f696846-23c6-4b74-ac10-04de84b5a537): select myUpper(description),description FROM sample_07 limit 10
+INFO  : Completed executing command(queryId=hive_20220622032252_7f696846-23c6-4b74-ac10-04de84b5a537); Time taken: 0.053 seconds
+INFO  : OK
++-----------------------------------------+--------------------------------------+
+|                   _c0                   |             description              |
++-----------------------------------------+--------------------------------------+
+| ALL OCCUPATIONS-gg                      | All Occupations                      |
+| MANAGEMENT OCCUPATIONS-gg               | Management occupations               |
+| CHIEF EXECUTIVES-gg                     | Chief executives                     |
+| GENERAL AND OPERATIONS MANAGERS-gg      | General and operations managers      |
+| LEGISLATORS-gg                          | Legislators                          |
+| ADVERTISING AND PROMOTIONS MANAGERS-gg  | Advertising and promotions managers  |
+| MARKETING MANAGERS-gg                   | Marketing managers                   |
+| SALES MANAGERS-gg                       | Sales managers                       |
+| PUBLIC RELATIONS MANAGERS-gg            | Public relations managers            |
+| ADMINISTRATIVE SERVICES MANAGERS-gg     | Administrative services managers     |
++-----------------------------------------+--------------------------------------+
+10 rows selected (4.1 seconds)
+```
+
+- (optional) You can register hive udf in the CDP Base cluster as well.
+
+```bash
+beeline -u 'jdbc:hive2://feng-base.sme-feng.athens.cloudera.com:10000/default;principal=hive/feng-base.sme-feng.athens.cloudera.com@ATHENS.CLOUDERA.COM;ssl=true;sslTrustStore=/opt/cloudera/security/pki/truststore.jks'
+```
+ 
+# 12. Demo8: Configure a Cloudera ODBC Driver for Impala Data Source on Linux
+
+- Download the [Cloudera ODBC Driver for Impala](https://www.cloudera.com/downloads/connectors/impala/odbc/2-6-7.html)
+
+![](../../assets/images/ds/addcdw42.png)
+
+- Install unixODBC and verify it
+
+```bash
+# yum install unixODBC -y
+
+# odbcinst -j
+unixODBC 2.3.1
+DRIVERS............: /etc/odbcinst.ini
+SYSTEM DATA SOURCES: /etc/odbc.ini
+FILE DATA SOURCES..: /etc/ODBCDataSources
+USER DATA SOURCES..: /root/.odbc.ini
+SQLULEN Size.......: 8
+SQLLEN Size........: 8
+SQLSETPOSIROW Size.: 8
+```
+
+- Install the Cloudera ODBC Driver for Impala and verify it
+
+```bash
+# rpm -ivh /home/centos/ClouderaImpalaODBC-2.6.7.1007-1.x86_64.rpm
+Preparing...                          ################################# [100%]
+Updating / installing...
+   1:ClouderaImpalaODBC-2.6.7.1007-1  ################################# [100%]
+   
+# ll /opt/cloudera/impalaodbc
+total 680
+-rwxr-xr-x. 1 root root 577882 Aug 26  2019 Cloudera-ODBC-Driver-for-Impala-Install-Guide.pdf
+drwxr-xr-x. 3 root root     19 Jun 22 05:34 ErrorMessages
+-rwxr-xr-x. 1 root root  12003 Aug 26  2019 EULA.txt
+drwxr-xr-x. 3 root root     16 Jun 22 05:34 lib
+-rwxr-xr-x. 1 root root  14244 Aug 26  2019 Release-Notes-Impala-ODBC.txt
+drwxr-xr-x. 2 root root     42 Jun 22 05:34 Setup
+-rwxr-xr-x. 1 root root  83667 Aug 26  2019 third-party-licenses.txt   
+```
+- Set Library Path
+
+```bash
+# echo "export LD_LIBRARY_PATH=/usr/local/lib:/opt/cloudera/impalaodbc/lib/64" >> ~/.bash_profile
+# source ~/.bash_profile
+```
+
+- Create setting Files and verify it
+
+**_NOTE:_** Please download `TrustedCerts` from /var/lib/rancher/rke2/server/tls/client-ca.crt on any ECS hosts.
+
+|HOST |coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com|
+|PORT |443|
+|Database |default|
+|TransportMode |http|
+|HttpPath |cliservice|
+|AuthMech |3|
+|UseSASL |1|
+|UID |feng.xu|
+|PWD |password|
+|TrustedCerts|/home/centos/client-ca.crt|
+
+```bash
+cat > /etc/odbc.ini  << EOF
+[ODBC]
+# Specify any global ODBC configuration here such as ODBC tracing.
+
+[ODBC Data Sources]
+ImpalaCDW=Cloudera ODBC Driver for Impala 64-bit on CDW
+ImpalaBase=Cloudera ODBC Driver for Impala 64-bit on CDP Base
+
+[ImpalaCDW]
+Description=Cloudera ODBC Driver for Impala (64-bit) DSN
+Driver=/opt/cloudera/impalaodbc/lib/64/libclouderaimpalaodbc64.so
+HOST=coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com
+PORT=443
+Database=default
+TransportMode=http
+HttpPath=cliservice
+AuthMech=3
+UseSASL=1
+UID=feng.xu
+PWD=password
+SSL=1
+AllowSelfSignedServerCert=1
+CAIssuedCertNamesMismatch=1
+TrustedCerts=/home/centos/client-ca.crt
+TSaslTransportBufSize=1000
+RowsFetchedPerBlock=10000
+SocketTimeout=0
+StringColumnLength=32767
+UseNativeQuery=0
+
+[ImpalaBase]
+Description=Cloudera ODBC Driver for Impala (64-bit) DSN
+Driver=/opt/cloudera/impalaodbc/lib/64/libclouderaimpalaodbc64.so
+HOST=ccycloud-4.feng.root.hwx.site
+PORT=21050
+Database=default
+AuthMech=3
+UseSASL=1
+UID=etl_user
+PWD=cloudera
+SSL=1
+AllowSelfSignedServerCert=1
+CAIssuedCertNamesMismatch=1
+TrustedCerts=/var/lib/cloudera-scm-agent/agent-cert/cm-auto-in_cluster_ca_cert.pem
+TSaslTransportBufSize=1000
+RowsFetchedPerBlock=10000
+SocketTimeout=0
+StringColumnLength=32767
+UseNativeQuery=0
+EOF
+
+# isql -v ImpalaCDW
++---------------------------------------+
+| Connected!                            |
+|                                       |
+| sql-statement                         |
+| help [tablename]                      |
+| quit                                  |
+|                                       |
++---------------------------------------+
+SQL> select * from default.sample_07 limit 1;
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+------------+
+| code                                                                                                                                                                                                                                                                                                        | description                                                                                                                                                                                                                                                                                                 | total_emp  | salary     |
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+------------+
+| 00-0000                                                                                                                                                                                                                                                                                                     | All Occupations                                                                                                                                                                                                                                                                                             | 134354250  | 40690      |
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------+------------+
+SQLRowCount returns -1
+1 rows fetched
+```
