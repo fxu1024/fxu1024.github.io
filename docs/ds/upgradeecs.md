@@ -96,7 +96,7 @@ gpgkey = https://archive.cloudera.com/p/cm7/7.6.5/redhat7/yum/RPM-GPG-KEY-cloude
 name = Cloudera Manager
 password = xxx
 username = xxx" > /etc/yum.repos.d/cloudera-manager.repo
-```bash
+```
 
 . Stop the Cloudera Management Service
     . Log in to the Cloudera Manager Admin Console.
@@ -192,8 +192,9 @@ systemctl status cloudera-scm-server
 
 ## 3. Upgrade from CDP Base 7.1.7 to 7.1.7 SP1
 
-### 3.1  fsck
+### 3.1  fsck & hbck
 
+. fsck report
 ```bash
 # kinit -kt /var/run/cloudera-scm-agent/process/`ls -l /var/run/cloudera-scm-agent/process/ | grep -i NAMENODE |awk '{print $9}' | sort -n | tail -n 1`/hdfs.keytab hdfs/`hostname -f`@ATHENS.CLOUDERA.COM && klist
 
@@ -238,8 +239,7 @@ FSCK ended at Fri Jun 24 14:44:40 UTC 2022 in 1813 milliseconds
 The filesystem under path '/' is HEALTHY
 ```
 
-### 3.2 hbck
-
+. hbck report
 ```bash
 # kinit -kt /var/run/cloudera-scm-agent/process/$(ls -t1 /var/run/cloudera-scm-agent/process/ | grep -e "hbase-MASTER\$" | head -1)/hbase.keytab hbase/`hostname -f`@ATHENS.CLOUDERA.COM && klist
 
@@ -265,9 +265,9 @@ Table atlas_janus is okay.
 Status: OK
 ```
 
-### 3.3 Back Up CDP Base Cluster
+### 3.2 Back Up CDP Base Cluster
 
-. Back up PG databases: Hive, Ranger, Hue, Oozie
+. Back up PG databases: Hive, Ranger, Hue, Oozie
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
 export DB_HOST=feng-base.sme-feng.athens.cloudera.com
@@ -278,21 +278,21 @@ pg_dump -h ${DB_HOST} -U hive -W -p 5432 metastore > $HOME/hive-backup-${CDH_BAC
 ```
 
 . Back Up ZooKeeper
-    . On all ZooKeeper hosts, back up the ZooKeeper data directory specified with the dataDir property in the ZooKeeper configuration. The default location is /var/lib/zookeeper.
+. On all ZooKeeper hosts, back up the ZooKeeper data directory specified with the dataDir property in the ZooKeeper configuration. The default location is /var/lib/zookeeper.
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
 cp -rp /var/lib/zookeeper/ /var/lib/zookeeper-backup-$CDH_BACKUP_DIR
 ```
 
 . Back up Jornalnode
-    . If high availability is enabled for HDFS, run the following command on all hosts running the JournalNode role:
+. If high availability is enabled for HDFS, run the following command on all hosts running the JournalNode role:
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
 cp -rp /dfs/jn /dfs/jn-backup-$CDH_BACKUP_DIR
 ```
 
 . Back up Namenode
-    . On all NameNode hosts, back up the NameNode runtime directory
+. On all NameNode hosts, back up the NameNode runtime directory
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
 cp -rp /dfs/nn /dfs/nn-backup-$CDH_BACKUP_DIR
@@ -304,7 +304,7 @@ cp -rp /etc/hadoop/conf.cloudera.hdfs/log4j.properties /etc/hadoop/conf.rollback
 ```
 
 . Back up Datanode
-    . Run the following commands on all DataNodes:
+. Run the following commands on all DataNodes:
     
 ```bash
 mkdir -p /etc/hadoop/conf.rollback.datanode/
@@ -314,8 +314,8 @@ cp -rp /etc/hadoop/conf.cloudera.hdfs/log4j.properties /etc/hadoop/conf.rollback
 ```
 
 . Back up Solr
-    . Stop Solr
-    . SolR > Actions > Backup Solr Configuration Meta-data for Upgrade
+    1. Stop Solr
+    2. SolR > Actions > Backup Solr Configuration Meta-data for Upgrade
 
 . Back up Hue
 
@@ -325,7 +325,7 @@ mkdir -p /opt/cloudera/parcels_backup/
 cp -rp /opt/cloudera/parcels/CDH/lib/hue/app.reg /opt/cloudera/parcels_backup/app.reg-$CDH_BACKUP_DIR
 ```
 
-### 3.4 Access Parcels and Restart Cluster
+### 3.3 Activate Parcel
 
 . Log in to the Cloudera Manager Admin Console. Click Parcels from the left menu.
 
