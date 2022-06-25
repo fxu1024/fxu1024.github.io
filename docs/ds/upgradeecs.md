@@ -192,7 +192,7 @@ systemctl status cloudera-scm-server
 
 ## 3. Upgrade from CDP Base 7.1.7 to 7.1.7 SP1
 
-### 3.1  fsck & hbck
+### 3.1 fsck & hbck
 
 . fsck report
 ```bash
@@ -267,7 +267,7 @@ Status: OK
 
 ### 3.2 Back Up CDP Base Cluster
 
-. Back up PG databases: Hive, Ranger, Hue, Oozie
+. Back up PG databases: Hive, Ranger, Hue, Oozie.
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
 export DB_HOST=feng-base.sme-feng.athens.cloudera.com
@@ -277,22 +277,22 @@ pg_dump -h ${DB_HOST} -U ranger -W -p 5432 ranger > $HOME/ranger-backup-${CDH_BA
 pg_dump -h ${DB_HOST} -U hive -W -p 5432 metastore > $HOME/hive-backup-${CDH_BACKUP_DIR}
 ```
 
-. Back Up ZooKeeper
-. On all ZooKeeper hosts, back up the ZooKeeper data directory specified with the dataDir property in the ZooKeeper configuration. The default location is /var/lib/zookeeper.
+. Back Up ZooKeeper.
+    . On all ZooKeeper hosts, back up the ZooKeeper data directory specified with the dataDir property in the ZooKeeper configuration. The default location is /var/lib/zookeeper.
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
 cp -rp /var/lib/zookeeper/ /var/lib/zookeeper-backup-$CDH_BACKUP_DIR
 ```
 
-. Back up Jornalnode
-. If high availability is enabled for HDFS, run the following command on all hosts running the JournalNode role:
+. Back up Jornalnode.
+    . If high availability is enabled for HDFS, run the following command on all hosts running the JournalNode role:
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
 cp -rp /dfs/jn /dfs/jn-backup-$CDH_BACKUP_DIR
 ```
 
-. Back up Namenode
-. On all NameNode hosts, back up the NameNode runtime directory
+. Back up Namenode.
+    . On all NameNode hosts, back up the NameNode runtime directory
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
 cp -rp /dfs/nn /dfs/nn-backup-$CDH_BACKUP_DIR
@@ -303,8 +303,8 @@ rm -rf /etc/hadoop/conf.rollback.namenode/log4j.properties
 cp -rp /etc/hadoop/conf.cloudera.hdfs/log4j.properties /etc/hadoop/conf.rollback.namenode/
 ```
 
-. Back up Datanode
-. Run the following commands on all DataNodes:
+. Back up Datanode.
+    . Run the following commands on all DataNodes:
     
 ```bash
 mkdir -p /etc/hadoop/conf.rollback.datanode/
@@ -313,11 +313,11 @@ rm -rf /etc/hadoop/conf.rollback.datanode/log4j.properties
 cp -rp /etc/hadoop/conf.cloudera.hdfs/log4j.properties /etc/hadoop/conf.rollback.datanode/
 ```
 
-. Back up Solr
+. Back up Solr.
     1. Stop Solr
     2. SolR > Actions > Backup Solr Configuration Meta-data for Upgrade
 
-. Back up Hue
+. Back up Hue.
 
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
