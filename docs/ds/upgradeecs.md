@@ -380,5 +380,6 @@ cp -rp /opt/cloudera/parcels/CDH/lib/hue/app.reg /opt/cloudera/parcels_backup/ap
 
 ![](../../assets/images/ds/upgrade22.jpg)
 
+. The ECS cluster upgrade is now complete.
 
-
+![](../../assets/images/ds/upgrade23.jpg)
