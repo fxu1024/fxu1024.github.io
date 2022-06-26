@@ -24,7 +24,7 @@ grand_parent: Data Service
 |Auto-TLS |No, using manual TLS|
 
 |IP addresss |hostname |description|
-|10.113.207.140	|feng-base.sme-feng.athens.cloudera.com |CDP Base cluster only a single node|
+|10.113.207.140	|feng-base.sme-feng.athens.cloudera.com |CDP Base cluster, only a single node|
 |10.113.207.141	|feng-ws1.sme-feng.athens.cloudera.com |ECS master node 1|
 |10.113.207.142	|feng-ws2.sme-feng.athens.cloudera.com |ECS worker node 1|
 |10.113.207.143	|feng-ws3.sme-feng.athens.cloudera.com |ECS worker node 2|
@@ -33,7 +33,7 @@ grand_parent: Data Service
 
 ### 2.1 Back Up Cloudera Manager
 
-. Log in to the Cloudera Manager Server host and collect database information
+- Log in to the Cloudera Manager Server host and collect database information.
 ```bash
 # cat /etc/cloudera-scm-server/db.properties
 
@@ -45,26 +45,26 @@ com.cloudera.cmf.db.setupType=EXTERNAL
 com.cloudera.cmf.db.password=xxx
 ```
 
-. Create a top level backup directory
+- Create a top level backup directory.
 ```bash
 export CM_BACKUP_DIR="`date +%F`-CM765"
 echo $CM_BACKUP_DIR
 mkdir -p $CM_BACKUP_DIR
 ```
 
-. Stop the Cloudera Management Service
-    . Log in to the Cloudera Manager Admin Console.
-    . Select Clusters > Cloudera Management Service.
-    . Select Actions > Stop.
+- Stop the Cloudera Management Service.
+   - Log in to the Cloudera Manager Admin Console.
+   - Select Clusters > Cloudera Management Service.
+   - Select Actions > Stop.
 
-. Stop the Cloudera Manager Server and Agent
+- Stop the Cloudera Manager Server and Agent.
 
 ```bash
 systemctl stop cloudera-scm-server
 systemctl stop cloudera-scm-agent
 ```
 
-. Back Up CM Agent/Repository/Cloudera Management Service/PG database/CM Server
+- Back Up CM Agent/Repository/Cloudera Management Service/PG database/CM Server.
 
 ```bash
 export DB_HOST=feng-base.sme-feng.athens.cloudera.com
@@ -85,7 +85,7 @@ tar -zcPf ${CM_BACKUP_DIR}/cloudera-scm-server.tar /etc/cloudera-scm-server /etc
 
 ### 2.2 Upgrade Cloudera Manager Server
 
-. Create a file named /etc/yum.repos.d/cloudera-manager.repo with the following content:
+- Create a file named /etc/yum.repos.d/cloudera-manager.repo with the following content:
 
 ```bash
 echo "[cloudera-manager]
@@ -98,43 +98,43 @@ password = xxx
 username = xxx" > /etc/yum.repos.d/cloudera-manager.repo
 ```
 
-. Stop the Cloudera Management Service
-    . Log in to the Cloudera Manager Admin Console.
-    . Select Clusters > Cloudera Management Service.
-    . Select Actions > Stop.
+- Stop the Cloudera Management Service.
+   - Log in to the Cloudera Manager Admin Console.
+   - Select Clusters > Cloudera Management Service.
+   - Select Actions > Stop.
 
-. Stop Cloudera Manager Server & Cloudera Manager Agent
+- Stop Cloudera Manager Server & Cloudera Manager Agent.
 
 ```bash
 systemctl stop cloudera-scm-server
 systemctl stop cloudera-scm-agent
 ```
 
-. Upgrade the packages.
+- Upgrade the packages.
 
 ```bash
 yum clean all
 yum upgrade cloudera-manager-server cloudera-manager-daemons cloudera-manager-agent
 ```
 
-. Verify the packages.
+- Verify the packages.
 
 ```bash
-rpm -qa 'cloudera-manager-*'
+# rpm -qa 'cloudera-manager-*'
 
 cloudera-manager-server-7.6.5-28323913.el7.x86_64
 cloudera-manager-daemons-7.6.5-28323913.el7.x86_64
 cloudera-manager-agent-7.6.5-28323913.el7.x86_64
 ```
 
-. Start the Cloudera Manager Agent.
+- Start the Cloudera Manager Agent.
 
 ```bash
 systemctl start cloudera-scm-agent
 systemctl status cloudera-scm-agent
 ```
 
-. Start the Cloudera Manager Server.
+- Start the Cloudera Manager Server.
 
 ```bash
 systemctl start cloudera-scm-server
@@ -143,39 +143,39 @@ systemctl status cloudera-scm-server
 
 ### 2.3 Upgrade Cloudera Manager Agent
 
-. Use a Web browser to open the Cloudera Manager Admin Console using the following URL: `https://feng-base.sme-feng.athens.cloudera.com:7183/cmf/upgrade`. The Upgrade Cloudera Manager screen displays:
+- Use a Web browser to open the Cloudera Manager Admin Console using the following URL: `https://feng-base.sme-feng.athens.cloudera.com:7183/cmf/upgrade`. The Upgrade Cloudera Manager screen displays:
 
 ![](../../assets/images/ds/upgrade01.png)
 
-. Click Upgrade Cloudera Manager Agent packages. The Upgrade Cloudera Manager Agent Packages page displays the Select Repository step.
+- Click Upgrade Cloudera Manager Agent packages. The Upgrade Cloudera Manager Agent Packages page displays the Select Repository step.
 
-. Select the Custom Repository and enter the Custom Repository URL. Click Continue.
+- Select the Custom Repository and enter the Custom Repository URL. Click Continue.
 
 ![](../../assets/images/ds/upgrade02.jpg)
 
-. Select JDK screen displays the available options for the JDK used in the cluster. Choose `Manually Manage JDK` and Click Continue.
+- Select JDK screen displays the available options for the JDK used in the cluster. Choose `Manually Manage JDK` and Click Continue.
 
 ![](../../assets/images/ds/upgrade03.png)
 
-. Specify the credentials and initiate Agent installation. Click Continue.
+- Specify the credentials and initiate Agent installation. Click Continue.
 
 ![](../../assets/images/ds/upgrade04.png)
 
-. When the installations are complete, click Finish. The Upgrade Cloudera Manager page displays the status of the upgrade. If you see a message listing Cloudera Manager Agents not upgraded, wait a few minutes for the agents to heartbeat and the click the Refresh button.
+- When the installations are complete, click Finish. The Upgrade Cloudera Manager page displays the status of the upgrade. If you see a message listing Cloudera Manager Agents not upgraded, wait a few minutes for the agents to heartbeat and the click the Refresh button.
 
 ![](../../assets/images/ds/upgrade05.png)
 
-. After the Agents are all upgraded, Click Run Host Inspector to run the host inspector. Inspect the output and correct any warnings. If problems occur, you can make changes and then rerun the inspector.
+- After the Agents are all upgraded, Click Run Host Inspector to run the host inspector. Inspect the output and correct any warnings. If problems occur, you can make changes and then rerun the inspector.
 
 ![](../../assets/images/ds/upgrade06.png)
 
-. When you are satisfied with the inspection results, click Start the Cloudera Management Service. Confirm that you want to start the Cloudera Management Service by clicking Continue. You will see a message indicating that the Cloudera Management Service has started.
+- When you are satisfied with the inspection results, click Start the Cloudera Management Service. Confirm that you want to start the Cloudera Management Service by clicking Continue. You will see a message indicating that the Cloudera Management Service has started.
 
 ![](../../assets/images/ds/upgrade07.png)
 
-. The CM upgrade is now complete.
+- The CM upgrade is now complete.
 
-. The ECS services prompts you to restart the stale service. Please follow the restart steps when the cluster is idle,
+- The ECS services prompts you to restart the stale service. Please follow the restart steps when the cluster is idle,
 
 ![](../../assets/images/ds/upgrade14.jpg)
 
@@ -183,7 +183,7 @@ systemctl status cloudera-scm-server
 
 ![](../../assets/images/ds/upgrade16.jpg)
 
-. Unseal the Vault. Go to the ECS service and click Actions > Unseal.
+- Unseal the Vault. Go to the ECS service and click Actions > Unseal.
 
 ![](../../assets/images/ds/addnode23.png)
 
@@ -192,9 +192,9 @@ systemctl status cloudera-scm-server
 
 ## 3. Upgrade from CDP Base 7.1.7 to 7.1.7 SP1
 
-### 3.1 fsck & hbck
+### 3.1 fsck & hbck
 
-. fsck report
+- fsck report
 ```bash
 # kinit -kt /var/run/cloudera-scm-agent/process/`ls -l /var/run/cloudera-scm-agent/process/ | grep -i NAMENODE |awk '{print $9}' | sort -n | tail -n 1`/hdfs.keytab hdfs/`hostname -f`@ATHENS.CLOUDERA.COM && klist
 
@@ -239,7 +239,7 @@ FSCK ended at Fri Jun 24 14:44:40 UTC 2022 in 1813 milliseconds
 The filesystem under path '/' is HEALTHY
 ```
 
-. hbck report
+- hbck report
 ```bash
 # kinit -kt /var/run/cloudera-scm-agent/process/$(ls -t1 /var/run/cloudera-scm-agent/process/ | grep -e "hbase-MASTER\$" | head -1)/hbase.keytab hbase/`hostname -f`@ATHENS.CLOUDERA.COM && klist
 
@@ -267,7 +267,7 @@ Status: OK
 
 ### 3.2 Back Up CDP Base Cluster
 
-. Back up PG databases: Hive, Ranger, Hue, Oozie.
+- Back up PG databases: Hive, Ranger, Hue, Oozie.
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
 export DB_HOST=feng-base.sme-feng.athens.cloudera.com
@@ -277,22 +277,22 @@ pg_dump -h ${DB_HOST} -U ranger -W -p 5432 ranger > $HOME/ranger-backup-${CDH_BA
 pg_dump -h ${DB_HOST} -U hive -W -p 5432 metastore > $HOME/hive-backup-${CDH_BACKUP_DIR}
 ```
 
-. Back Up ZooKeeper.
-    . On all ZooKeeper hosts, back up the ZooKeeper data directory specified with the dataDir property in the ZooKeeper configuration. The default location is /var/lib/zookeeper.
+- Back Up ZooKeeper.
+    - On all ZooKeeper hosts, back up the ZooKeeper data directory specified with the dataDir property in the ZooKeeper configuration. The default location is /var/lib/zookeeper.
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
 cp -rp /var/lib/zookeeper/ /var/lib/zookeeper-backup-$CDH_BACKUP_DIR
 ```
 
-. Back up Jornalnode.
-    . If high availability is enabled for HDFS, run the following command on all hosts running the JournalNode role:
+- Back up Jornalnode.
+   - If high availability is enabled for HDFS, run the following command on all hosts running the JournalNode role:
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
 cp -rp /dfs/jn /dfs/jn-backup-$CDH_BACKUP_DIR
 ```
 
-. Back up Namenode.
-    . On all NameNode hosts, back up the NameNode runtime directory
+- Back up Namenode.
+   - On all NameNode hosts, back up the NameNode runtime directory
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
 cp -rp /dfs/nn /dfs/nn-backup-$CDH_BACKUP_DIR
@@ -303,8 +303,8 @@ rm -rf /etc/hadoop/conf.rollback.namenode/log4j.properties
 cp -rp /etc/hadoop/conf.cloudera.hdfs/log4j.properties /etc/hadoop/conf.rollback.namenode/
 ```
 
-. Back up Datanode.
-    . Run the following commands on all DataNodes:
+- Back up Datanode.
+   - Run the following commands on all DataNodes:
     
 ```bash
 mkdir -p /etc/hadoop/conf.rollback.datanode/
@@ -313,11 +313,11 @@ rm -rf /etc/hadoop/conf.rollback.datanode/log4j.properties
 cp -rp /etc/hadoop/conf.cloudera.hdfs/log4j.properties /etc/hadoop/conf.rollback.datanode/
 ```
 
-. Back up Solr.
-    1. Stop Solr
-    2. SolR > Actions > Backup Solr Configuration Meta-data for Upgrade
+- Back up Solr.
+   1. Stop Solr
+   2. SolR > Actions > Backup Solr Configuration Meta-data for Upgrade
 
-. Back up Hue.
+- Back up Hue.
 
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
@@ -327,59 +327,59 @@ cp -rp /opt/cloudera/parcels/CDH/lib/hue/app.reg /opt/cloudera/parcels_backup/ap
 
 ### 3.3 Activate Parcel
 
-. Log in to the Cloudera Manager Admin Console. Click Parcels from the left menu.
+- Log in to the Cloudera Manager Admin Console. Click Parcels from the left menu.
 
-. Select `PVC-Base` under Location. Locate the row in the table that contains the new Cloudera Runtime parcel and click the Download button.
+- Select `PVC-Base` under Location. Locate the row in the table that contains the new Cloudera Runtime parcel and click the Download button.
 
 ![](../../assets/images/ds/upgrade08.jpg)
 
-. After the parcel is downloaded, click the Distribute button.
+- After the parcel is downloaded, click the Distribute button.
 
 ![](../../assets/images/ds/upgrade09.jpg)
 
-. Wait for the parcel to be distributed and unpacked before continuing. Cloudera Manager displays the status of the Cloudera Runtime parcel distribution. Click on the status display to view detailed status for each host.
+- Wait for the parcel to be distributed and unpacked before continuing. Cloudera Manager displays the status of the Cloudera Runtime parcel distribution. Click on the status display to view detailed status for each host.
 
 ![](../../assets/images/ds/upgrade10.jpg)
 
-. Click Activate button. The Activate cloudera runtime window displays. select `Restart` and Click OK.
+- Click Activate button. The Activate cloudera runtime window displays. select `Restart` and Click OK.
 
 ![](../../assets/images/ds/upgrade11.jpg)
 
-. The Restart Cluster Command screen opens and displays the progress of the restart.
+- The Restart Cluster Command screen opens and displays the progress of the restart.
 
 ![](../../assets/images/ds/upgrade12.jpg)
 
-. Parcel Cloudera Runtime 7.1.7-1.cdh7.1.7.p1000.24102687 is activated.
+- Parcel Cloudera Runtime 7.1.7-1.cdh7.1.7.p1000.24102687 is activated.
 
 ![](../../assets/images/ds/upgrade13.jpg)
 
 
 ## 4. Upgrade from ECS 1.3.4 to 1.4.0
 
-. In Cloudera Manager, navigate to CDP Private Cloud Data Services 1.3.4 and Click Update.
+- In Cloudera Manager, navigate to CDP Private Cloud Data Services 1.3.4 and Click Update.
 
 ![](../../assets/images/ds/upgrade17.jpg)
 
-. On the Getting Started page, you can select the Install method - Air Gapped or Internet and proceed. Click Continue.
+- On the Getting Started page, you can select the Install method - Air Gapped or Internet and proceed. Click Continue.
 
 ![](../../assets/images/ds/upgrade18.jpg)
 
-. On the Collect Information page, click Continue.
+- On the Collect Information page, click Continue.
 
 ![](../../assets/images/ds/upgrade19.jpg)
 
-. On the Install Parcels page, click Continue.
+- On the Install Parcels page, click Continue.
 
 ![](../../assets/images/ds/upgrade20.jpg)
 
-. On the Update Progress page, you can see the progress of your update. Click Continue after the update is complete.
+- On the Update Progress page, you can see the progress of your update. Click Continue after the update is complete.
 
 ![](../../assets/images/ds/upgrade21.jpg)
 
-. After the update is complete, the Summary page appears. You can now Launch CDP Private Cloud from here.
+- After the update is complete, the Summary page appears. You can now Launch CDP Private Cloud from here.
 
 ![](../../assets/images/ds/upgrade22.jpg)
 
-. The ECS cluster upgrade is now complete.
+- The ECS cluster upgrade is now complete.
 
 ![](../../assets/images/ds/upgrade23.jpg)
