@@ -263,8 +263,8 @@ wget https://www.cloudera.com/content/dam/www/marketing/tutorials/cdp-using-cli-
 ```
 
 - modify file `Data_Extraction_Sub_150k.py` and `Data_Extraction_Over_150k.py`. Change to access data on hdfs not s3.
-```console
 
+```console
 # in *Sub_150k.py
 - input_path ='s3a://usermarketing-cdp-demo/tutorial-data/data-engineering/PPP-Sub-150k-TX.csv'
 + input_path = '/tmp/PPP-Sub-150k-TX.csv'
