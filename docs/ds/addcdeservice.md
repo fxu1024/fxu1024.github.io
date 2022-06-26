@@ -45,7 +45,7 @@ grand_parent: Data Service
 
 ![](../../assets/images/ds/addcde02.jpg)
 
-- The CDE service initialization is ready.
+- The CDE service initialization is now complete.
 
 ![](../../assets/images/ds/addcde03.jpg)
 
@@ -56,7 +56,7 @@ grand_parent: Data Service
    - Enter a Cluster Name. Cluster names must begin with a letter, be between 3 and 30 characters (inclusive) and contain only alphanumeric characters and hyphens
    - Select the CDE Service to create the virtual cluster in.
    - Select the Spark Version to use in the virtual cluster.
-   - Click Create.
+   - Click `Create`.
 
 ![](../../assets/images/ds/addcde04.jpg)
 
@@ -64,7 +64,7 @@ grand_parent: Data Service
 
 ![](../../assets/images/ds/addcde05.jpg)
 
-- Click Cluster Details. Click JOBS API URL to copy the URL to your clipboard. In this case JOBS API URL is `https://zpfflxrf.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cloudera.com/dex/api/v1`
+- Click `Cluster Details`, and then click `JOBS API URL` to copy the URL to your clipboard. In this case JOBS API URL is `https://zpfflxrf.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cloudera.com/dex/api/v1`
 
 ![](../../assets/images/ds/addcde06.jpg)
 
@@ -105,7 +105,7 @@ secret/tls-dex-base created
 INFO : Exit code = 0
 ```
 
-- Add backend user `dexuser` which is allowed to run Jobs
+- Add backend user `dexuser` which is allowed frontend user `admin` & `feng.xu` to run Jobs.
 
 ```bash
 # export host=zpfflxrf.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cloudera.com
@@ -142,15 +142,15 @@ INFO : Exit code = 0
 
 **_NOTE:_** The CDE CLI can only be accessed by AD/LDAP users, so the Local admin account wont work here. You need to make sure your ad/ldap account is setup as a PowerUser.
 
-- In the Virtual Clusters column on the right, click the Cluster Details icon on the virtual cluster.
+- In the Virtual Clusters column on the right, click the `Cluster Details` icon on the virtual cluster.
 
 ![](../../assets/images/ds/addcde05.jpg)
 
-- Click the link under CLI TOOL to download the CLI client
+- Click the link under `CLI TOOL` to download the CLI client.
 
 ![](../../assets/images/ds/addcde16.jpg)
 
-- Open terminal on your computer and move cde binary to ~/cde
+- Open terminal on your computer and move cde binary to `~/cde/bin`.
 ```bash
 $ mkdir -p ~/cde/bin
 $ cd ~/cde/bin
@@ -161,7 +161,7 @@ $ echo 'export PATH="~/cde/bin:$PATH"' >> ~/.bash_profile
 $ source ~/.bash_profile
 ```
 
-- Create a /.cde directory and config ~/.cde/config.yaml.
+- Create a `/.cde` directory and config `~/.cde/config.yaml`.
 ```bash
 export host=zpfflxrf.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cloudera.com
 export user=feng.xu
@@ -170,6 +170,7 @@ vcluster-endpoint: https://$host/dex/api/v1" > ~/.cde/config.yaml
 ```
 
 - test cde cli
+
 ```bash
 $ cde job list --tls-insecure
 WARN: Plaintext or insecure TLS connection requested, take care before continuing. Continue? yes/no [no]: yes
@@ -181,15 +182,15 @@ API User Password:
     "created": "2022-06-26T08:48:20Z",
     "modified": "2022-06-26T08:48:20Z",
     "retentionPolicy": "keep_indefinitely",
-......
-]
+.....
 ```
 
 ## 4. Demo1: Create a Job by CDE UI
 
-- Download file `access-logs-ETL.py` and `access-log.txt`.
+- Download file `tutorial-files.zip` and unzip it.
 ```bash
 wget https://www.cloudera.com/content/dam/www/marketing/tutorials/cdp-getting-started-with-cloudera-data-engineering/tutorial-files.zip
+unzip tutorial-files.zip
 ```
 
 - Open file `access-logs-ETL.py` and change to access data on hdfs not s3.
@@ -238,10 +239,10 @@ permission to the `all-database` policy name.
 ![](../../assets/images/ds/addcde08.jpg)
 
 - Provide the Job Details:
-   - Select Spark for the job type -  Spark 2.4.7
-   - Specify the Name - access-logs-ETL
-   - Select from Resource - access-logs-ETL.py
-   - Select Python 3
+   - Select Spark for the job type -  "Spark 2.4.7"
+   - Specify the Name - "access-logs-ETL"
+   - Select from Resource - "access-logs-ETL.py"
+   - Select "Python 3"
    - Turn off Schedule
    - Create and Run
 
@@ -260,9 +261,10 @@ permission to the `all-database` policy name.
 
 ## 5. Demo2: Create a Job by CDE CLI
 
-- Download file `access-logs-ETL.py` and `access-log.txt`.
+- Download file `tutorial-files.zip` and unzip it.
 ```bash
 wget https://www.cloudera.com/content/dam/www/marketing/tutorials/cdp-using-cli-api-to-automate-access-to-cloudera-data-engineering/tutorial-files.zip
+unzip tutorial-files.zip
 ```
 
 - modify file `Data_Extraction_Sub_150k.py` and `Data_Extraction_Over_150k.py`. Change to access data on hdfs not s3.

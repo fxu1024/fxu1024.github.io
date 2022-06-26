@@ -301,7 +301,7 @@ Click Continue.
 ```bash
 sudo chmod 644 /etc/rancher/rke2/rke2.yaml
 echo "export PATH=/var/lib/rancher/rke2/bin:$PATH
-export KUBECONFIG=/etc/rancher/rke2/rke2.yaml" > ~/.bash_profile
+export KUBECONFIG=/etc/rancher/rke2/rke2.yaml" >> ~/.bash_profile
 source ~/.bash_profile
 ```
 
@@ -316,7 +316,7 @@ EOF
 chmod 755 ~/gen_ext_kubeconfig.sh
 sh ~/gen_ext_kubeconfig.sh
 ```
-- scp file `external_kubeconfig` to each ECS worker node.
+- Copy file `external_kubeconfig` to each ECS worker node.
 
 - Open SSH terminal for ECS worker node and modify `.bash_profile`.
 ```bash
@@ -327,8 +327,8 @@ source ~/.bash_profile
 ```
 - You can run kubectl commands now
 ```bash
-kubectl get nodes
-kubectl get namespaces
-kubectl get pods -n cdp
+kubectl get node
+kubectl get ns
+kubectl get pod -n cdp
 ```
 
