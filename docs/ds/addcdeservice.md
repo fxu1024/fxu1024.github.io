@@ -88,83 +88,30 @@ KVNO Timestamp         Principal
    1 01/01/70 00:00:00 dexuser@ATHENS.CLOUDERA.COM
 ```
  
--  Configure TLS for Clusters Jobs API
+-  Configure TLS for Cluster's Jobs API
+
 ```bash
 # export host=zpfflxrf.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cloudera.com
+
 # cd /tmp/cde-1.4.0
+
 # ./cdp-cde-utils.sh init-virtual-cluster -h $host -a
-INFO : Using the domain name as-is:service.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cloudera.com
-INFO : Running command: bash -c "mkdir -p /tmp/cdp-cde-utils-tmp/certs"
-INFO : Exit code = 0
-INFO : Running command: bash -c "openssl req -new -newkey RSA:2048 -nodes -keyout /tmp/cdp-cde-utils-tmp/certs/ssl.key -out /tmp/cdp-cde-utils-tmp/certs/ssl.csr -extensions v3_req -config /tmp/cdp-cde-utils-tmp/certs/req.conf"
-Generating a 2048 bit RSA private key
-..................+++
-.........+++
-writing new private key to '/tmp/cdp-cde-utils-tmp/certs/ssl.key'
------
-INFO : Exit code = 0
-INFO : Running command: bash -c "openssl x509 -req -days 365 -in /tmp/cdp-cde-utils-tmp/certs/ssl.csr -signkey /tmp/cdp-cde-utils-tmp/certs/ssl.key -out /tmp/cdp-cde-utils-tmp/certs/ssl.crt -extensions v3_req -extfile /tmp/cdp-cde-utils-tmp/certs/req.conf"
-Signature ok
-subject=/CN=service.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cloudera.com
-Getting Private key
-INFO : Exit code = 0
-INFO : Running command: bash -c "rm /tmp/cdp-cde-utils-tmp/certs/req.conf"
-INFO : Exit code = 0
-INFO : Running command: bash -c "rm /tmp/cdp-cde-utils-tmp/certs/ssl.csr"
-INFO : Exit code = 0
-INFO : Checking if ingresses was already fixed before ..
-INFO : Running command: bash -c "kubectl describe ingress dex-base-api -n dex-base-tlwzshhj | grep tls-dex-base | grep service.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cloudera.com || true"
-INFO : Exit code = 0
-INFO : Ingresses not already fixed, doing so now ..
+........
 INFO : Creating secrets out of TLS certs
 INFO : Running command: bash -c "kubectl create secret tls tls-dex-base --cert=/tmp/cdp-cde-utils-tmp/certs/ssl.crt --key=/tmp/cdp-cde-utils-tmp/certs/ssl.key -o yaml --dry-run | kubectl apply -f - -n dex-base-tlwzshhj"
 W0626 07:30:49.568860    1813 helpers.go:557] --dry-run is deprecated and can be replaced with --dry-run=client.
 secret/tls-dex-base created
-INFO : Exit code = 0
-INFO : Injecting TLS certs in the clusters as a secret object
-INFO : sed -i "s/^spec:/spec:\n  tls:\n    - hosts:\n      - service.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cloudera.com\n      secretName: tls-dex-base/g"
-INFO : Running command: bash -c "kubectl edit ingress dex-base-api -n dex-base-tlwzshhj"
-ingress.networking.k8s.io/dex-base-api edited
-INFO : Exit code = 0
-INFO : Using the domain name as-is:zpfflxrf.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cloudera.com
-INFO : Running command: bash -c "mkdir -p /tmp/cdp-cde-utils-tmp/certs"
-INFO : Exit code = 0
-INFO : Running command: bash -c "openssl req -new -newkey RSA:2048 -nodes -keyout /tmp/cdp-cde-utils-tmp/certs/ssl.key -out /tmp/cdp-cde-utils-tmp/certs/ssl.csr -extensions v3_req -config /tmp/cdp-cde-utils-tmp/certs/req.conf"
-Generating a 2048 bit RSA private key
-........+++
-.........................+++
-writing new private key to '/tmp/cdp-cde-utils-tmp/certs/ssl.key'
------
-INFO : Exit code = 0
-INFO : Running command: bash -c "openssl x509 -req -days 365 -in /tmp/cdp-cde-utils-tmp/certs/ssl.csr -signkey /tmp/cdp-cde-utils-tmp/certs/ssl.key -out /tmp/cdp-cde-utils-tmp/certs/ssl.crt -extensions v3_req -extfile /tmp/cdp-cde-utils-tmp/certs/req.conf"
-Signature ok
-subject=/CN=zpfflxrf.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cloudera.com
-Getting Private key
-INFO : Exit code = 0
-INFO : Running command: bash -c "rm /tmp/cdp-cde-utils-tmp/certs/req.conf"
-INFO : Exit code = 0
-INFO : Running command: bash -c "rm /tmp/cdp-cde-utils-tmp/certs/ssl.csr"
-INFO : Exit code = 0
-INFO : Checking if ingresses was already fixed before ..
-INFO : Running command: bash -c "kubectl describe ingress dex-app-zpfflxrf-api -n dex-base-tlwzshhj | grep tls-dex-app-zpfflxrf | grep zpfflxrf.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cloudera.com || true"
-INFO : Exit code = 0
-INFO : Ingresses not already fixed, doing so now ..
-INFO : Creating secrets out of TLS certs
-INFO : Running command: bash -c "kubectl create secret tls tls-dex-app-zpfflxrf --cert=/tmp/cdp-cde-utils-tmp/certs/ssl.crt --key=/tmp/cdp-cde-utils-tmp/certs/ssl.key -o yaml --dry-run | kubectl apply -f - -n dex-base-tlwzshhj"
-W0626 07:30:51.256302    2061 helpers.go:557] --dry-run is deprecated and can be replaced with --dry-run=client.
-secret/tls-dex-app-zpfflxrf created
-INFO : Exit code = 0
-INFO : Injecting TLS certs in the clusters as a secret object
-INFO : sed -i "s/^spec:/spec:\n  tls:\n    - hosts:\n      - zpfflxrf.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cloudera.com\n      secretName: tls-dex-app-zpfflxrf/g"
-INFO : Running command: bash -c "kubectl edit ingress dex-app-zpfflxrf-api -n dex-base-tlwzshhj"
-ingress.networking.k8s.io/dex-app-zpfflxrf-api edited
+........
 INFO : Exit code = 0
 ```
 
 - Add backend user `dexuser` which is allowed to run Jobs
+
 ```bash
 # export host=zpfflxrf.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cloudera.com
+
 # cd /tmp/cde-1.4.0
+
 # ./cdp-cde-utils.sh init-user-in-virtual-cluster -h $host -u admin -p /home/centos/dexuser.principal -k /home/centos/dexuser.keytab
 INFO : Deleting old secrets in dex-app-zpfflxrf..
 INFO : Running command: bash -c "kubectl delete --ignore-not-found=true secret admin-krb5-secret    -n dex-app-zpfflxrf"
