@@ -34,6 +34,7 @@ grand_parent: Data Service
 ### 2.1 Back Up Cloudera Manager
 
 - Log in to the Cloudera Manager Server host and collect database information.
+
 ```bash
 # cat /etc/cloudera-scm-server/db.properties
 
