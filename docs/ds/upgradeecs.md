@@ -34,7 +34,6 @@ grand_parent: Data Service
 ### 2.1 Back Up Cloudera Manager
 
 - Log in to the Cloudera Manager Server host and collect database information.
-
 ```bash
 # cat /etc/cloudera-scm-server/db.properties
 
@@ -59,14 +58,12 @@ mkdir -p $CM_BACKUP_DIR
    - Select Actions > Stop.
 
 - Stop the Cloudera Manager Server and Agent.
-
 ```bash
 systemctl stop cloudera-scm-server
 systemctl stop cloudera-scm-agent
 ```
 
 - Back Up CM Agent/Repository/Cloudera Management Service/PG database/CM Server.
-
 ```bash
 export DB_HOST=feng-base.sme-feng.athens.cloudera.com
 tar -zcPf ${CM_BACKUP_DIR}/cloudera-scm-agent.tar --exclude=*.sock /etc/cloudera-scm-agent /etc/default/cloudera-scm-agent /var/run/cloudera-scm-agent /var/lib/cloudera-scm-agent
@@ -87,7 +84,6 @@ tar -zcPf ${CM_BACKUP_DIR}/cloudera-scm-server.tar /etc/cloudera-scm-server /etc
 ### 2.2 Upgrade Cloudera Manager Server
 
 - Create a file named /etc/yum.repos.d/cloudera-manager.repo with the following content:
-
 ```bash
 echo "[cloudera-manager]
 baseurl = https://archive.cloudera.com/p/cm7/7.6.5/redhat7/yum
@@ -105,21 +101,18 @@ username = xxx" > /etc/yum.repos.d/cloudera-manager.repo
    - Select Actions > Stop.
 
 - Stop Cloudera Manager Server & Cloudera Manager Agent.
-
 ```bash
 systemctl stop cloudera-scm-server
 systemctl stop cloudera-scm-agent
 ```
 
 - Upgrade the packages.
-
 ```bash
 yum clean all
 yum upgrade cloudera-manager-server cloudera-manager-daemons cloudera-manager-agent
 ```
 
 - Verify the packages.
-
 ```bash
 # rpm -qa 'cloudera-manager-*'
 
@@ -129,14 +122,12 @@ cloudera-manager-agent-7.6.5-28323913.el7.x86_64
 ```
 
 - Start the Cloudera Manager Agent.
-
 ```bash
 systemctl start cloudera-scm-agent
 systemctl status cloudera-scm-agent
 ```
 
 - Start the Cloudera Manager Server.
-
 ```bash
 systemctl start cloudera-scm-server
 systemctl status cloudera-scm-server
@@ -196,7 +187,6 @@ systemctl status cloudera-scm-server
 ### 3.1 fsck & hbck
 
 - fsck report
-
 ```bash
 # kinit -kt /var/run/cloudera-scm-agent/process/`ls -l /var/run/cloudera-scm-agent/process/ | grep -i NAMENODE |awk '{print $9}' | sort -n | tail -n 1`/hdfs.keytab hdfs/`hostname -f`@ATHENS.CLOUDERA.COM && klist
 
@@ -242,7 +232,6 @@ The filesystem under path '/' is HEALTHY
 ```
 
 - hbck report
-
 ```bash
 # kinit -kt /var/run/cloudera-scm-agent/process/$(ls -t1 /var/run/cloudera-scm-agent/process/ | grep -e "hbase-MASTER\$" | head -1)/hbase.keytab hbase/`hostname -f`@ATHENS.CLOUDERA.COM && klist
 
@@ -270,7 +259,7 @@ Status: OK
 
 ### 3.2 Back Up CDP Base Cluster
 
-- Back up PG databases: Hive, Ranger, Hue, Oozie.
+- Back up PG databases: Hive, Ranger, Hue, Oozie.
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
 export DB_HOST=feng-base.sme-feng.athens.cloudera.com
@@ -296,7 +285,6 @@ cp -rp /dfs/jn /dfs/jn-backup-$CDH_BACKUP_DIR
 
 - Back up Namenode.
    - On all NameNode hosts, back up the NameNode runtime directory
-   
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
 cp -rp /dfs/nn /dfs/nn-backup-$CDH_BACKUP_DIR
@@ -308,8 +296,7 @@ cp -rp /etc/hadoop/conf.cloudera.hdfs/log4j.properties /etc/hadoop/conf.rollback
 ```
 
 - Back up Datanodes.
-   - Run the following commands on all DataNodes:
-    
+   - Run the following commands on all DataNodes: 
 ```bash
 mkdir -p /etc/hadoop/conf.rollback.datanode/
 cp -rp /var/run/cloudera-scm-agent/process/$(ls -t1 /var/run/cloudera-scm-agent/process/ | grep -e "-DATANODE\$" | head -1)/* /etc/hadoop/conf.rollback.datanode/
@@ -322,7 +309,6 @@ cp -rp /etc/hadoop/conf.cloudera.hdfs/log4j.properties /etc/hadoop/conf.rollback
    2. Solr > Actions > Backup Solr Configuration Meta-data for Upgrade
 
 - Back up Hue.
-
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
 mkdir -p /opt/cloudera/parcels_backup/
