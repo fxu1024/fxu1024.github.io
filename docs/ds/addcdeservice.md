@@ -200,11 +200,11 @@ unzip tutorial-files.zip
 - input_path ='s3a://usermarketing-cdp-demo/tutorial-data/data-engineering'
 + input_path = '/tmp/access-log.txt'
 
-# A sed script will fix up the files
+# A sed script will fix up the files.
 sed -i '' 's?s3a://usermarketing-cdp-demo/tutorial-data/data-engineering?/tmp/access-log.txt?g' access-logs-ETL.py
 ```
 
-- Open SSH terminal for CDP Base master node and upload file to HDFS 
+- Open SSH terminal for CDP Base master node and upload file to HDFS.
 ```bash
 kinit -kt dexuser.keytab dexuser
 hdfs dfs -put access-log.txt /tmp
@@ -215,18 +215,18 @@ permission to the `all-database` policy name.
 
 ![](../../assets/images/ds/addcde14.jpg)
 
-- In the Virtual Clusters column on the right, click the View Jobs icon on the virtual cluster.
+- In the Virtual Clusters column on the right, click the `View Jobs` icon on the virtual cluster.
 
 ![](../../assets/images/ds/addcde07.jpg)
 
 
-- In the left hand menu, click Resources. and then click the Create Resource button.
+- In the left hand menu, click Resources. and then click the `Create Resource` button.
    - Resource Name - testjob1
    - Type - file
 
 ![](../../assets/images/ds/addcde09.jpg)
 
-- Click Upload Files button and select `access-logs-ETL.py` from your computer.
+- Click `Upload Files` button and select `access-logs-ETL.py` from your computer.
 
 ![](../../assets/images/ds/addcde10.jpg)
 
@@ -234,7 +234,7 @@ permission to the `all-database` policy name.
 
 ![](../../assets/images/ds/addcde11.jpg)
 
-- In the left hand menu, click Jobs. and then click the Create Job button.
+- In the left hand menu, click Jobs. and then click the `Create Job` button.
 
 ![](../../assets/images/ds/addcde08.jpg)
 
@@ -251,8 +251,6 @@ permission to the `all-database` policy name.
 ![](../../assets/images/ds/addcde13.jpg)
 
 - Job `access-logs-ETL` is ready and run successfully.
-
-![](../../assets/images/ds/addcde14.jpg)
 
 ![](../../assets/images/ds/addcde15.jpg)
 
