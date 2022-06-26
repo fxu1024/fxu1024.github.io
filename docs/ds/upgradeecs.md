@@ -35,7 +35,7 @@ grand_parent: Data Service
 
 - Log in to the Cloudera Manager Server host and collect database information.
 
-```bash
+   ```bash
 # cat /etc/cloudera-scm-server/db.properties
 
 com.cloudera.cmf.db.type=postgresql
@@ -44,7 +44,7 @@ com.cloudera.cmf.db.name=scm
 com.cloudera.cmf.db.user=scm
 com.cloudera.cmf.db.setupType=EXTERNAL
 com.cloudera.cmf.db.password=xxx
-```
+   ```
 
 - Create a top level backup directory.
 ```bash
@@ -65,7 +65,8 @@ systemctl stop cloudera-scm-agent
 ```
 
 - Back Up CM Agent/Repository/Cloudera Management Service/PG database/CM Server.
-```bash
+
+   ```bash
 export DB_HOST=feng-base.sme-feng.athens.cloudera.com
 tar -zcPf ${CM_BACKUP_DIR}/cloudera-scm-agent.tar --exclude=*.sock /etc/cloudera-scm-agent /etc/default/cloudera-scm-agent /var/run/cloudera-scm-agent /var/lib/cloudera-scm-agent
 
@@ -80,7 +81,7 @@ pg_dump -h ${DB_HOST} -U rman -W -p 5432 rman > $HOME/rman-backup-${CM_BACKUP_DI
 
 tar -zcPf ${CM_BACKUP_DIR}/cloudera-scm-server.tar /etc/cloudera-scm-server /etc/default/cloudera-scm-server
 tar -zcPf ${CM_BACKUP_DIR}/cloudera-scm-server.tar /etc/cloudera-scm-server /etc/default/cloudera-scm-server
-```
+   ```
 
 ### 2.2 Upgrade Cloudera Manager Server
 
@@ -115,13 +116,13 @@ yum upgrade cloudera-manager-server cloudera-manager-daemons cloudera-manager-ag
 
 - Verify the packages.
 
-```bash
+   ```bash
 # rpm -qa 'cloudera-manager-*'
 
 cloudera-manager-server-7.6.5-28323913.el7.x86_64
 cloudera-manager-daemons-7.6.5-28323913.el7.x86_64
 cloudera-manager-agent-7.6.5-28323913.el7.x86_64
-```
+   ```
 
 - Start the Cloudera Manager Agent.
 ```bash
