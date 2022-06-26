@@ -104,7 +104,7 @@ username = xxx" > /etc/yum.repos.d/cloudera-manager.repo
    - Select Clusters > Cloudera Management Service.
    - Select Actions > Stop.
 
-- Stop Cloudera Manager Server & Cloudera Manager Agent.
+- Stop Cloudera Manager Server & Cloudera Manager Agent.
 
 ```bash
 systemctl stop cloudera-scm-server
@@ -118,7 +118,7 @@ yum clean all
 yum upgrade cloudera-manager-server cloudera-manager-daemons cloudera-manager-agent
 ```
 
-- Verify the packages.
+- Verify the packages.
 
 ```bash
 # rpm -qa 'cloudera-manager-*'
@@ -193,9 +193,10 @@ systemctl status cloudera-scm-server
 
 ## 3. Upgrade from CDP Base 7.1.7 to 7.1.7 SP1
 
-### 3.1 fsck & hbck
+### 3.1 fsck & hbck
 
 - fsck report
+
 ```bash
 # kinit -kt /var/run/cloudera-scm-agent/process/`ls -l /var/run/cloudera-scm-agent/process/ | grep -i NAMENODE |awk '{print $9}' | sort -n | tail -n 1`/hdfs.keytab hdfs/`hostname -f`@ATHENS.CLOUDERA.COM && klist
 
@@ -241,6 +242,7 @@ The filesystem under path '/' is HEALTHY
 ```
 
 - hbck report
+
 ```bash
 # kinit -kt /var/run/cloudera-scm-agent/process/$(ls -t1 /var/run/cloudera-scm-agent/process/ | grep -e "hbase-MASTER\$" | head -1)/hbase.keytab hbase/`hostname -f`@ATHENS.CLOUDERA.COM && klist
 
@@ -268,7 +270,7 @@ Status: OK
 
 ### 3.2 Back Up CDP Base Cluster
 
-- Back up PG databases: Hive, Ranger, Hue, Oozie.
+- Back up PG databases: Hive, Ranger, Hue, Oozie.
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
 export DB_HOST=feng-base.sme-feng.athens.cloudera.com
@@ -285,7 +287,7 @@ export CDH_BACKUP_DIR="`date +%F`-CM765"
 cp -rp /var/lib/zookeeper/ /var/lib/zookeeper-backup-$CDH_BACKUP_DIR
 ```
 
-- Back up Jornalnode.
+- Back up Jornalnode.
    - If high availability is enabled for HDFS, run the following command on all hosts running the JournalNode role:
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
@@ -294,6 +296,7 @@ cp -rp /dfs/jn /dfs/jn-backup-$CDH_BACKUP_DIR
 
 - Back up Namenode.
    - On all NameNode hosts, back up the NameNode runtime directory
+   
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
 cp -rp /dfs/nn /dfs/nn-backup-$CDH_BACKUP_DIR
@@ -304,7 +307,7 @@ rm -rf /etc/hadoop/conf.rollback.namenode/log4j.properties
 cp -rp /etc/hadoop/conf.cloudera.hdfs/log4j.properties /etc/hadoop/conf.rollback.namenode/
 ```
 
-- Back up Datanode.
+- Back up Datanodes.
    - Run the following commands on all DataNodes:
     
 ```bash
@@ -316,7 +319,7 @@ cp -rp /etc/hadoop/conf.cloudera.hdfs/log4j.properties /etc/hadoop/conf.rollback
 
 - Back up Solr.
    1. Stop Solr
-   2. SolR > Actions > Backup Solr Configuration Meta-data for Upgrade
+   2. Solr > Actions > Backup Solr Configuration Meta-data for Upgrade
 
 - Back up Hue.
 
