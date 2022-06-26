@@ -183,7 +183,7 @@ API User Password:
     "retentionPolicy": "keep_indefinitely",
 ......
 ]
-```bash
+```
 
 ## 4. Demo1: Create a Job by CDE UI
 
@@ -192,12 +192,15 @@ API User Password:
 wget https://www.cloudera.com/content/dam/www/marketing/tutorials/cdp-getting-started-with-cloudera-data-engineering/tutorial-files.zip
 ```
 
-- Open file `access-logs-ETL.py` and modify input_path ='/tmp/access-log.txt'. Change to access data on hdfs not s3.
+- Open file `access-logs-ETL.py` and change to access data on hdfs not s3.
+
 ```bash
-# vi access-logs-ETL.py
-......
-input_path ='/tmp/access-log.txt'
-......
+# in access-logs-ETL.py
+- input_path ='s3a://usermarketing-cdp-demo/tutorial-data/data-engineering'
++ input_path = '/tmp/access-log.txt'
+
+# A sed script will fix up the files
+sed -i '' 's?s3a://usermarketing-cdp-demo/tutorial-data/data-engineering?/tmp/access-log.txt?g' access-logs-ETL.py
 ```
 
 - Open SSH terminal for CDP Base master node and upload file to HDFS 
@@ -264,12 +267,12 @@ wget https://www.cloudera.com/content/dam/www/marketing/tutorials/cdp-using-cli-
 
 - modify file `Data_Extraction_Sub_150k.py` and `Data_Extraction_Over_150k.py`. Change to access data on hdfs not s3.
 
-```console
-# in *Sub_150k.py
+```bash
+# in Data_Extraction_Sub_150k.py
 - input_path ='s3a://usermarketing-cdp-demo/tutorial-data/data-engineering/PPP-Sub-150k-TX.csv'
 + input_path = '/tmp/PPP-Sub-150k-TX.csv'
 
-# in *Over_150k.py
+# in Data_Extraction_Over_150k.py
 - input_path ='s3a://usermarketing-cdp-demo/tutorial-data/data-engineering/PPP-Over-150k-ALL.csv'
 + input_path = '/tmp/PPP-Over-150k-ALL.csv'
 
