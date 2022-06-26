@@ -405,7 +405,7 @@ cp -rp /opt/cloudera/parcels/CDH/lib/hue/app.reg /opt/cloudera/parcels_backup/ap
 registry-user:187umud2e70t852xqo2uirfp
 ```
 
-- View docker registry catalog
+- View docker registry catalog (skip CML images)
 ```bash
 # curl --insecure -u registry-user:187umud2e70t852xqo2uirfp https://feng-ws2.sme-feng.athens.cloudera.com:5000/v2/_catalog
 {"repositories":["cloudera/1.1.9-b31/cdw/cluster-autoscaler"

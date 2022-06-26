@@ -26,7 +26,7 @@ grand_parent: Data Service
 |Databases options |external existing databases|
 
 |IP addresss |hostname |description|
-|10.113.207.140	|feng-base.sme-feng.athens.cloudera.com |CDP Base cluster only a single node|
+|10.113.207.140	|feng-base.sme-feng.athens.cloudera.com |CDP Base cluster, only a single node|
 |10.113.207.141	|feng-ws1.sme-feng.athens.cloudera.com |ECS master node 1|
 |10.113.207.142	|feng-ws2.sme-feng.athens.cloudera.com |ECS master node 2|
 |10.113.207.143	|feng-ws3.sme-feng.athens.cloudera.com |ECS master node 3|
