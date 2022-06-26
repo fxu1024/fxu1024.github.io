@@ -34,17 +34,18 @@ grand_parent: Data Service
 ### 2.1 Back Up Cloudera Manager
 
 - Log in to the Cloudera Manager Server host and collect database information.
-
-   ```bash
+```bash
 # cat /etc/cloudera-scm-server/db.properties
+```
 
+```console
 com.cloudera.cmf.db.type=postgresql
 com.cloudera.cmf.db.host=feng-base.sme-feng.athens.cloudera.com:5432
 com.cloudera.cmf.db.name=scm
 com.cloudera.cmf.db.user=scm
 com.cloudera.cmf.db.setupType=EXTERNAL
 com.cloudera.cmf.db.password=xxx
-   ```
+```
 
 - Create a top level backup directory.
 ```bash
@@ -66,22 +67,30 @@ systemctl stop cloudera-scm-agent
 
 - Back Up CM Agent/Repository/Cloudera Management Service/PG database/CM Server.
 
-   ```bash
+```bash
 export DB_HOST=feng-base.sme-feng.athens.cloudera.com
 tar -zcPf ${CM_BACKUP_DIR}/cloudera-scm-agent.tar --exclude=*.sock /etc/cloudera-scm-agent /etc/default/cloudera-scm-agent /var/run/cloudera-scm-agent /var/lib/cloudera-scm-agent
+```
 
+```bash
 tar -zcPf ${CM_BACKUP_DIR}/repository.tar /etc/yum.repos.d
+```
 
+```bash
 cp -rp /var/lib/cloudera-service-monitor /var/lib/cloudera-service-monitor-${CM_BACKUP_DIR}
 cp -rp /var/lib/cloudera-host-monitor /var/lib/cloudera-host-monitor-${CM_BACKUP_DIR}
 cp -rp /var/lib/cloudera-scm-eventserver /var/lib/cloudera-scm-eventserver-${CM_BACKUP_DIR}
+```
 
+```bash
 pg_dump -h ${DB_HOST} -U scm -W -p 5432 scm > $HOME/scm-backup-${CM_BACKUP_DIR}
 pg_dump -h ${DB_HOST} -U rman -W -p 5432 rman > $HOME/rman-backup-${CM_BACKUP_DIR}
+```
 
+```bash
 tar -zcPf ${CM_BACKUP_DIR}/cloudera-scm-server.tar /etc/cloudera-scm-server /etc/default/cloudera-scm-server
 tar -zcPf ${CM_BACKUP_DIR}/cloudera-scm-server.tar /etc/cloudera-scm-server /etc/default/cloudera-scm-server
-   ```
+```
 
 ### 2.2 Upgrade Cloudera Manager Server
 
@@ -115,14 +124,15 @@ yum upgrade cloudera-manager-server cloudera-manager-daemons cloudera-manager-ag
 ```
 
 - Verify the packages.
-
-   ```bash
+```bash
 # rpm -qa 'cloudera-manager-*'
+```
 
+```console
 cloudera-manager-server-7.6.5-28323913.el7.x86_64
 cloudera-manager-daemons-7.6.5-28323913.el7.x86_64
 cloudera-manager-agent-7.6.5-28323913.el7.x86_64
-   ```
+```
 
 - Start the Cloudera Manager Agent.
 ```bash
