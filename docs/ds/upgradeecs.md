@@ -387,3 +387,125 @@ cp -rp /opt/cloudera/parcels/CDH/lib/hue/app.reg /opt/cloudera/parcels_backup/ap
 - The ECS cluster upgrade is now complete.
 
 ![](../../assets/images/ds/upgrade23.jpg)
+
+
+## 5. Get docker image list of ECS 1.4.0
+
+- Get token from file `/root/.docker/config.json`. In this case docker registry is `feng-ws2.sme-feng.athens.cloudera.com`.
+```bash
+# grep -A2 feng-ws2.sme-feng.athens.cloudera.com /root/.docker/config.json
+		"feng-ws2.sme-feng.athens.cloudera.com:5000": {
+			"auth": "cmVnaXN0cnktdXNlcjoxODd1bXVkMmU3MHQ4NTJ4cW8ydWlyZnA="
+		},
+```
+
+- Decode registry user and password
+```bash
+# echo "cmVnaXN0cnktdXNlcjoxODd1bXVkMmU3MHQ4NTJ4cW8ydWlyZnA=" |base64 -d
+registry-user:187umud2e70t852xqo2uirfp
+```
+
+- View docker registry catalog
+```bash
+# curl --insecure -u registry-user:187umud2e70t852xqo2uirfp https://feng-ws2.sme-feng.athens.cloudera.com:5000/v2/_catalog
+{"repositories":["cloudera/1.1.9-b31/cdw/cluster-autoscaler"
+,"cloudera/1.1.9-b31/cdw/compute-operator"
+,"cloudera/1.1.9-b31/cdw/compute-usage-monitor"
+,"cloudera/1.1.9-b31/cdw/configuration-sidecar"
+,"cloudera/1.1.9-b31/cdw/das"
+,"cloudera/1.1.9-b31/cdw/diagnostic-data-generator"
+,"cloudera/1.1.9-b31/cdw/diagnostic-tools"
+,"cloudera/1.1.9-b31/cdw/dwx"
+,"cloudera/1.1.9-b31/cdw/fluentd"
+,"cloudera/1.1.9-b31/cdw/hive"
+,"cloudera/1.1.9-b31/cdw/impala-autoscaler"
+,"cloudera/1.1.9-b31/cdw/leader-elector"
+,"cloudera/1.1.9-b31/cdw/service-proxy"
+,"cloudera/catalogd"
+,"cloudera/cdp-gateway"
+,"cloudera/cdpcli"
+,"cloudera/cdsw/third-party/pod-evaluator/webhook"
+,"cloudera/cdv/cdwdataviz"
+,"cloudera/cloud/cluster-proxy-private"
+,"cloudera/cloud/dp-cluster-service-private"
+,"cloudera/cloud/dp-migrate-private"
+,"cloudera/cloud/dp-web-private"
+,"cloudera/cloudera-scheduler"
+,"cloudera/cloudera-scheduler-admission-controller"
+,"cloudera/cluster-access-manager"
+,"cloudera/cm-health-exporter"
+,"cloudera/compute-operator"
+,"cloudera/compute-usage-monitor"
+,"cloudera/configuration-sidecar"
+,"cloudera/das"
+,"cloudera/dex/dex-admission-controller"
+,"cloudera/dex/dex-airflow-7.1.7.74"
+,"cloudera/dex/dex-airflow-7.2.14.0"
+,"cloudera/dex/dex-airflow-api-server-7.1.7.74"
+,"cloudera/dex/dex-airflow-api-server-7.2.14.0"
+,"cloudera/dex/dex-airflow-connections-7.1.7.74"
+,"cloudera/dex/dex-airflow-connections-7.2.14.0"
+,"cloudera/dex/dex-configs-manager"
+,"cloudera/dex/dex-configs-templates-init"
+,"cloudera/dex/dex-configs-templates-init-pvc"
+,"cloudera/dex/dex-cp"
+,"cloudera/dex/dex-diagnostics"
+,"cloudera/dex/dex-downloads"
+,"cloudera/dex/dex-efs-init"
+,"cloudera/dex/dex-eventlog-reader"
+,"cloudera/dex/dex-grafana"
+,"cloudera/dex/dex-k8s-events-logger"
+,"cloudera/dex/dex-knox"
+,"cloudera/dex/dex-livy-runtime-2.4.7-7.1.7.74"
+,"cloudera/dex/dex-livy-runtime-2.4.8-7.2.14.0"
+,"cloudera/dex/dex-livy-server-2.4.7-7.1.7.74"
+,"cloudera/dex/dex-livy-server-2.4.8-7.2.14.0"
+,"cloudera/dex/dex-livy-server-3.2.0-7.1.7.74"
+,"cloudera/dex/dex-livy-server-3.2.0-7.2.14.0"
+,"cloudera/dex/dex-pipelines-api-server"
+,"cloudera/dex/dex-rss"
+,"cloudera/dex/dex-runtime-api-kinit"
+,"cloudera/dex/dex-runtime-api-server"
+,"cloudera/dex/dex-runtime-db-hook"
+,"cloudera/dex/dex-runtime-management-authz"
+,"cloudera/dex/dex-runtime-management-metadata-proxy"
+,"cloudera/dex/dex-runtime-management-metadata-proxy-templates-init"
+,"cloudera/dex/dex-runtime-management-server"
+,"cloudera/dex/dex-runtime-python-builder"
+,"cloudera/dex/dex-safari-7.1.7.74"
+,"cloudera/dex/dex-safari-7.2.14.0"
+,"cloudera/dex/dex-shs-init"
+,"cloudera/dex/dex-spark-history-server-2.4.8"
+,"cloudera/dex/dex-spark-history-server-3.2.0"
+,"cloudera/dex/dex-spark-runtime-2.4.7-7.1.7.74"
+,"cloudera/dex/dex-spark-runtime-2.4.8-7.2.14.0"
+,"cloudera/dex/dex-spark-runtime-3.2.0-7.1.7.74"
+,"cloudera/dex/dex-spark-runtime-3.2.0-7.2.14.0"
+,"cloudera/dex/dex-tgtgen-reconciler"
+,"cloudera/dex/dex-tgtgen-templates-init"
+,"cloudera/diagnostic-data-generator"
+,"cloudera/diagnostic-tools"
+,"cloudera/dmx-app"
+,"cloudera/dmx-web"
+,"cloudera/dwx"
+,"cloudera/feng"
+,"cloudera/fluentd"
+,"cloudera/hive"
+,"cloudera/hue"
+,"cloudera/huelb"
+,"cloudera/hueqp"
+,"cloudera/impala-autoscaler"
+,"cloudera/impalad_coord_exec"
+,"cloudera/impalad_coordinator"
+,"cloudera/impalad_executor"
+,"cloudera/leader-elector"
+,"cloudera/liftie"
+,"cloudera/logger-alert-receiver"
+,"cloudera/metrics-server-exporter"
+,"cloudera/mlx-control-plane-app"
+,"cloudera/mlx-control-plane-app-cadence-worker"
+,"cloudera/mlx-control-plane-app-cdsw-migrator"
+,"cloudera/mlx-control-plane-app-health-poller"
+,"cloudera/monitoring"
+,"cloudera/monitoring-app"]}
+```
