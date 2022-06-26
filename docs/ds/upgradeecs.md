@@ -34,6 +34,7 @@ grand_parent: Data Service
 ### 2.1 Back Up Cloudera Manager
 
 - Log in to the Cloudera Manager Server host and collect database information.
+
 ```bash
 # cat /etc/cloudera-scm-server/db.properties
 
@@ -113,6 +114,7 @@ yum upgrade cloudera-manager-server cloudera-manager-daemons cloudera-manager-ag
 ```
 
 - Verify the packages.
+
 ```bash
 # rpm -qa 'cloudera-manager-*'
 
@@ -187,6 +189,7 @@ systemctl status cloudera-scm-server
 ### 3.1 fsck & hbck
 
 - fsck report
+
 ```bash
 # kinit -kt /var/run/cloudera-scm-agent/process/`ls -l /var/run/cloudera-scm-agent/process/ | grep -i NAMENODE |awk '{print $9}' | sort -n | tail -n 1`/hdfs.keytab hdfs/`hostname -f`@ATHENS.CLOUDERA.COM && klist
 
@@ -232,6 +235,7 @@ The filesystem under path '/' is HEALTHY
 ```
 
 - hbck report
+
 ```bash
 # kinit -kt /var/run/cloudera-scm-agent/process/$(ls -t1 /var/run/cloudera-scm-agent/process/ | grep -e "hbase-MASTER\$" | head -1)/hbase.keytab hbase/`hostname -f`@ATHENS.CLOUDERA.COM && klist
 
@@ -284,11 +288,10 @@ cp -rp /dfs/jn /dfs/jn-backup-$CDH_BACKUP_DIR
 ```
 
 - Back up Namenode.
-   - On all NameNode hosts, back up the NameNode runtime directory
+   - On all NameNode hosts, back up the NameNode runtime directory   
 ```bash
 export CDH_BACKUP_DIR="`date +%F`-CM765"
 cp -rp /dfs/nn /dfs/nn-backup-$CDH_BACKUP_DIR
-
 mkdir -p /etc/hadoop/conf.rollback.namenode
 cp -rp /var/run/cloudera-scm-agent/process/$(ls -t1 /var/run/cloudera-scm-agent/process/ | grep -e "-NAMENODE\$" | head -1)/* /etc/hadoop/conf.rollback.namenode/
 rm -rf /etc/hadoop/conf.rollback.namenode/log4j.properties
