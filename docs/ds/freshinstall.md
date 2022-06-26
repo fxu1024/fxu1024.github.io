@@ -294,3 +294,41 @@ Click Continue.
 
 ![](../../assets/images/ds/freshinstall18.png)
 
+
+## 7. Setup kubectl for command line
+
+- Open SSH terminal for ECS server node and modify `.bash_profile`.
+```bash
+sudo chmod 644 /etc/rancher/rke2/rke2.yaml
+echo "export PATH=/var/lib/rancher/rke2/bin:$PATH
+export KUBECONFIG=/etc/rancher/rke2/rke2.yaml" > ~/.bash_profile
+source ~/.bash_profile
+```
+
+- Create gen_ext_kubeconfig.sh and generates a kubeconfig file for ECS worker node.
+```bash
+cat <<EOF > ~/gen_ext_kubeconfig.sh
+#!/bin/bash
+# usage: gen_ext_kubeconfig.sh
+# generates an external_kubeconfig file under current user's home directory. This kubeconfig can be used externally to access the RKE cluster.
+sudo sed -e 's/certificate-authority-data/#&/' -e "s/server: .*/server: https:\/\/`hostname`:6443/" -e '/server/a \ \ \ \ insecure-skip-tls-verify: true' /etc/rancher/rke2/rke2.yaml > ~/external_kubeconfig
+EOF
+chmod 755 ~/gen_ext_kubeconfig.sh
+sh ~/gen_ext_kubeconfig.sh
+```
+- scp file `external_kubeconfig` to each ECS worker node.
+
+- Open SSH terminal for ECS worker node and modify `.bash_profile`.
+```bash
+sudo chmod 644 /home/centos/external_kubeconfig
+echo "export PATH=/var/lib/rancher/rke2/bin:$PATH
+export KUBECONFIG=/home/centos/external_kubeconfig" >> ~/.bash_profile
+source ~/.bash_profile
+```
+- You can run kubectl commands now
+```bash
+kubectl get nodes
+kubectl get namespaces
+kubectl get pods -n cdp
+```
+
