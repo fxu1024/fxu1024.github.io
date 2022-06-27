@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Remove failed worker node from the existing ECS cluster
-nav_order: 5
+nav_order: 7
 parent: Operations
 grand_parent: Data Service
 ---
@@ -19,9 +19,17 @@ grand_parent: Data Service
 |CDP Runtime version |CDP PvC Base 7.1.7|
 |CM version |Cloudera Manager 7.5.5|
 |ECS version |CDP PvC DataServices 1.3.4|
+|OS version |Centos 7.9|
+|K8S version |RKE 1.21|
 |Whether to enable Kerberos |Yes|
 |Whether to enable TLS |Yes|
 |Auto-TLS |No, using manual TLS|
+|Kerberos |AD|
+|LDAP |AD|
+|DB Configuration |External Postgres 12|
+|Vault |Embedded|
+|Docker registry |Embedded|
+|Install Method |Internet|
 
 |IP addresss |hostname |description|
 |10.113.207.140	|feng-base.sme-feng.athens.cloudera.com |CDP Base cluster, only a single node|

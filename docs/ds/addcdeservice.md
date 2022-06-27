@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Add Cloudera Data Engineering service and demo it
-nav_order: 4
+nav_order: 6
 parent: Operations
 grand_parent: Data Service
 ---
@@ -19,9 +19,17 @@ grand_parent: Data Service
 |CDP Runtime version |CDP PvC Base 7.1.7 SP1|
 |CM version |Cloudera Manager 7.6.5|
 |ECS version |CDP PvC DataServices 1.4.0|
+|OS version |Centos 7.9|
+|K8S version |RKE 1.21|
 |Whether to enable Kerberos |Yes|
 |Whether to enable TLS |Yes|
 |Auto-TLS |No, using manual TLS|
+|Kerberos |AD|
+|LDAP |AD|
+|DB Configuration |External Postgres 12|
+|Vault |Embedded|
+|Docker registry |Embedded|
+|Install Method |Internet|
 
 |IP addresss |hostname |description|
 |10.113.207.140	|feng-base.sme-feng.athens.cloudera.com |CDP Base cluster, only a single node|
@@ -138,7 +146,7 @@ INFO : Exit code = 0
 ......
 ```
 
-## 3. Configure the CDE CLI client
+## 4. Configure the CDE CLI client
 
 **_NOTE:_** The CDE CLI can only be accessed by AD/LDAP users, so the Local admin account wont work here. You need to make sure your ad/ldap account is setup as a PowerUser.
 
@@ -185,7 +193,7 @@ API User Password:
 .....
 ```
 
-## 4. Demo1: Create a Job by CDE UI
+## 5. Demo1: Create a Job by CDE UI
 
 - Download file `tutorial-files.zip` and unzip it.
 ```bash
@@ -257,7 +265,7 @@ permission to the `all-database` policy name.
 - If your CDW is running, open up HUE and verify the `retail` db and `tokenized_accesss_logs` table data that was prepped by your CDE job.
 
 
-## 5. Demo2: Create a Job by CDE CLI
+## 6. Demo2: Create a Job by CDE CLI
 
 - Download file `tutorial-files.zip` and unzip it.
 ```bash
@@ -320,14 +328,20 @@ cde job create --name "Over_150K_ETL" \
           --tls-insecure
 ```
 
-- Confirm scheduling
+- Confirm scheduling by CDE CLI
 ```bash
 cde job list --filter 'name[like]%ETL%' --tls-insecure
 ```
 
-- View Job Runs
+- View Job Runs by CDE CLI
 ```bash
 cde run list --filter 'job[like]%ETL%' --tls-insecure
 ```
 
-## 6. Demo3: Orchestrate CDE jobs by Airflow
+- View job Runs by CDE UI
+
+![](../../assets/images/ds/addcde17.jpg)
+
+![](../../assets/images/ds/addcde18.jpg)
+
+## 7. Demo3: Orchestrate CDE jobs by Airflow
