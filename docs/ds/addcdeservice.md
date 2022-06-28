@@ -193,7 +193,42 @@ API User Password:
 .....
 ```
 
-## 5. Demo1: Create a Job by CDE UI
+## 5. Setup REST API
+
+- In the Virtual Clusters column on the right, click the `Cluster Details` icon on the virtual cluster.
+
+![](../../assets/images/ds/addcde05.jpg)
+
+- Click `GRAFANA CHARTS` to copy the URL to your clipboard. In this case GRAFANA CHARTS is `https://service.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cloudera.com/grafana/d/0Oq0WmQWk/instance-metrics?orgId=1&refresh=5s&var-virtual_cluster_name=test001`.
+
+![](../../assets/images/ds/addcde19.jpg)
+
+- Click `JOBS API URL` to copy the URL to your clipboard. In this case JOBS API URL is `https://zpfflxrf.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cloudera.com/dex/api/v1`
+
+![](../../assets/images/ds/addcde06.jpg)
+
+- Get CDE API access token and job api url.
+
+```bash
+yum install epel-release
+yum -y install jq
+export workload_user=feng.xu
+export grafana_charts='https://service.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cloudera.com/grafana/d/0Oq0WmQWk/instance-metrics?orgId=1&refresh=5s&var-virtual_cluster_name=test001'
+export CDE_TOKEN=$(curl -u ${workload_user} -k $(echo ${grafana_charts} | cut -d'/' -f1-3 | awk '{print $1"/gateway/authtkn/knoxtoken/api/v1/token"}') | jq -r '.access_token')
+export CDE_JOB_URL='https://zpfflxrf.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cloudera.com/dex/api/v1'
+```
+
+- The command needed to make any REST API call is:
+```bash
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X <request_method> "${CDE_JOB_URL}/<api_command>" <api_options> | jq .
+```
+Where:
+    <request_method> is DELETE, GET, PATCH, POST or PUT; depending on your request
+    <api_command> is the command youd like to execute from [API DOC](https://docs.cloudera.com/data-engineering/1.4.0/jobs-rest-api-reference/index.html)
+    <api_options> are the required options for requested command
+
+
+## 6. Demo1: Create a Job by CDE UI
 
 - Download file `tutorial-files.zip` and unzip it.
 ```bash
@@ -265,7 +300,9 @@ permission to the `all-database` policy name.
 - If your CDW is running, open up HUE and verify the `retail` db and `tokenized_accesss_logs` table data that was prepped by your CDE job.
 
 
-## 6. Demo2: Create a Job by CDE CLI
+## 7. Demo2: Create and schedule a Job by CDE CLI
+
+### 7.1 Prerequisites
 
 - Download file `tutorial-files.zip` and unzip it.
 ```bash
@@ -294,27 +331,32 @@ kinit -kt dexuser.keytab dexuser
 hdfs dfs -put *.csv /tmp
 ```
 
-- Open terminal on your computer and create a resource
+### 7.2 Run spark job only once
+
+- Open terminal on your computer and use the spark submit command.
+```bash
+cde spark submit --conf "spark.pyspark.python=python3" Data_Extraction_Sub_150k.py --tls-insecure
+```
+
+- Check Job Status and review the output.
+```bash
+export JOB_ID=1
+cde run describe --tls-insecure --id ${JOB_ID}
+cde run logs --type "submitter/jobs_api" --tls-insecure --id ${JOB_ID}
+```
+
+- If your CDW is running, open up HUE and verify the `texasapp` db and `loan_data` table data that was prepped by your CDE job.
+
+### 7.3 Run spark job repeatedly
+
+- If you plan to run the same job several times, it is a good idea to create and upload the resource at first.
 ```bash
 cde resource create --name "cde_ETL"  --tls-insecure
 cde resource upload --local-path "Data_Extraction*.py" --name "cde_ETL" --tls-insecure
 cde resource describe --name "cde_ETL" --tls-insecure
 ```
 
-- Run adhoc spark job
-```bash
-cde spark submit --conf "spark.pyspark.python=python3" Data_Extraction_Sub_150k.py --tls-insecure
-```
-
-- Check Job Status
-```bash
-cde run describe --tls-insecure --id #, where # is the job id
-cde run logs --type "submitter/jobs_api" --tls-insecure --id #, where # is the job id
-```
-
-- If your CDW is running, open up HUE and verify the `texasapp` db and `loan_data` table data that was prepped by your CDE job.
-
-- create job and schedule
+- Create job and schedule
 ```bash
 cde job create --name "Over_150K_ETL" \
           --type spark \
@@ -344,4 +386,30 @@ cde run list --filter 'job[like]%ETL%' --tls-insecure
 
 ![](../../assets/images/ds/addcde18.jpg)
 
-## 7. Demo3: Orchestrate CDE jobs by Airflow
+
+### 7.4 Run spark job using REST API
+
+- Create a resource `cde_REPORTS`
+```bash
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/resources" -H "Content-Type: application/json" -d "{ \"name\": \"cde_REPORTS\"}"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X PUT "${CDE_JOB_URL}/resources/cde_REPORTS/Create_Reports.py" -F 'file=@/root/Create_Reports.py'
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/resources/cde_REPORTS" | jq .
+```
+
+- Schedule a job `Create_Report` to run every thirty minutes past the hour
+```bash
+export workload_user=feng.xu
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/jobs" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"name\": \"Create_Report\", \"type\": \"spark\", \"retentionPolicy\": \"keep_indefinitely\", \"mounts\": [ { \"dirPrefix\": \"/\", \"resourceName\": \"cde_REPORTS\" } ], \"spark\": { \"file\": \"Create_Reports.py\", \"conf\": { \"spark.pyspark.python\": \"python3\" } }, \"schedule\": { \"enabled\": true, \"user\": \"${workload_user}\", \"cronExpression\": \"30 */1 * * *\", \"start\": \"2022-06-27\", \"end\": \"2022-06-28\" } }"
+```bash
+
+- Take a look at the most recent job execution
+```bash
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/jobs?latestjob=true&filter=name%5Beq%5DCreate_Report&limit=20&offset=0&orderby=name&orderasc=true" | jq .
+```
+
+- Review the job output.
+```bash
+export JOB_ID=16
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs/${JOB_ID}/logs?type=submitter%2Fstderr"
+```
+

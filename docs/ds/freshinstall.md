@@ -51,7 +51,7 @@ grand_parent: Data Service
 ## 3. Add DNS records
 
 |hostname|subdomain|Expected roles|DNS ForwardZone|Reverse Zone PTR|
-|Wildcard (hostname = *)|apps.ecs-lb.`subdomain`|The string `apps` is required, `ecs-lb` is up to user|Virtual app domain wildcard , `A Record` wildcard (hostsname = *) , Resolves to fixed IP of ha_proxy|N|
+|Wildcard (hostname = *)|apps.ecs-lb.`subdomain`|The string `apps` is required, `ecs-lb` is up to user|Virtual app domain wildcard , `A Record` wildcard (hostsname = *) , Resolves to fixed IP of ha_proxy|N|
 |`apps alias`|apps.ecs-lb.`subdomain`|Virtual app domain Alias|CNAME Alias points to `A Record` of ha_proxy. Alternatively can be an ARecord with IP of ha_proxy|N/A|
 |ha_proxy|`subdomain`|HA Load balancer|Depends on vendor/software||
 |ecs-master1|`subdomain`|ECS Server 1 & Docker server|`A Record` resolves to IP of ecs-master1|Y|
