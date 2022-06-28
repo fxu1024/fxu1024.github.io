@@ -222,10 +222,11 @@ export CDE_JOB_URL='https://zpfflxrf.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cl
 ```bash
 curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X <request_method> "${CDE_JOB_URL}/<api_command>" <api_options> | jq .
 ```
-Where:
-    <request_method> is DELETE, GET, PATCH, POST or PUT; depending on your request
-    <api_command> is the command youd like to execute from [API DOC](https://docs.cloudera.com/data-engineering/1.4.0/jobs-rest-api-reference/index.html)
-    <api_options> are the required options for requested command
+
+Where
+    - `request_method` is DELETE, GET, PATCH, POST or PUT; depending on your request
+    - `api_command` is the command youd like to execute from [API DOC](https://docs.cloudera.com/data-engineering/1.4.0/jobs-rest-api-reference/index.html)
+    - `api_options` are the required options for requested command
 
 
 ## 6. Demo1: Create a Job by CDE UI
@@ -300,7 +301,7 @@ permission to the `all-database` policy name.
 - If your CDW is running, open up HUE and verify the `retail` db and `tokenized_accesss_logs` table data that was prepped by your CDE job.
 
 
-## 7. Demo2: Create and schedule a Job by CDE CLI
+## 7. Demo2: Create and schedule a Job by CDE CLI & API
 
 ### 7.1 Prerequisites
 
@@ -331,7 +332,7 @@ kinit -kt dexuser.keytab dexuser
 hdfs dfs -put *.csv /tmp
 ```
 
-### 7.2 Run spark job only once
+### 7.2 Run spark job only once by CDE CLI
 
 - Open terminal on your computer and use the spark submit command.
 ```bash
@@ -347,7 +348,7 @@ cde run logs --type "submitter/jobs_api" --tls-insecure --id ${JOB_ID}
 
 - If your CDW is running, open up HUE and verify the `texasapp` db and `loan_data` table data that was prepped by your CDE job.
 
-### 7.3 Run spark job repeatedly
+### 7.3 Run spark job repeatedly by CDE CLI
 
 - If you plan to run the same job several times, it is a good idea to create and upload the resource at first.
 ```bash
@@ -387,7 +388,7 @@ cde run list --filter 'job[like]%ETL%' --tls-insecure
 ![](../../assets/images/ds/addcde18.jpg)
 
 
-### 7.4 Run spark job using REST API
+### 7.4 Run spark job repeatedly by REST API
 
 - Create a resource `cde_REPORTS`
 ```bash
@@ -400,7 +401,7 @@ curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/resources
 ```bash
 export workload_user=feng.xu
 curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/jobs" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"name\": \"Create_Report\", \"type\": \"spark\", \"retentionPolicy\": \"keep_indefinitely\", \"mounts\": [ { \"dirPrefix\": \"/\", \"resourceName\": \"cde_REPORTS\" } ], \"spark\": { \"file\": \"Create_Reports.py\", \"conf\": { \"spark.pyspark.python\": \"python3\" } }, \"schedule\": { \"enabled\": true, \"user\": \"${workload_user}\", \"cronExpression\": \"30 */1 * * *\", \"start\": \"2022-06-27\", \"end\": \"2022-06-28\" } }"
-```bash
+```
 
 - Take a look at the most recent job execution
 ```bash
