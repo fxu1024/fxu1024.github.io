@@ -414,10 +414,9 @@ curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs/
 
 ## 8. Demo3: Run Spark Job w/o Resource
 
-
 ### 8.1 Prerequisites
 
-- Download assets from [cdescript URL](https://github.com/fxu1024/fxu1024.github.io/assets/cdescript). The required files are as follows:
+- Download assets from [cdescript URL](https://github.com/fxu1024/fxu1024.github.io/tree/main/assets/cdescript). The required files are as follows:
    - pyspark_wordcount.py
    - scala-wordcount-hdfs-read-write.py
    - word_count_templates.txt
@@ -519,7 +518,7 @@ curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?
 
 ### 9.1 Prerequisites   
    
-- Download assets from [cdescript URL](https://github.com/fxu1024/fxu1024.github.io/assets/cdescript). The required files are as follows:
+- Download assets from [cdescript URL](https://github.com/fxu1024/fxu1024.github.io/tree/main/assets/cdescript). The required files are as follows:
    - cdeoperator.py
    - spark-examples_2.11-2.4.4.jar  
 
@@ -602,7 +601,7 @@ curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?
    - CDE on CDP Private Cloud currently supports only the CDE job run operator.
    - You can deploy Airflow tasks using CDE UI, CDE CLI, REST API.
 
-- Download assets from [cdescript URL](https://github.com/fxu1024/fxu1024.github.io/assets/cdescript). The required files are as follows:
+- Download assets from [cdescript URL](https://github.com/fxu1024/fxu1024.github.io/tree/main/assets/cdescript). The required files are as follows:
    - complex-dag.py
    - execute_sql_queries.py
 
