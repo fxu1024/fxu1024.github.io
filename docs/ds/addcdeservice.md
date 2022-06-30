@@ -224,14 +224,12 @@ export CDE_JOB_URL='https://zpfflxrf.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cl
 ```bash
 curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X <request_method> "${CDE_JOB_URL}/<api_command>" <api_options> | jq .
 ```
-
-> Where
     - &lt;request_method&gt; is DELETE, GET, PATCH, POST or PUT; depending on your request
     - &lt;api_command&gt; is the command youd like to execute from [API DOC](https://docs.cloudera.com/data-engineering/1.4.0/jobs-rest-api-reference/index.html)
     - &lt;api_options&gt; are the required options for requested command
 
 
-## 6. Demo1: Create a Job by CDE UI
+## 6. Demo1: Run Spark job by CDE UI
 
 - Download file `tutorial-files.zip` and unzip it.
 ```bash
@@ -267,8 +265,8 @@ permission to the `all-database` policy name.
 
 
 - In the left hand menu, click Resources. and then click the `Create Resource` button.
-   - Resource Name - testjob1
-   - Type - file
+   - Resource Name - `testjob1`
+   - Type - `File`
 
 ![](../../assets/images/ds/addcde09.jpg)
 
@@ -303,7 +301,7 @@ permission to the `all-database` policy name.
 - If your CDW is running, open up HUE and verify the `retail` db and `tokenized_accesss_logs` table data that was prepped by your CDE job.
 
 
-## 7. Demo2: Create and schedule a Job by CDE CLI & API
+## 7. Demo2: Run Spark job by CDE CLI & API
 
 ### 7.1 Prerequisites
 
@@ -385,8 +383,6 @@ cde run list --filter 'job[like]%ETL%' --tls-insecure
 
 - View job Runs by CDE UI
 
-![](../../assets/images/ds/addcde17.jpg)
-
 ![](../../assets/images/ds/addcde18.jpg)
 
 
@@ -416,7 +412,7 @@ export JOB_ID=16
 curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs/${JOB_ID}/logs?type=submitter%2Fstderr"
 ```
 
-## 8. Demo3: Run Scala Job w/o Resource
+## 8. Demo3: Run Spark Job w/o Resource
 
 
 ### 8.1 Prerequisites
@@ -508,7 +504,7 @@ curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?
 ```
 
 
-## 9. Demo4: Automate simple data pipelines using Airflow
+## 9. Demo4: Run simple Airflow job
 
 - CDE enables you to automate a workflow or data pipeline using Apache Airflow Python DAG files. Each CDE virtual cluster includes an embedded instance of Apache Airflow.
    - CDE on CDP Private Cloud currently supports only the CDE job run operator.
@@ -587,7 +583,7 @@ curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/jobs" -H
 curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?filter=job%5Beq%5D${job}&offset=0"
 ```
 
-## 10. Demo5: Automate complex data pipelines using Airflow
+## 10. Demo5: Run complex Airflow job
 
 - CDE enables you to automate a workflow or data pipeline using Apache Airflow Python DAG files. Each CDE virtual cluster includes an embedded instance of Apache Airflow.
    - CDE on CDP Private Cloud currently supports only the CDE job run operator.
