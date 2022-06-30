@@ -417,6 +417,13 @@ curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs/
 
 ### 8.1 Prerequisites
 
+- Download assets from [cdescript URL](https://github.com/fxu1024/fxu1024.github.io/assets/cdescript). The required files are as follows:
+   - pyspark_wordcount.py
+   - scala-wordcount-hdfs-read-write.py
+   - word_count_templates.txt
+   - wordcount.txt
+   - wordcount_input_1.txt
+
 - Open SSH terminal for CDP Base master node and upload file to HDFS 
 ```bash
 kinit -kt dexuser.keytab dexuser
@@ -510,7 +517,13 @@ curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?
    - CDE on CDP Private Cloud currently supports only the CDE job run operator.
    - You can deploy Airflow tasks using CDE UI, CDE CLI, REST API.
 
-### 9.1 Using CDE UI
+### 9.1 Prerequisites   
+   
+- Download assets from [cdescript URL](https://github.com/fxu1024/fxu1024.github.io/assets/cdescript). The required files are as follows:
+   - cdeoperator.py
+   - spark-examples_2.11-2.4.4.jar  
+
+### 9.2 Using CDE UI
 
 - Create a Resouce named `resource-scala-pi` and upload a file named `spark-examples_2.11-2.4.4.jar`
 
@@ -546,7 +559,7 @@ curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?
 ![](../../assets/images/ds/addcde27.jpg)
 
 
-### 9.2 Using CDE REST API
+### 9.3 Using CDE REST API
 
 **_NOTE:_**  This section implements the same operation through the REST API
 
@@ -588,6 +601,10 @@ curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?
 - CDE enables you to automate a workflow or data pipeline using Apache Airflow Python DAG files. Each CDE virtual cluster includes an embedded instance of Apache Airflow.
    - CDE on CDP Private Cloud currently supports only the CDE job run operator.
    - You can deploy Airflow tasks using CDE UI, CDE CLI, REST API.
+
+- Download assets from [cdescript URL](https://github.com/fxu1024/fxu1024.github.io/assets/cdescript). The required files are as follows:
+   - complex-dag.py
+   - execute_sql_queries.py
 
 ```bash
 export job=spark_sql_shell_mimic
