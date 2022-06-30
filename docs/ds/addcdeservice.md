@@ -148,7 +148,7 @@ INFO : Exit code = 0
 
 ## 4. Configure the CDE CLI client
 
-**_NOTE:_** The CDE CLI can only be accessed by AD/LDAP users, so the Local admin account wont work here. You need to make sure your ad/ldap account is setup as a PowerUser.
+> The CDE CLI can only be accessed by AD/LDAP users, so the Local admin account wont work here. You need to make sure your ad/ldap account is setup as a PowerUser.
 
 - In the Virtual Clusters column on the right, click the `Cluster Details` icon on the virtual cluster.
 
@@ -158,7 +158,7 @@ INFO : Exit code = 0
 
 ![](../../assets/images/ds/addcde16.jpg)
 
-- Open terminal on your computer and move cde binary to `~/cde/bin`.
+- Open terminal on your computer and move cde client binary to `~/cde/bin`.
 ```bash
 $ mkdir -p ~/cde/bin
 $ cd ~/cde/bin
@@ -193,7 +193,9 @@ API User Password:
 .....
 ```
 
-## 5. Setup REST API
+## 5. Setup CDE REST API
+
+- In contrast to the CDE CLI client, REST API can run on any server and does not require a cde client binary.
 
 - In the Virtual Clusters column on the right, click the `Cluster Details` icon on the virtual cluster.
 
@@ -223,10 +225,10 @@ export CDE_JOB_URL='https://zpfflxrf.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cl
 curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X <request_method> "${CDE_JOB_URL}/<api_command>" <api_options> | jq .
 ```
 
-Where
-    - `request_method` is DELETE, GET, PATCH, POST or PUT; depending on your request
-    - `api_command` is the command youd like to execute from [API DOC](https://docs.cloudera.com/data-engineering/1.4.0/jobs-rest-api-reference/index.html)
-    - `api_options` are the required options for requested command
+- Where
+    - &lt;request_method&gt; is DELETE, GET, PATCH, POST or PUT; depending on your request
+    - &lt;api_command&gt; is the command youd like to execute from [API DOC](https://docs.cloudera.com/data-engineering/1.4.0/jobs-rest-api-reference/index.html)
+    - &lt;api_options&gt; are the required options for requested command
 
 
 ## 6. Demo1: Create a Job by CDE UI
@@ -283,10 +285,10 @@ permission to the `all-database` policy name.
 ![](../../assets/images/ds/addcde08.jpg)
 
 - Provide the Job Details:
-   - Select Spark for the job type -  "Spark 2.4.7"
-   - Specify the Name - "access-logs-ETL"
-   - Select from Resource - "access-logs-ETL.py"
-   - Select "Python 3"
+   - Select Spark for the job type -  `Spark 2.4.7`
+   - Specify the Name - `access-logs-ETL`
+   - Select from Resource - `access-logs-ETL.py`
+   - Select `Python 3`
    - Turn off Schedule
    - Create and Run
 
@@ -414,3 +416,221 @@ export JOB_ID=16
 curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs/${JOB_ID}/logs?type=submitter%2Fstderr"
 ```
 
+## 8. Demo3: Run Scala Job w/o Resource
+
+
+### 8.1 Prerequisites
+
+- Open SSH terminal for CDP Base master node and upload file to HDFS 
+```bash
+kinit -kt dexuser.keytab dexuser
+hdfs dfs -put /home/centos/cdescript/wordcount.txt /tmp
+```
+
+### 8.2 Without Resource
+
+> You can select URL option for Application File, so that the CDE job does not need any resources.
+
+![](../../assets/images/ds/addcde20.jpg)
+
+- Here is a sample REST API:
+```bash
+export job=scala-wordcount-hdfs-read-job
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X DELETE "${CDE_JOB_URL}/jobs/${job}"
+
+
+export file=http://qe-repo.s3.amazonaws.com/dex/app-jar/spark-examples_2.11-2.4.4.jar
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/jobs" -H "Content-Type: application/json" -d "{ \"name\": \"${job}\", \"spark\": {     \"args\":     [         \"hdfs:///tmp/wordcount.txt\"     ],     \"className\": \"org.apache.spark.examples.HdfsTest\",     \"conf\":     {         \"spark.dynamicAllocation.minExecutors\": \"1\",         \"spark.dynamicAllocation.maxExecutors\": \"50\",         \"spark.dynamicAllocation.initialExecutors\": \"1\",         \"dex.safariEnabled\": \"true\"     },     \"driverCores\": 1,     \"driverMemory\": \"1g\",     \"executorCores\": 1,     \"executorMemory\": \"1g\",     \"logLevel\": \"INFO\",     \"file\": \"${file}\",     \"pyFiles\":     [],     \"jars\":     [],     \"files\":     [] }, \"mounts\": [], \"schedule\": {     \"catchup\": false,     \"cronExpression\": \"\",     \"dependsOnPast\": false,     \"enabled\": false,     \"paused\": true,     \"start\": \"\",     \"end\": \"\" }, \"type\": \"spark\"}"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/jobs/${job}/run"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?filter=job%5Beq%5D${job}&offset=0"
+```
+
+## 8.3  Single Resource
+
+> You can select File option for Application File. This is the most common way, and you need to create the resource in advance
+
+![](../../assets/images/ds/addcde21.jpg)
+
+- Here is a sample REST API:
+```bash
+export job=scala-wordcount-hdfs-read-write-job
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X DELETE "${CDE_JOB_URL}/jobs/${job}"
+
+
+export path=/home/centos/cdescript
+export file=scala-wordcount-hdfs-read-write.py
+export resource=AutoResource-hdfs-read-write-job
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X DELETE "${CDE_JOB_URL}/resources/${resource}"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/resources" -H "Content-Type: application/json" -d "{\"name\": \"${resource}\", \"hidden\": false, \"type\": \"files\"}"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X PUT "${CDE_JOB_URL}/resources/${resource}/${file}" -F "file=@${path}/${file}"
+
+
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/jobs" -H "Content-Type: application/json" -d "{ \"name\": \"${job}\", \"spark\": { \"args\": [     \"hdfs:///tmp/wordcount.txt\",     \"hdfs:///tmp/output_00001\" ], \"className\": \"\", \"conf\": {     \"spark.pyspark.python\": \"python3\",     \"spark.dynamicAllocation.maxExecutors\": \"50\",     \"dex.safariEnabled\": \"false\" }, \"driverCores\": 1, \"executorCores\": 1, \"logLevel\": \"INFO\", \"file\": \"${file}\", \"pyFiles\": [], \"jars\": [], \"files\": [], \"executorMemory\": \"1g\", \"driverMemory\": \"1g\" }, \"mounts\": [ {     \"resourceName\": \"${resource}\",     \"dirPrefix\": \"\" } ], \"schedule\": { \"catchup\": false, \"cronExpression\": \"\", \"dependsOnPast\": false, \"enabled\": false, \"paused\": true, \"start\": \"\", \"end\": \"\" }, \"type\": \"spark\" }"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/jobs/${job}/run"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?filter=job%5Beq%5D${job}&offset=0"
+```
+
+### 8.4  Multiple Resources
+
+> You can create multiple resources, one resource is used as `Application File`, and the other resources are used as `Arguments`.
+
+![](../../assets/images/ds/addcde22.jpg)
+
+- Here is a sample REST API:
+```bash
+export job=spark_wordcount_resources_job
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X DELETE "${CDE_JOB_URL}/jobs/${job}"
+
+
+export path=/home/centos/cdescript
+export file=pyspark_wordcount.py
+export resource=resource-spark-apps
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X DELETE "${CDE_JOB_URL}/resources/${resource}"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/resources" -H "Content-Type: application/json" -d "{\"name\": \"${resource}\", \"hidden\": false, \"type\": \"files\"}"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X PUT "${CDE_JOB_URL}/resources/${resource}/${file}" -F "file=@${path}/${file}"
+
+
+export path=/home/centos/cdescript
+export file=wordcount_input_1.txt
+export resource=resource-data-sets
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X DELETE "${CDE_JOB_URL}/resources/${resource}"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/resources" -H "Content-Type: application/json" -d "{\"name\": \"${resource}\", \"hidden\": false, \"type\": \"files\"}"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X PUT "${CDE_JOB_URL}/resources/${resource}/${file}" -F "file=@${path}/${file}"
+
+
+export path=/home/centos/cdescript
+export file=word_count_templates.txt
+export resource=resource-output-templates
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X DELETE "${CDE_JOB_URL}/resources/${resource}"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/resources" -H "Content-Type: application/json" -d "{\"name\": \"${resource}\", \"hidden\": false, \"type\": \"files\"}"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X PUT "${CDE_JOB_URL}/resources/${resource}/${file}" -F "file=@${path}/${file}"
+
+
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/jobs" -H "Content-Type: application/json" -d "{ \"name\": \"${job}\", \"spark\": {     \"args\":     [         \"file:///app/mount/wordcount_input_1.txt\",         \"file:///app/mount/word_count_templates.txt\"     ],     \"className\": \"\",     \"conf\":     {         \"spark.pyspark.python\": \"python3\",         \"spark.dynamicAllocation.maxExecutors\": \"4\",         \"dex.safariEnabled\": \"false\"     },     \"driverCores\": 1,     \"executorCores\": 1,     \"logLevel\": \"INFO\",     \"file\": \"pyspark_wordcount.py\",     \"pyFiles\":     [],     \"jars\":     [],     \"files\":     [],     \"executorMemory\": \"1g\",     \"driverMemory\": \"1g\" }, \"mounts\": [     {         \"resourceName\": \"resource-spark-apps\",         \"dirPrefix\": \"\"     },     {         \"resourceName\": \"resource-data-sets\",         \"dirPrefix\": \"\"     },     {         \"resourceName\": \"resource-output-templates\",         \"dirPrefix\": \"\"     } ], \"schedule\": {     \"catchup\": false,     \"cronExpression\": \"\",     \"dependsOnPast\": false,     \"enabled\": false,     \"paused\": true,     \"start\": \"\",     \"end\": \"\" }, \"type\": \"spark\" }"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/jobs/${job}/run"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?filter=job%5Beq%5D${job}&offset=0"
+```
+
+
+## 9. Demo4: Automate simple data pipelines using Airflow
+
+- CDE enables you to automate a workflow or data pipeline using Apache Airflow Python DAG files. Each CDE virtual cluster includes an embedded instance of Apache Airflow.
+
+> CDE on CDP Private Cloud currently supports only the CDE job run operator.
+> You can deploy Airflow tasks using CDE UI, CDE CLI, REST API.
+
+### 9.1 Using CDE UI
+
+- Create a Resouce named `resource-scala-pi` and upload a file named `spark-examples_2.11-2.4.4.jar`
+
+![](../../assets/images/ds/addcde26.jpg)
+
+- Create a Spark CDE job.
+   - Select Spark for the job type -  `Spark 2.4.7`
+   - Specify the Name - `spark-scala-pi-job`
+   - Application File - Click Select from Resource to select `spark-examples_2.11-2.4.4.jar` from Resource `resource-scala-pi`
+   - Main Class - `org.apache.spark.examples.SparkPi`
+   - Arguments - `22`
+   - Turn on Spark Analysis
+   - Log Level - `INFO`
+   - Turn off Schedule
+
+![](../../assets/images/ds/addcde25.jpg)
+
+- Create a Resouce named `AutoResource-cde-operator` and upload a file named `cdeoperator.py`
+
+![](../../assets/images/ds/addcde23.jpg)
+
+- Create a Airflow CDE job.
+    - Select the Airflow job type - `Airflow`
+    - Specify the Name - `cdeoperator-job`
+    - DAG File -  Click Select from Resource to select `cdeoperator.py` from Resource `AutoResource-cde-operator`.
+
+![](../../assets/images/ds/addcde24.jpg)
+
+- Click `Create and Run` button.
+
+- Navigate to Jobs > cdeoperator-job > Airflow UI for DAG info. Two tasks are run successively through CDEJobRunOperator, namely ingest and data_prep.
+
+![](../../assets/images/ds/addcde27.jpg)
+
+
+### 9.2 Using CDE REST API
+
+**_NOTE:_**  This section implements the same operation through the REST API
+
+- Create a Spark CDE job named `spark-scala-pi-job`
+
+```bash
+export job=spark-scala-pi-job
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X DELETE "${CDE_JOB_URL}/jobs/${job}"
+
+
+export path=/home/centos/cdescript
+export file=spark-examples_2.11-2.4.4.jar
+export resource=resource-scala-pi
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X DELETE "${CDE_JOB_URL}/resources/${resource}"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/resources" -H "Content-Type: application/json" -d "{\"name\": \"${resource}\", \"hidden\": false, \"type\": \"files\"}"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X PUT "${CDE_JOB_URL}/resources/${resource}/${file}" -F "file=@${path}/${file}"
+
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/jobs" -H "Content-Type: application/json" -d "{ \"name\": \"${job}\", \"spark\": {     \"args\":     [         \"22\"     ],     \"className\": \"org.apache.spark.examples.SparkPi\",     \"conf\":     {         \"spark.dynamicAllocation.minExecutors\": \"1\",         \"spark.dynamicAllocation.maxExecutors\": \"50\",         \"spark.dynamicAllocation.initialExecutors\": \"1\",         \"dex.safariEnabled\": \"true\"     },     \"driverCores\": 1,     \"driverMemory\": \"1g\",     \"executorCores\": 1,     \"executorMemory\": \"1g\",     \"logLevel\": \"INFO\",     \"file\": \"${file}\",     \"pyFiles\":     [],     \"jars\":     [],     \"files\":     [] }, \"mounts\": [{     \"resourceName\": \"${resource}\",     \"dirPrefix\": \"\" } ], \"schedule\": {     \"catchup\": false,     \"cronExpression\": \"\",     \"dependsOnPast\": false,     \"enabled\": false,     \"paused\": true,     \"start\": \"\",     \"end\": \"\" }, \"type\": \"spark\" }"
+```
+
+- Create a Airflow CDE job named `cdeoperator-job`
+
+```bash
+export job=cdeoperator-job
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X DELETE "${CDE_JOB_URL}/jobs/${job}"
+
+
+export path=/home/centos/cdescript
+export file=cdeoperator.py
+export resource=AutoResource-cde-operator
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X DELETE "${CDE_JOB_URL}/resources/${resource}"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/resources" -H "Content-Type: application/json" -d "{\"name\": \"${resource}\", \"hidden\": false, \"type\": \"files\"}"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X PUT "${CDE_JOB_URL}/resources/${resource}/${file}" -F "file=@${path}/${file}"
+
+
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/jobs" -H "Content-Type: application/json" -d "{ \"name\": \"${job}\", \"airflow\": {     \"dagFile\": \"${file}\" }, \"mounts\": [     {         \"resourceName\": \"${resource}\",         \"dirPrefix\": \"\"     } ], \"type\": \"airflow\" }"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?filter=job%5Beq%5D${job}&offset=0"
+```
+
+## 10. Demo5: Automate complex data pipelines using Airflow
+
+- CDE enables you to automate a workflow or data pipeline using Apache Airflow Python DAG files. Each CDE virtual cluster includes an embedded instance of Apache Airflow.
+
+> CDE on CDP Private Cloud currently supports only the CDE job run operator.
+> You can deploy Airflow tasks using CDE UI, CDE CLI, REST API.
+
+```bash
+export job=spark_sql_shell_mimic
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X DELETE "${CDE_JOB_URL}/jobs/${job}"
+
+export path=/home/centos/cdescript
+export file=execute_sql_queries.py
+export resource=AutoResource-spark-sql-shell-job
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X DELETE "${CDE_JOB_URL}/resources/${resource}"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/resources" -H "Content-Type: application/json" -d "{\"name\": \"${resource}\", \"hidden\": false, \"type\": \"files\"}"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X PUT "${CDE_JOB_URL}/resources/${resource}/${file}" -F "file=@${path}/${file}"
+
+
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/jobs" -H "Content-Type: application/json" -d "{ \"name\": \"${job}\", \"spark\": {     \"args\":     [         \"{{{ spark_queries }}}\"     ],     \"className\": \"\",     \"conf\":     {         \"spark.pyspark.python\": \"python3\",         \"spark.dynamicAllocation.maxExecutors\": \"50\",         \"dex.safariEnabled\": \"false\"     },     \"driverCores\": 1,     \"executorCores\": 1,     \"logLevel\": \"INFO\",     \"file\": \"execute_sql_queries.py\",     \"pyFiles\":     [],     \"jars\":     [],     \"files\":     [],     \"executorMemory\": \"1g\",     \"driverMemory\": \"1g\" }, \"mounts\": [     {         \"resourceName\": \"${resource}\",         \"dirPrefix\": \"\"     } ], \"schedule\": {     \"catchup\": false,     \"cronExpression\": \"\",     \"dependsOnPast\": false,     \"enabled\": false,     \"paused\": true,     \"start\": \"\",     \"end\": \"\" }, \"type\": \"spark\" }"
+
+
+export job=complex-dag-job
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X DELETE "${CDE_JOB_URL}/jobs/${job}"
+
+
+export path=/home/centos/cdescript
+export file=complex-dag.py
+export resource=AutoResource-complex-dag
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X DELETE "${CDE_JOB_URL}/resources/${resource}"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/resources" -H "Content-Type: application/json" -d "{\"name\": \"${resource}\", \"hidden\": false, \"type\": \"files\"}"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X PUT "${CDE_JOB_URL}/resources/${resource}/${file}" -F "file=@${path}/${file}"
+
+
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/jobs" -H "Content-Type: application/json" -d "{ \"name\": \"${job}\", \"airflow\": {     \"dagFile\": \"${file}\" }, \"mounts\": [     {         \"resourceName\": \"${resource}\",         \"dirPrefix\": \"\"     } ], \"type\": \"airflow\" }"
+curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?filter=job%5Beq%5D${job}&offset=0"
+```
+
+![](../../assets/images/ds/addcde28.jpg)
