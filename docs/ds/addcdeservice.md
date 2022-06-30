@@ -509,6 +509,36 @@ curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/jobs/${j
 curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?filter=job%5Beq%5D${job}&offset=0"
 ```
 
+- Here is a sample CDE CLI:
+
+```bash
+cde job delete --name spark_wordcount_resources_job --tls-insecure
+
+cde resource delete --name resource-spark-apps --tls-insecure
+cde resource create --name resource-spark-apps --tls-insecure
+cde resource upload --name resource-spark-apps --local-path pyspark_wordcount.py --tls-insecure
+
+cde resource delete --name resource-data-sets --tls-insecure
+cde resource create --name resource-data-sets --tls-insecure
+cde resource upload --name resource-data-sets --local-path wordcount_input_1.txt --tls-insecure
+
+cde resource delete --name resource-output-templates --tls-insecure
+cde resource create --name resource-output-templates --tls-insecure
+cde resource upload --name resource-output-templates --local-path word_count_templates.txt --tls-insecure
+
+cde job create --name spark_wordcount_resources_job --type spark \
+    --application-file pyspark_wordcount.py \
+    --num-executors 4 \
+    --mount-1-resource resource-spark-apps \
+    --mount-2-resource resource-data-sets \
+    --mount-3-resource resource-output-templates \
+    --arg "file:///app/mount/wordcount_input_1.txt" \
+    --arg "file:///app/mount/word_count_templates.txt" \
+    --conf spark.pyspark.python=python3 \
+    --tls-insecure    
+cde job run --name spark_wordcount_resources_job --tls-insecure
+```
+
 
 ## 9. Demo4: Run simple Airflow job
 
