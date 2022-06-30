@@ -225,7 +225,7 @@ export CDE_JOB_URL='https://zpfflxrf.cde-tlwzshhj.apps.ecs-lb.sme-feng.athens.cl
 curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X <request_method> "${CDE_JOB_URL}/<api_command>" <api_options> | jq .
 ```
 
-- Where
+> Where
     - &lt;request_method&gt; is DELETE, GET, PATCH, POST or PUT; depending on your request
     - &lt;api_command&gt; is the command youd like to execute from [API DOC](https://docs.cloudera.com/data-engineering/1.4.0/jobs-rest-api-reference/index.html)
     - &lt;api_options&gt; are the required options for requested command
@@ -429,11 +429,12 @@ hdfs dfs -put /home/centos/cdescript/wordcount.txt /tmp
 
 ### 8.2 Without Resource
 
-> You can select URL option for Application File, so that the CDE job does not need any resources.
+- You can select URL option for Application File, so that the CDE job does not need any resources.
 
 ![](../../assets/images/ds/addcde20.jpg)
 
 - Here is a sample REST API:
+
 ```bash
 export job=scala-wordcount-hdfs-read-job
 curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X DELETE "${CDE_JOB_URL}/jobs/${job}"
@@ -452,6 +453,7 @@ curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?
 ![](../../assets/images/ds/addcde21.jpg)
 
 - Here is a sample REST API:
+
 ```bash
 export job=scala-wordcount-hdfs-read-write-job
 curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X DELETE "${CDE_JOB_URL}/jobs/${job}"
@@ -472,11 +474,12 @@ curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?
 
 ### 8.4  Multiple Resources
 
-> You can create multiple resources, one resource is used as `Application File`, and the other resources are used as `Arguments`.
+- You can create multiple resources, one resource is used as `Application File`, and the other resources are used as `Arguments`.
 
 ![](../../assets/images/ds/addcde22.jpg)
 
 - Here is a sample REST API:
+
 ```bash
 export job=spark_wordcount_resources_job
 curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X DELETE "${CDE_JOB_URL}/jobs/${job}"
@@ -515,9 +518,8 @@ curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?
 ## 9. Demo4: Automate simple data pipelines using Airflow
 
 - CDE enables you to automate a workflow or data pipeline using Apache Airflow Python DAG files. Each CDE virtual cluster includes an embedded instance of Apache Airflow.
-
-> CDE on CDP Private Cloud currently supports only the CDE job run operator.
-> You can deploy Airflow tasks using CDE UI, CDE CLI, REST API.
+   - CDE on CDP Private Cloud currently supports only the CDE job run operator.
+   - You can deploy Airflow tasks using CDE UI, CDE CLI, REST API.
 
 ### 9.1 Using CDE UI
 
@@ -598,9 +600,8 @@ curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?
 ## 10. Demo5: Automate complex data pipelines using Airflow
 
 - CDE enables you to automate a workflow or data pipeline using Apache Airflow Python DAG files. Each CDE virtual cluster includes an embedded instance of Apache Airflow.
-
-> CDE on CDP Private Cloud currently supports only the CDE job run operator.
-> You can deploy Airflow tasks using CDE UI, CDE CLI, REST API.
+   - CDE on CDP Private Cloud currently supports only the CDE job run operator.
+   - You can deploy Airflow tasks using CDE UI, CDE CLI, REST API.
 
 ```bash
 export job=spark_sql_shell_mimic
