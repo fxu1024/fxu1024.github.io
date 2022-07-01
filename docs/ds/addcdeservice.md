@@ -146,7 +146,42 @@ INFO : Exit code = 0
 ......
 ```
 
-## 4. Configure the CDE CLI client
+## 4. Assign CDE resources to end user
+
+- Log out the CDP Private Cloud console and then login as user `feng.xu`
+
+![](../../assets/images/ds/addcdw06.png)
+
+![](../../assets/images/ds/addcdw07.png)
+
+- User `feng.xu` cannot see any CDE objects because it is not assigned any roles or resources. 
+
+![](../../assets/images/ds/addcde29.png)
+
+- You have to login as the local administrator `admin` again.
+
+- Navigate to Management Console > Environments, and select environment `default` by clicking on it.
+
+![](../../assets/images/ds/addcdw04.png)
+
+- The Environment Clusters page appears. Click Actions. Click Manage Access in the dropdown list.
+
+![](../../assets/images/ds/addcdw05.png)
+
+- In the Access tab, enter the name of the user in the Select group or user text box.
+
+![](../../assets/images/ds/addcdw09.png)
+
+- The Update Resource Roles window appears. Select the resource role `DEUser`. Click Update Roles.
+
+![](../../assets/images/ds/addcde30png)
+
+- User `feng.xu` can access CDW objects now.
+
+![](../../assets/images/ds/addcde31.png)
+
+
+## 5. Configure the CDE CLI client
 
 > The CDE CLI can only be accessed by AD/LDAP users, so the Local admin account wont work here. You need to make sure your ad/ldap account is setup as a PowerUser.
 
@@ -193,7 +228,7 @@ API User Password:
 .....
 ```
 
-## 5. Setup CDE REST API
+## 6. Setup CDE REST API
 
 - In contrast to the CDE CLI client, REST API can run on any server and does not require a cde client binary.
 
@@ -229,7 +264,7 @@ curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X <request_method> "${CDE_JOB_U
     - &lt;api_options&gt; are the required options for requested command
 
 
-## 6. Demo1: Run Spark job by CDE UI
+## 7. Demo1: Run Spark job by CDE UI
 
 - Download file `tutorial-files.zip` and unzip it.
 ```bash
@@ -301,9 +336,9 @@ permission to the `all-database` policy name.
 - If your CDW is running, open up HUE and verify the `retail` db and `tokenized_accesss_logs` table data that was prepped by your CDE job.
 
 
-## 7. Demo2: Run Spark job by CDE CLI & API
+## 8. Demo2: Run Spark job by CDE CLI & API
 
-### 7.1 Prerequisites
+### 8.1 Prerequisites
 
 - Download file `tutorial-files.zip` and unzip it.
 ```bash
@@ -332,7 +367,7 @@ kinit -kt dexuser.keytab dexuser
 hdfs dfs -put *.csv /tmp
 ```
 
-### 7.2 Run spark job only once by CDE CLI
+### 8.2 Run spark job only once by CDE CLI
 
 - Open terminal on your computer and use the spark submit command.
 ```bash
@@ -348,7 +383,7 @@ cde run logs --type "submitter/jobs_api" --tls-insecure --id ${JOB_ID}
 
 - If your CDW is running, open up HUE and verify the `texasapp` db and `loan_data` table data that was prepped by your CDE job.
 
-### 7.3 Run spark job repeatedly by CDE CLI
+### 8.3 Run spark job repeatedly by CDE CLI
 
 - If you plan to run the same job several times, it is a good idea to create and upload the resource at first.
 ```bash
@@ -386,7 +421,7 @@ cde run list --filter 'job[like]%ETL%' --tls-insecure
 ![](../../assets/images/ds/addcde18.jpg)
 
 
-### 7.4 Run spark job repeatedly by REST API
+### 8.4 Run spark job repeatedly by REST API
 
 - Create a resource `cde_REPORTS`
 ```bash
@@ -412,9 +447,9 @@ export JOB_ID=16
 curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs/${JOB_ID}/logs?type=submitter%2Fstderr"
 ```
 
-## 8. Demo3: Run Spark Job w/o Resource
+## 9. Demo3: Run Spark Job w/o Resource
 
-### 8.1 Prerequisites
+### 9.1 Prerequisites
 
 - Download assets from [cdescript URL](https://github.com/fxu1024/fxu1024.github.io/tree/main/assets/cdescript). The required files are as follows:
    - pyspark_wordcount.py
@@ -429,7 +464,7 @@ kinit -kt dexuser.keytab dexuser
 hdfs dfs -put /home/centos/cdescript/wordcount.txt /tmp
 ```
 
-### 8.2 Without Resource
+### 9.2 Without Resource
 
 - You can select URL option for Application File, so that the CDE job does not need any resources.
 
@@ -447,7 +482,7 @@ curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/jobs/${j
 curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?filter=job%5Beq%5D${job}&offset=0"
 ```
 
-### 8.3  Single Resource
+### 9.3  Single Resource
 
 - You can select File option for Application File. This is the most common way, and you need to create the resource in advance
 
@@ -471,7 +506,7 @@ curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/jobs/${j
 curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?filter=job%5Beq%5D${job}&offset=0"
 ```
 
-### 8.4  Multiple Resources
+### 9.4  Multiple Resources
 
 - You can create multiple resources, one resource is used as `Application File`, and the other resources are used as `Arguments`.
 
@@ -540,19 +575,19 @@ cde job run --name spark_wordcount_resources_job --tls-insecure
 ```
 
 
-## 9. Demo4: Run simple Airflow job
+## 10. Demo4: Run simple Airflow job
 
 - CDE enables you to automate a workflow or data pipeline using Apache Airflow Python DAG files. Each CDE virtual cluster includes an embedded instance of Apache Airflow.
    - CDE on CDP Private Cloud currently supports only the CDE job run operator.
    - You can deploy Airflow tasks using CDE UI, CDE CLI, REST API.
 
-### 9.1 Prerequisites   
+### 10.1 Prerequisites   
    
 - Download assets from [cdescript URL](https://github.com/fxu1024/fxu1024.github.io/tree/main/assets/cdescript). The required files are as follows:
    - cdeoperator.py
    - spark-examples_2.11-2.4.4.jar  
 
-### 9.2 Using CDE UI
+### 10.2 Using CDE UI
 
 - Create a Resouce named `resource-scala-pi` and upload a file named `spark-examples_2.11-2.4.4.jar`
 
@@ -588,7 +623,7 @@ cde job run --name spark_wordcount_resources_job --tls-insecure
 ![](../../assets/images/ds/addcde27.jpg)
 
 
-### 9.3 Using CDE REST API
+### 10.3 Using CDE REST API
 
 **_NOTE:_**  This section implements the same operation through the REST API
 
@@ -625,7 +660,7 @@ curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X POST "${CDE_JOB_URL}/jobs" -H
 curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?filter=job%5Beq%5D${job}&offset=0"
 ```
 
-## 10. Demo5: Run complex Airflow job
+## 11. Demo5: Run complex Airflow job
 
 - CDE enables you to automate a workflow or data pipeline using Apache Airflow Python DAG files. Each CDE virtual cluster includes an embedded instance of Apache Airflow.
    - CDE on CDP Private Cloud currently supports only the CDE job run operator.
