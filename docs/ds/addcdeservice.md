@@ -156,7 +156,7 @@ INFO : Exit code = 0
 
 - User `feng.xu` cannot see any CDE objects because it is not assigned any roles or resources. 
 
-![](../../assets/images/ds/addcde29.png)
+![](../../assets/images/ds/addcde29.jpg)
 
 - You have to login as the local administrator `admin` again.
 
@@ -174,11 +174,11 @@ INFO : Exit code = 0
 
 - The Update Resource Roles window appears. Select the resource role `DEUser`. Click Update Roles.
 
-![](../../assets/images/ds/addcde30png)
+![](../../assets/images/ds/addcde30jpg)
 
 - User `feng.xu` can access CDW objects now.
 
-![](../../assets/images/ds/addcde31.png)
+![](../../assets/images/ds/addcde31.jpg)
 
 
 ## 5. Configure the CDE CLI client
