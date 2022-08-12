@@ -47,16 +47,17 @@ grand_parent: Data Service
 
 - You can provision an ML workspace with TLS enabled, so that it can be accessed via https.
 
-- The certificate URL is generally of the form: <workspaceid>.<cluster>.<domain>.com. Assuming an example URL for the certificate of ml-47e0ade8-e0a.cluster.yourcompany.com, check that the certificate correctly shows the corresponding Common Name (CN) and Subject Alternative Names (SAN):
+- The certificate URL is generally of the form: &lt;workspaceid&gt;
+.&lt;cluster&gt;
+.&lt;domain&gt;
+.com. Assuming an example URL for the certificate of ml-47e0ade8-e0a.cluster.yourcompany.com, check that the certificate correctly shows the corresponding Common Name (CN) and Subject Alternative Names (SAN):
     - CN: ml-47e0ade8-e0a.cluster.yourcompany.com
     - SAN: *.ml-47e0ade8-e0a.cluster.yourcompany.com
     - SAN: ml-47e0ade8-e0a.cluster.yourcompany.com
 
-- Given a certificate (ca-cert.pem) and its private key (ca-key.pem), You can use OpenSSL to sign a provided CSR (host.csr) and generate a certificate for CML (host.crt).
-
-- For the AutoTLS enabled CDP cluster
-    - ca-cert.pem is /var/lib/cloudera-scm-agent/agent-cert/cm-auto-in_cluster_ca_cert.pem
-    - ca-key.pem is /var/lib/cloudera-scm-server/certmanager/CMCA/private/ca_key.pem, which is hidden in the CM backend database
+- Given a certificate (ca-cert.pem) and its private key (ca-key.pem), You can use OpenSSL to sign a provided CSR (host.csr) and generate a certificate for CML (host.crt). For the AutoTLS enabled CDP cluster:
+    - ca-cert.pem is `/var/lib/cloudera-scm-agent/agent-cert/cm-auto-in_cluster_ca_cert.pem`
+    - ca-key.pem is `/var/lib/cloudera-scm-server/certmanager/CMCA/private/ca_key.pem`, which is hidden in the CM backend database
     - host.crt is generate by `openssl req` command with the corresponding Common Name (CN) tag
 
 ## 3. Export AutoTLS CMCA package from CM database
@@ -77,7 +78,6 @@ tar zxvf ~/cmca.tar.gz -C /var/lib/cloudera-scm-server/certmanager
 
 ```bash
 su - oracle
-
 mkdir -p /home/oracle/blobs
 
 sqlplus / as sysdba
@@ -152,7 +152,7 @@ SQL>exit
 scp /home/oracle/blobs/cmca.tar.gz root@cb01.ecs.ycloud.com:~
 ```
 
-- Extract files into the target directory `/var/lib/cloudera-scm-server/certmanager`.
+-  Open SSH terminal for CM server and unzip files into the target directory `/var/lib/cloudera-scm-server/certmanager`.
 
 ```bash
 mkdir -p /var/lib/cloudera-scm-server/certmanager
@@ -210,7 +210,6 @@ p = Popen(["openssl", "enc", "-d", "-aes-256-ofb",
  stdin=PIPE, stdout=PIPE, stderr=PIPE)
 stdout, stderr = p.communicate(enc)
 print (stdout)
-
 EOF
 ```
 
@@ -239,7 +238,6 @@ DNS.1 = *.${host}
 DNS.2 = ${host}" > cml.ext
 
 openssl x509 -req -extfile cml.ext -days 365 -in ${host}.csr -CA /var/lib/cloudera-scm-agent/agent-cert/cm-auto-in_cluster_ca_cert.pem -CAkey /var/lib/cloudera-scm-server/certmanager/CMCA/private/ca_key.pem -CAcreateserial -out ${host}.crt -passin pass:$(python tmp.py)
-
 openssl x509 -in ${host}.crt -text -noout
 ```
 
