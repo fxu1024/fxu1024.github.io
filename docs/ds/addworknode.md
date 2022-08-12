@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Add new worker node to the existing ECS cluster
-nav_order: 8
+nav_order: 10
 parent: Operations
 grand_parent: Data Service
 ---

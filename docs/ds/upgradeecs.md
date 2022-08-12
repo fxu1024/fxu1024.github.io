@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Upgrade from ECS 1.3.4 to 1.4.0
-nav_order: 2
+nav_order: 3
 parent: Operations
 grand_parent: Data Service
 ---

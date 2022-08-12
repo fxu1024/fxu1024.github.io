@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Add Cloudera Machine Learning service and demo it
-nav_order: 5
+nav_order: 7
 parent: Operations
 grand_parent: Data Service
 ---

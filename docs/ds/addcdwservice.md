@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Add Cloudera Data Warehouse service and demo it
-nav_order: 4
+nav_order: 6
 parent: Operations
 grand_parent: Data Service
 ---
