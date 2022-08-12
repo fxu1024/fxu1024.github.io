@@ -43,7 +43,7 @@ grand_parent: Data Service
 |192.168.8.143	|ds03.ecs.openstack.com |ECS worker node 2|
 |192.168.8.144	|ds04.ecs.openstack.com |ECS worker node 3|
 
-## 2. CML workspace certificate requirements
+## 2. ML Workspace certificate requirements
 
 - You can provision an ML workspace with TLS enabled, so that it can be accessed via https.
 
@@ -55,10 +55,11 @@ grand_parent: Data Service
     - SAN: *.ml-47e0ade8-e0a.cluster.yourcompany.com
     - SAN: ml-47e0ade8-e0a.cluster.yourcompany.com
 
-- Given a certificate (ca-cert.pem) and its private key (ca-key.pem), You can use OpenSSL to sign a provided CSR (host.csr) and generate a certificate for CML (host.crt). For the AutoTLS enabled CDP cluster:
+- Given a certificate (ca-cert.pem) and its private key (ca-key.pem), You can use OpenSSL to sign a provided CSR (host.csr) and generate a certificate for ML workspace (host.crt). For the AutoTLS enabled CDP cluster:
     - ca-cert.pem is `/var/lib/cloudera-scm-agent/agent-cert/cm-auto-in_cluster_ca_cert.pem`
     - ca-key.pem is `/var/lib/cloudera-scm-server/certmanager/CMCA/private/ca_key.pem`, which is hidden in the CM backend database
-    - host.crt is generate by `openssl req` command with the corresponding Common Name (CN) tag
+    - host.csr is generate by `openssl req` command with the corresponding Common Name (CN) tag
+    - host.crt is the target ML Workspace certificate
 
 ## 3. Export AutoTLS CMCA package from CM database
 
