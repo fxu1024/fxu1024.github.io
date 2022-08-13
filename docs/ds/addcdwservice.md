@@ -713,7 +713,7 @@ SQLRowCount returns -1
 |LDAP Bind Password |password|
 |LDAP User Search Base |cn=users,cn=accounts,dc=feng,dc=com|
 |LDAP User Search Filter |(&(uid={0})(objectClass=posixAccount))|
-|LDAP Group Search Base |DC=ecs,DC=openstack,DC=com|
+|LDAP Group Search Base |cn=groups,cn=accounts,dc=feng,dc=com|
 |LDAP Group Search Filter |(&(member={1})(objectClass=posixGroup))|
 |Sync Groups on Logon |enable|
 

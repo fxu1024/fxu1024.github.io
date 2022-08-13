@@ -337,7 +337,7 @@ Rman Database Name: orcl
 PROBLEM: 
 {: .label .label-yellow } 
 
-- Get errors from /var/log/ranger/admin/ranger-admin-cb01.ecs.ycloud.com-ranger.log
+- Get errors from /var/log/ranger/admin/ranger-admin-ccycloud-1.tiger.root.hwx.site-ranger.log
 
 ```console
 com.mchange.v2.resourcepool.BasicResourcePool$ScatteredAcquireTask@3f11c924 -- Acquisition Attempt Failed!!! Clearing pending acquires. While trying to acquire a needed new resource, we failed to succeed more than the maximum number of allowed acquisition attempts (30). Last acquisition attempt exception: 
@@ -541,7 +541,7 @@ RESOLUTION:
   if [[ $HOST =~ \. ]]; then
     ipa host-add $HOST  --force --no-reverse
   else
-    ipa host-add $HOST.ecs.openstack.com  --force --no-reverse
+    ipa host-add $HOST.sme-feng.athens.cloudera.com  --force --no-reverse
   fi
 ```
 

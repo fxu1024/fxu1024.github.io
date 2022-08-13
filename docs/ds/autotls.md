@@ -262,7 +262,7 @@ ml-47e0ade8-e0a.apps.ecs-lb.ecs.openstack.com 100% 2484     1.9MB/s   00:00
 # kubectl create secret tls cml-tls-secret --cert=${host}.crt --key=${host}.key -o yaml --dry-run | kubectl -n cml01 create -f -
 ```
 
-- In Site Administration > Security > Root CA configuration, paste the root CA certificate (chain.pem) to the workspace.
+- In Site Administration > Security > Root CA configuration, paste the root CA certificate (/var/lib/cloudera-scm-agent/agent-cert/cm-auto-in_cluster_ca_cert.pem) to the workspace.
 
 ![](../../assets/images/ds/addcml05.png)
 
