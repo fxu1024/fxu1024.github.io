@@ -582,3 +582,211 @@ RESOLUTION:
 
 (&(member={1})(objectClass=posixGroup))
 ```
+
+## 11. Unable to see other user queries in DAS
+
+--- 
+PROBLEM: 
+{: .label .label-yellow } 
+
+- You can only view the hive queries submitted by yourself in DAS Queries window.
+
+--- 
+ENVIRONMENT: 
+{: .label .label-yellow }
+
+- ECS - All Versions
+
+--- 
+CAUSE: 
+{: .label .label-red }
+
+- Users should be specified as adminUsers.
+
+---  
+RESOLUTION: 
+{: .label .label-green } 
+   
+- Step 1 : CDW &gt; Virtual Warehouse and click on the Edit (pencil) icon.
+- Step 2 : Configurations &gt; Choose das-webapp-json in the selection box.
+- Step 3 : Update adminUsers to the users you want to view queries and change "adminUsers":"&lt;user1&gt;,&lt;user2&gt;", "ldapGroupFilter":"" &gt; Apply &gt; Save
+- Step 4 : Once the pod became running state, please log into your Virtual Warehouse DAS instance and now you should be able to see the query history of all users.
+
+
+## 12. 0/2 nodes are available: 2 Insufficient cpu, 2 Insufficient memory
+
+--- 
+PROBLEM: 
+{: .label .label-yellow } 
+
+- All attempts to create Impala VW fails with Insufficient cpu/ memory error:
+
+```console
+kubectl describe pod impala-executor-000-1 -n impala-1635670911-8mdk
+
+Events:
+  Type     Reason            Age   From      Message
+  ----     ------            ----  ----      -------
+  Warning  FailedScheduling  82s   yunikorn  0/2 nodes are available: 1 Insufficient cpu, 2 Insufficient memory.
+  Warning  FailedScheduling  82s   yunikorn  0/2 nodes are available: 1 Insufficient cpu, 2 Insufficient memory.
+  Warning  FailedScheduling  75s   yunikorn  0/2 nodes are available: 2 Insufficient cpu, 2 Insufficient memory.
+```
+
+--- 
+ENVIRONMENT: 
+{: .label .label-yellow }
+
+- ECS - All Versions
+
+--- 
+CAUSE: 
+{: .label .label-red }
+
+- Insufficient hardware resources
+
+---  
+RESOLUTION: 
+{: .label .label-green } 
+
+- Remove the resources section from the statefulsets.
+   
+```bash
+1.	Install yq first
+
+wget https://github.com/mikefarah/yq/releases/download/v4.13.5/yq_linux_386.tar.gz
+tar xzf yq_linux_386.tar.gz
+mv yq_linux_386 /usr/bin/yq
+
+
+2.	Remove hive source limit:
+
+ns=`kubectl get ns|awk '/^compute/{print$1}'|awk 'END{print}'`
+
+kubectl get sts -l 'app in (hiveserver2, das-webapp, huebackend, standalone-compute-operator)' -n $ns -o yaml \
+    | yq e .items[].spec.replicas=0 - \
+    | kubectl apply --overwrite=true --grace-period=0 --force -f -
+    
+kubectl get sts -l 'app in (hiveserver2, das-webapp, huebackend, standalone-compute-operator)' -n $ns -o yaml \
+    | yq e .items[].spec.replicas=1 - \
+    | yq e 'del(.items[].spec.template.spec.containers[].resources)' - \
+    | kubectl apply --overwrite=true --grace-period=0 --force -f -
+
+kubectl get sts -l 'app in (query-coordinator, query-executor-0)' -n $ns -o yaml \
+    | yq e .items[].spec.replicas=0 - \
+    | kubectl apply --overwrite=true --grace-period=0 --force -f -
+
+kubectl get sts -l 'app in (query-coordinator, query-executor-0)' -n $ns -o yaml \
+    | yq e .items[].spec.replicas=2 - \
+    | yq e 'del(.items[].spec.template.spec.containers[].resources)' - \
+    | kubectl apply --overwrite=true --grace-period=0 --force -f -
+
+kubectl get pod -n $ns
+
+3.	remove impala source limit:
+
+ns=`kubectl get ns|awk '/^impala/{print$1}'|awk 'END{print}'`
+
+kubectl get deploy -l 'app in (catalogd,huefrontend,impala-autoscaler,statestored,usage-monitor)' -n $ns -o yaml \
+    | yq e .items[].spec.replicas=0 -\
+    | kubectl apply --overwrite=true --grace-period=0 --force -f -
+
+kubectl get deploy -l 'app in (catalogd,huefrontend,impala-autoscaler,statestored,usage-monitor)' -n $ns -o yaml \
+    | yq e .items[].spec.replicas=1 - \
+    | yq e 'del(.items[].spec.template.spec.containers[].resources)' - \
+    | kubectl apply --overwrite=true --grace-period=0 --force -f -
+
+kubectl get sts -l 'app in (huebackend,impala-executor,coordinator)' -n $ns -o yaml \
+    | yq e .items[].spec.replicas=0 -\
+    | kubectl apply --overwrite=true --grace-period=0 --force -f -
+
+kubectl get sts -l 'app in (huebackend)' -n $ns -o yaml \
+    | yq e .items[].spec.replicas=1 - \
+    | yq e 'del(.items[].spec.template.spec.containers[].resources)' - \
+    | kubectl apply --overwrite=true --grace-period=0 --force -f -
+
+kubectl get sts -l 'app in (impala-executor,coordinator)' -n $ns -o yaml \
+    | yq e .items[].spec.replicas=2 - \
+    | yq e 'del(.items[].spec.template.spec.containers[].resources)' - \
+    | kubectl apply --overwrite=true --grace-period=0 --force -f -
+
+kubectl get pod -n $ns
+```
+
+## 13. Unable to connect to ums host context deadline exceeded
+
+--- 
+PROBLEM: 
+{: .label .label-yellow } 
+
+- Pod dp-mlx-control-plane-app is always in CrashLoopBackoff state in middle of "install control plane" stage.
+
+```console
+# kubectl logs dp-mlx-control-plane-app-d86cdc76b-8ppjp -n cdp -c cdp-release-mlx-control-plane-app
+
+panic: Unable to connect to ums host cdp-release-thunderhead-usermanagement-private.cdp.svc.cluster.local:80: context deadline exceeded
+
+goroutine 1 [running]:
+github.infra.cloudera.com/Sense/mlx-crud-app/service/pkg/utils.CreateGRPCClientOrPanic(0xc000052239, 0x47, 0x6fc23ac00, 0xc0007809c0)
+	/go/src/github.infra.cloudera.com/Sense/mlx-crud-app/service/pkg/utils/utils.go:490 +0x259
+github.infra.cloudera.com/Sense/mlx-crud-app/service/pkg/ums.init.0()
+	/go/src/github.infra.cloudera.com/Sense/mlx-crud-app/service/pkg/ums/ums.go:45 +0x57
+```
+
+--- 
+ENVIRONMENT: 
+{: .label .label-yellow }
+
+- ECS - All Versions
+
+--- 
+CAUSE: 
+{: .label .label-red }
+
+- iptable rules leftover from a previous install are interfering with networking.
+
+---  
+RESOLUTION: 
+{: .label .label-green } 
+
+- Delete the network policies on the CDP namespace.
+   
+```bash
+kubectl delete networkpolicy cdp-release-allow-same-namespace -n cdp
+kubectl delete networkpolicy cdp-release-deny-all -n cdp
+```
+
+## 14. 1 node(s) had volume node affinity conflict
+
+--- 
+PROBLEM: 
+{: .label .label-yellow } 
+
+- When Node feng-ws1 crashed, pod impala-executor-000-1 freezed in pending state and reported an error: 0/6 nodes are available: 1 Insufficient cpu, 1 node(s) had taint {node.kubernetes.io/unreachable: }, that the pod didn't tolerate, 1 node(s) had volume node affinity conflict, 4 Insufficient memory.
+
+--- 
+ENVIRONMENT: 
+{: .label .label-yellow }
+
+- ECS - All Versions
+
+--- 
+CAUSE: 
+{: .label .label-red }
+
+- If you're using local volumes, and the node crashes, your pod cannot be rescheduled to a different node. It is scheduled to the same node by default. That is the caveat of using local storage, your Pod becomes bound forever to one specific node. Please refer to
+https://github.com/kubernetes/kubernetes/issues/61620.
+
+---  
+RESOLUTION: 
+{: .label .label-green } 
+
+- Both pvc and pod should be deleted for rescheduling if you use local volume.
+
+```bash
+# kubectl delete pvc scratch-cache-volume-impala-executor-000-1 -n impala-1639918159-d2ld
+persistentvolumeclaim "scratch-cache-volume-impala-executor-000-1" deleted
+
+# kubectl delete pod impala-executor-000-1 -n impala-1639918159-d2ld
+pod "impala-executor-000-1" deleted
+```
+
