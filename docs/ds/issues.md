@@ -790,7 +790,7 @@ persistentvolumeclaim "scratch-cache-volume-impala-executor-000-1" deleted
 pod "impala-executor-000-1" deleted
 ```
 
-## 15. ERROR: column "UPDATED_COUNT" does not exist
+## 15. Unable to update transactional statistics org.postgresql.util.PSQLException: ERROR: column "UPDATED_COUNT" does not exist
 
 --- 
 PROBLEM: 
