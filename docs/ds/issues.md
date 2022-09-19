@@ -651,14 +651,14 @@ RESOLUTION:
 - Remove the resources section from the statefulsets.
    
 ```bash
-1.	Install yq first
+1.Install yq first
 
 wget https://github.com/mikefarah/yq/releases/download/v4.13.5/yq_linux_386.tar.gz
 tar xzf yq_linux_386.tar.gz
 mv yq_linux_386 /usr/bin/yq
 
 
-2.	Remove hive source limit:
+2.Remove hive source limit:
 
 ns=`kubectl get ns|awk '/^compute/{print$1}'|awk 'END{print}'`
 
@@ -682,7 +682,7 @@ kubectl get sts -l 'app in (query-coordinator, query-executor-0)' -n $ns -o yaml
 
 kubectl get pod -n $ns
 
-3.	remove impala source limit:
+3.remove impala source limit:
 
 ns=`kubectl get ns|awk '/^impala/{print$1}'|awk 'END{print}'`
 
@@ -790,3 +790,58 @@ persistentvolumeclaim "scratch-cache-volume-impala-executor-000-1" deleted
 pod "impala-executor-000-1" deleted
 ```
 
+## 15. ERROR: column "UPDATED_COUNT" does not exist
+
+--- 
+PROBLEM: 
+{: .label .label-yellow } 
+
+- All the hive insert queries are throwing the below warnings:
+
+```console
+0: jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-fe> insert into cdp_test1 values(2,'cloudera');
+
+INFO  : [Warning] could not update stats.Failed with exception MetaException(message:Unable to update transactional statistics org.postgresql.util.PSQLException: ERROR: column "UPDATED_COUNT" does not exist
+```
+
+--- 
+ENVIRONMENT: 
+{: .label .label-yellow }
+
+- ECS - 1.4.0
+
+--- 
+CAUSE: 
+{: .label .label-red }
+
+- The table definition of "MV_TABLES_USED" is incomplete, 3 columns are missing.
+
+```console
+metastore=# \d "MV_TABLES_USED";
+                   Table "public.MV_TABLES_USED"
+         Column          |  Type  | Collation | Nullable | Default
+-------------------------+--------+-----------+----------+---------
+ MV_CREATION_METADATA_ID | bigint |           | not null |
+ TBL_ID                  | bigint |           | not null |
+Foreign-key constraints:
+    "MV_TABLES_USED_FK1" FOREIGN KEY ("MV_CREATION_METADATA_ID") REFERENCES "MV_CREATION_METADATA"("MV_CREATION_METADATA_ID") DEFERRABLE
+    "MV_TABLES_USED_FK2" FOREIGN KEY ("TBL_ID") REFERENCES "TBLS"("TBL_ID") DEFERRABLE
+```
+
+---  
+RESOLUTION: 
+{: .label .label-green }
+
+- Add column "INSERTED_COUNT", "UPDATED_COUNT", "DELETED_COUNT" for table "MV_TABLES_USED".
+   
+```bash
+# sudo -u postgres psql
+
+postgres=# \c metastore
+metastore=# ALTER TABLE "MV_TABLES_USED" ADD "INSERTED_COUNT" bigint NOT NULL DEFAULT 0;
+ALTER TABLE
+metastore=# ALTER TABLE "MV_TABLES_USED" ADD "UPDATED_COUNT" bigint NOT NULL DEFAULT 0;
+ALTER TABLE
+metastore=# ALTER TABLE "MV_TABLES_USED" ADD "DELETED_COUNT" bigint NOT NULL DEFAULT 0;
+ALTER TABLE
+```
