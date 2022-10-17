@@ -58,21 +58,44 @@ export JAVA_HOME=/Library/Internet\ Plug-Ins/JavaAppletPlugin.plugin/Contents/Ho
 source ~/.bash_profile
 ```
 
-- Connect to CDW VW using LDAP authentication.
-    - beeline command `beeline -u 'jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=false;retries=3' -n admin -p`
+- Connect to Hive in CDP Base cluster using Kerberos authentication.
 
-![](../../assets/images/ds/gateway004.jpg)
-
-This shows that Standalone Beeline CLI supports LDAP authentication.
-
-- Connect to CDP Base cluster using Kerberos authentication.
-    - beeline commands `beeline -u 'jdbc:hive2://ccycloud-1.tiger.root.hwx.site:10000/default;principal=hive/_HOST@FENG.COM;ssl=true;sslTrustStore=cm-auto-in_cluster_truststore.jks'`
+```bash
+beeline -u 'jdbc:hive2://ccycloud-1.tiger.root.hwx.site:10000/default;principal=hive/_HOST@FENG.COM;ssl=true;sslTrustStore=cm-auto-in_cluster_truststore.jks'
+```
 
 ![](../../assets/images/ds/gateway003.jpg)
 
-This shows that Standalone Beeline CLI supports Kerberos authentication.
+- Connect to Impala in CDP Base cluster using LDAP authentication.
 
+```bash
+export HIVE_AUX_JARS_PATH=/Users/feng.xu/projects/ImpalaJDBC41.jar
+beeline -d 'com.cloudera.impala.jdbc41.Driver' -u 'jdbc:impala://ccycloud-3.tiger.root.hwx.site:21050;AuthMech=3;uid=admin;pwd=xxx;SSL=1;sslTrustStore=/Users/feng.xu/hadoop-clients/cm-auto-in_cluster_truststore.jks'
+```
 
+![](../../assets/images/ds/gateway005.jpg)
 
+- Connect to Hive VW in PvC CDW using LDAP authentication.
 
+```bash
+beeline -u 'jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=false;retries=3' -n admin -p
+```
+
+![](../../assets/images/ds/gateway004.jpg)
+
+- Connect to Impala VW in PvC CDW using LDAP authentication.
+
+```bash
+export host=coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com
+export file=pvc140_impala
+rm -f $file.jks $file.pem
+openssl s_client -showcerts -connect $host:443 -servername $host </dev/null 2>/dev/null|openssl x509 -outform PEM > $file.pem
+keytool -import -alias $host -file $file.pem -keystore $file.jks
+export HIVE_AUX_JARS_PATH=/Users/feng.xu/projects/ImpalaJDBC41.jar
+beeline -d "com.cloudera.impala.jdbc41.Driver" -u "jdbc:impala://coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com:443/default;AuthMech=3;transportMode=http;httpPath=cliservice;ssl=1;sslTrustStore=/Users/feng.xu/pvc140_impala.jks;trustStorePassword=123456"
+```
+
+![](../../assets/images/ds/gateway006.jpg)
+
+It returned error messages "Error setting/closing session: HTTP Response code: 401". This shows that beeline does not support direct access to impala VW.
 
