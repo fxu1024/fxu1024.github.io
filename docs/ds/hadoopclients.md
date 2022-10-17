@@ -16,7 +16,7 @@ grand_parent: Data Service
 
 This topic would allow you to access HDFS, submit yarn/spark jobs, connect to hive using beeline from your MAC computer.
 
-## 1. Standalone Beeline for CDW
+## 1. Standalone Beeline
 
 - In order to connect to Hive VW via beeline shell, the first step is to download Beeline CLI software. Click on the 3 dots beside the HUE button, and click on the ["Download Beeline CLI"](https://cdw-ui.s3.amazonaws.com/hive3/beeline-standalone/apache-hive-beeline-3.1.3000.tar.gz).
 
@@ -63,14 +63,14 @@ source ~/.bash_profile
 
 ![](../../assets/images/ds/gateway004.jpg)
 
-This shows that the current Beeline CLI provided by CDW only supports LDAP authentication.
+This shows that Standalone Beeline CLI supports LDAP authentication.
 
 - Connect to CDP Base cluster using Kerberos authentication.
     - beeline commands `beeline -u 'jdbc:hive2://ccycloud-1.tiger.root.hwx.site:10000/default;principal=hive/_HOST@FENG.COM;ssl=true;sslTrustStore=cm-auto-in_cluster_truststore.jks'`
 
 ![](../../assets/images/ds/gateway003.jpg)
 
-beeline -u 'jdbc:hive2://ccycloud-1.tiger.root.hwx.site:2181/default;principal=hive/_HOST@FENG.COM;serviceDiscoveryMode=zooKeeper;ssl=true;sslTrustStore=cm-auto-global_truststore.jks;trustStorePassword=yIUI8QOkj51B7rszOjVKZX2G7FPbGmmZcWhedM3aM7z;zooKeeperNamespace=hiveserver2'
+This shows that Standalone Beeline CLI supports Kerberos authentication.
 
 
 
