@@ -445,7 +445,7 @@ done
         echo $target "==========>"
         echo "Clean up lib/logs/umount/config directory";
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa centos@$target "
-    sudo mount| awk '/on \/var\/lib\/(kubelet|k3s)/{print \$3}' | xargs -r sudo umount
+    sudo mount| awk '/on \/var\/lib\/(kubelet|k3s)/{print \$3}' | xargs -r sudo umount -l
     sudo rm -rf /var/lib/longhorn /var/lib/calico /var/lib/docker /var/lib/docker_server /var/log/pods /var/log/containers
     sudo rm -rf /run/containerd /run/docker /run/longhorn-iscsi.lock /etc/docker /etc/iscsi /opt/containerd /opt/cni
     sudo rm -rf ${docker_dir} ${pv_dir} ${local_dir}
@@ -466,7 +466,7 @@ done
         echo $target "==========>"
         echo "Clean up lib/logs/umount/config directory";
         ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa centos@$target "
-    sudo mount| awk '/on \/mnt\/(kubelet|k3s)/{print \$3}' | xargs -r sudo umount
+    sudo mount| awk '/on \/mnt\/(kubelet|k3s)/{print \$3}' | xargs -r sudo umount -l
     sudo rm -rf /var/lib/longhorn /var/lib/calico /var/lib/docker /var/lib/docker_server /var/log/pods /var/log/containers
     sudo rm -rf /run/containerd /run/docker /run/longhorn-iscsi.lock /etc/docker /etc/iscsi /opt/containerd /opt/cni
     sudo rm -rf ${docker_dir} ${pv_dir} ${local_dir}
