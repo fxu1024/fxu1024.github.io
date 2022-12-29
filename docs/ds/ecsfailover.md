@@ -67,9 +67,9 @@ grand_parent: Data Service
 
 ### 2.4 Cronjob pod-reaper introduced in PvC 1.4.1
 
-- CronJob pod-reaper creates reaper job every 10 minutes. The reaper job will scan all namespaces and force delete pods that have been in the terminating state for more than 10 minutes.
+- CronJob pod-reaper creates reaper job every 10 minutes. The reaper job will scan all namespaces and force deleting pods that have been in the terminating state for more than 10 minutes.
 
-## Case #1. ECS server suddenly goes down, verify whether CDW/CML cluster are not affected
+## Case #1. An ECS Server is down
 
 - Check all ECS nodes
 
@@ -151,7 +151,7 @@ warehouse-default-datalake-default   metastore-0                                
 
 ![](../../assets/images/ds/hatest04.png)
 
-- Confirm that only feng-ws1 is NotReady
+- Confirm that only feng-ws2 is NotReady
 
 ```bash
 $ kubectl get node
@@ -164,31 +164,33 @@ feng-ws5.sme-feng.athens.cloudera.com   Ready      <none>                      2
 feng-ws6.sme-feng.athens.cloudera.com   Ready      <none>                      2d4h   v1.21.14+rke2r1
 ```
 
-- As you can see from the HAProxy UI, all ports on feng-ws1 ( http port 80, https port 434) have become Down state 
+- ECS server (feng-ws2, feng-ws3) stderr.log indicated Stopped tunnel to 10.113.207.142.
+
+```console
+time="2022-12-29T17:13:37+08:00" level=info msg="error in remotedialer server [400]: websocket: close 1006 (abnormal closure): unexpected EOF"
+time="2022-12-29T17:13:37+08:00" level=error msg="Remotedialer proxy error" error="websocket: close 1006 (abnormal closure): unexpected EOF"
+time="2022-12-29T17:13:42+08:00" level=info msg="Connecting to proxy" url="wss://10.113.207.142:9345/v1-rke2/connect"
+time="2022-12-29T17:13:53+08:00" level=info msg="Stopped tunnel to 10.113.207.142:9345"
+time="2022-12-29T17:14:47+08:00" level=error msg="Failed to connect to proxy" error="dial tcp 10.113.207.142:9345: connect: no route to host"
+time="2022-12-29T17:14:47+08:00" level=error msg="Remotedialer proxy error" error="dial tcp 10.113.207.142:9345: connect: no route to host"
+```
+
+- ECS Agent (feng-ws4, feng-ws5, feng-ws6 ) stderr.log indicated Updating load balancer server addresses and Stopped tunnel to 10.113.207.141.
+
+```console 
+time="2022-12-29T17:13:37+08:00" level=error msg="Remotedialer proxy error" error="websocket: close 1006 (abnormal closure): unexpected EOF"
+time="2022-12-29T17:13:42+08:00" level=info msg="Connecting to proxy" url="wss://10.113.207.142:9345/v1-rke2/connect"
+time="2022-12-29T17:14:08+08:00" level=error msg="Tunnel endpoint watch channel closed: {ERROR &Status{ListMeta:ListMeta{SelfLink:,ResourceVersion:,Continue:,RemainingItemCount:nil,},Status:Failure,Message:an error on the server (\"unable to decode an event from the watch stream: http2: client connection lost\") has prevented the request from succeeding,Reason:InternalError,Details:&StatusDetails{Name:,Group:,Kind:,Causes:[]StatusCause{StatusCause{Type:UnexpectedServerResponse,Message:unable to decode an event from the watch stream: http2: client connection lost,Field:,},StatusCause{Type:ClientWatchDecoding,Message:unable to decode an event from the watch stream: http2: client connection lost,Field:,},},RetryAfterSeconds:0,UID:,},Code:500,}}"
+time="2022-12-29T17:14:13+08:00" level=info msg="Updating load balancer rke2-api-server-agent-load-balancer server addresses -> [10.113.207.141:6443 10.113.207.143:6443 10.113.207.142:6443]"
+time="2022-12-29T17:14:13+08:00" level=info msg="Updating load balancer rke2-agent-load-balancer server addresses -> [10.113.207.141:9345 10.113.207.143:9345]"
+time="2022-12-29T17:14:13+08:00" level=info msg="Stopped tunnel to 10.113.207.142:9345"
+time="2022-12-29T17:14:45+08:00" level=error msg="Failed to connect to proxy" error="dial tcp 10.113.207.142:9345: connect: no route to host"
+time="2022-12-29T17:14:45+08:00" level=error msg="Remotedialer proxy error" error="dial tcp 10.113.207.142:9345: connect: no route to host"
+```
+
+- As you can see from the HAProxy UI, all ports on feng-ws2 ( http port 80, https port 434) have become Down state 
 
 ![](../../assets/images/ds/hatest05.png)
-
-    - ECS server (feng-ws2, feng-ws3) stderr.log indicated Stopped tunnel to 10.113.207.141.
-    ```console
-    time="2022-12-29T17:13:37+08:00" level=info msg="error in remotedialer server [400]: websocket: close 1006 (abnormal closure): unexpected EOF"
-    time="2022-12-29T17:13:37+08:00" level=error msg="Remotedialer proxy error" error="websocket: close 1006 (abnormal closure): unexpected EOF"
-    time="2022-12-29T17:13:42+08:00" level=info msg="Connecting to proxy" url="wss://10.113.207.142:9345/v1-rke2/connect"
-    time="2022-12-29T17:13:53+08:00" level=info msg="Stopped tunnel to 10.113.207.142:9345"
-    time="2022-12-29T17:14:47+08:00" level=error msg="Failed to connect to proxy" error="dial tcp 10.113.207.142:9345: connect: no route to host"
-    time="2022-12-29T17:14:47+08:00" level=error msg="Remotedialer proxy error" error="dial tcp 10.113.207.142:9345: connect: no route to host"
-    ```
-
-    - ECS Agent (feng-ws4, feng-ws5, feng-ws6 ) stderr.log indicated Updating load balancer server addresses and Stopped tunnel to 10.113.207.141.
-    ```console 
-    time="2022-12-29T17:13:37+08:00" level=error msg="Remotedialer proxy error" error="websocket: close 1006 (abnormal closure): unexpected EOF"
-    time="2022-12-29T17:13:42+08:00" level=info msg="Connecting to proxy" url="wss://10.113.207.142:9345/v1-rke2/connect"
-    time="2022-12-29T17:14:08+08:00" level=error msg="Tunnel endpoint watch channel closed: {ERROR &Status{ListMeta:ListMeta{SelfLink:,ResourceVersion:,Continue:,RemainingItemCount:nil,},Status:Failure,Message:an error on the server (\"unable to decode an event from the watch stream: http2: client connection lost\") has prevented the request from succeeding,Reason:InternalError,Details:&StatusDetails{Name:,Group:,Kind:,Causes:[]StatusCause{StatusCause{Type:UnexpectedServerResponse,Message:unable to decode an event from the watch stream: http2: client connection lost,Field:,},StatusCause{Type:ClientWatchDecoding,Message:unable to decode an event from the watch stream: http2: client connection lost,Field:,},},RetryAfterSeconds:0,UID:,},Code:500,}}"
-    time="2022-12-29T17:14:13+08:00" level=info msg="Updating load balancer rke2-api-server-agent-load-balancer server addresses -> [10.113.207.141:6443 10.113.207.143:6443 10.113.207.142:6443]"
-    time="2022-12-29T17:14:13+08:00" level=info msg="Updating load balancer rke2-agent-load-balancer server addresses -> [10.113.207.141:9345 10.113.207.143:9345]"
-    time="2022-12-29T17:14:13+08:00" level=info msg="Stopped tunnel to 10.113.207.142:9345"
-    time="2022-12-29T17:14:45+08:00" level=error msg="Failed to connect to proxy" error="dial tcp 10.113.207.142:9345: connect: no route to host"
-    time="2022-12-29T17:14:45+08:00" level=error msg="Remotedialer proxy error" error="dial tcp 10.113.207.142:9345: connect: no route to host"
-    ```
 
 - As you can see from the CM UI, ECS server health/Control Plane Health/Kubernetes Health/Longhorn Health start to alarm.
 
@@ -253,7 +255,7 @@ warehouse-default-datalake-default   metastore-0                                
 
 ![](../../assets/images/ds/hatest08.png)
 
-- Job pod-reaper forced to delete pods in terminating state which are older than 10 minutes.
+- Job pod-reaper forced deleting pods in terminating state after 25 minutes of service interruption.
 
 ```bash
 $ kubectl logs -n pod-reaper pod-reaper-27871780-tpwzm
@@ -292,7 +294,7 @@ Thu Dec 29 09:40:02 UTC 2022 Successfully force deleted pod huebackend-0 in name
 ......
 ```
 
-- The remaining 13 pods are basically daemonset type. Pod rke2-ingress-nginx-controller is an exception.
+- The remaining 13 pods on feng-ws2 are basically daemonset type. Pod rke2-ingress-nginx-controller is an exception.
 
 ```bash
 $ kubectl get pods -A -o wide --field-selector spec.nodeName=feng-ws2.sme-feng.athens.cloudera.com
@@ -312,7 +314,7 @@ longhorn-system    longhorn-csi-plugin-p24j8                                    
 longhorn-system    longhorn-manager-h2vb2                                            1/1     Running   0          2d5h   10.42.1.6        feng-ws2.sme-feng.athens.cloudera.com   <none>           <none>
 ```
 
-- Only 13 pods are in failed state on Kubernetes Web UI and they are all daemonset type.
+- We also see the same result on k8s web UI, only 13 failed pods. But these abnormal pods will not affect existing applications at all.
 
 ![](../../assets/images/ds/hatest14.png)
 
@@ -326,3 +328,242 @@ longhorn-system    longhorn-manager-h2vb2                                       
 
 ![](../../assets/images/ds/hatest09.png)
 
+
+## Case #2. An ECS Agent is down
+
+- Check all ECS nodes
+
+```bash
+$ kubectl get node
+NAME                                    STATUS   ROLES                       AGE    VERSION
+feng-ws1.sme-feng.athens.cloudera.com   Ready    control-plane,etcd,master   2d4h   v1.21.14+rke2r1
+feng-ws2.sme-feng.athens.cloudera.com   Ready    control-plane,etcd,master   2d4h   v1.21.14+rke2r1
+feng-ws3.sme-feng.athens.cloudera.com   Ready    control-plane,etcd,master   2d4h   v1.21.14+rke2r1
+feng-ws4.sme-feng.athens.cloudera.com   Ready    <none>                      2d4h   v1.21.14+rke2r1
+feng-ws5.sme-feng.athens.cloudera.com   Ready    <none>                      2d4h   v1.21.14+rke2r1
+feng-ws6.sme-feng.athens.cloudera.com   Ready    <none>                      2d4h   v1.21.14+rke2r1
+```
+
+- Check the state of ECS roles on CM UI
+
+![](../../assets/images/ds/hatest02.png)
+
+- Check all Kubernetes objects
+
+![](../../assets/images/ds/hatest03.png)
+
+- Check all pods running on feng-ws4
+
+```bash
+$ kubectl get pods -A -o wide --field-selector spec.nodeName=feng-ws4.sme-feng.athens.cloudera.com
+NAMESPACE                              NAME                                                              READY   STATUS      RESTARTS   AGE    IP               NODE                                    NOMINATED NODE   READINESS GATES
+cdp                                    cdp-release-dps-gateway-1.0-595cdcfcd6-kvp7f                      3/3     Running     0          2d7h   10.42.5.18       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cdp                                    cdp-release-grafana-6f577d4bdb-4ll59                              3/3     Running     0          2d5h   10.42.5.46       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cdp                                    cdp-release-monitoring-app-6c9794967-jcdrf                        2/2     Running     0          2d6h   10.42.5.32       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cdp                                    cdp-release-monitoring-metricproxy-6c46bb46d8-jgq62               2/2     Running     0          2d6h   10.42.5.33       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cdp                                    cdp-release-monitoring-pvcservice-5cdb55c9c5-rnp7g                2/2     Running     0          2d6h   10.42.5.31       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cdp                                    cdp-release-thunderhead-kerberosmgmt-api-7d484b8fd6-j9vb2         2/2     Running     0          2d7h   10.42.5.21       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cdp                                    cdp-release-thunderhead-sdx2-api-6f9989c764-8cqsj                 2/2     Running     0          2d7h   10.42.5.19       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cdp                                    echoserver-9dfbcd89b-h6z4n                                        1/1     Running     0          2d7h   10.42.5.17       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cml01                                  livelog-publisher-989hx                                           2/2     Running     2          2d5h   10.42.5.45       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cml01                                  mlx-cml01-pod-evaluator-6445d6946b-txlrq                          1/1     Running     0          2d5h   10.113.207.144   feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cml01                                  model-metrics-db-0                                                1/1     Running     0          2d5h   10.42.5.47       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cml01                                  s2i-builder-58d875f44c-4zn4z                                      2/2     Running     6          2d5h   10.42.5.48       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cml01                                  s2i-builder-58d875f44c-ftqhl                                      2/2     Running     6          2d5h   10.42.5.49       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cml01                                  s2i-builder-58d875f44c-kqkrk                                      2/2     Running     6          2d5h   10.42.5.50       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+compute-hive01                         huebackend-0                                                      1/1     Running     0          124m   10.42.5.55       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+default-ad522d9e-monitoring-platform   monitoring-logger-alert-receiver-7485d89576-vg6n4                 2/2     Running     0          2d6h   10.42.5.34       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+default-ad522d9e-monitoring-platform   monitoring-metrics-server-exporter-7f977ddff5-ht2n6               2/2     Running     0          2d6h   10.42.5.35       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+default-ad522d9e-monitoring-platform   monitoring-prometheus-server-664745446f-pw6jc                     3/3     Running     0          2d6h   10.42.5.37       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+impala-impala01                        impala-executor-000-0                                             1/1     Running     0          32h    10.42.5.54       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+infra-prometheus                       infra-prometheus-operator-1-1672115985-prometheus-node-expzhqf7   1/1     Running     0          2d7h   10.113.207.144   feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+infra-prometheus                       infra-prometheus-operator-operator-854bdc78b6-2whcf               1/1     Running     0          2d7h   10.42.5.15       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+kube-system                            kube-proxy-feng-ws4.sme-feng.athens.cloudera.com                  1/1     Running     0          2d7h   10.113.207.144   feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+kube-system                            nvidia-device-plugin-daemonset-j278f                              1/1     Running     0          2d7h   10.42.5.16       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+kube-system                            rke2-canal-kmtnv                                                  2/2     Running     0          2d7h   10.113.207.144   feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system                        csi-attacher-559b9bc796-2wv7w                                     1/1     Running     1          2d7h   10.42.5.6        feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system                        csi-provisioner-d7df997cf-g7wbj                                   1/1     Running     0          2d7h   10.42.5.8        feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system                        csi-resizer-9db78b867-zkb9k                                       1/1     Running     0          2d7h   10.42.5.7        feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system                        csi-snapshotter-74d97b97bf-nlqk2                                  1/1     Running     1          2d7h   10.42.5.9        feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system                        engine-image-ei-045573ad-knqc5                                    1/1     Running     0          2d7h   10.42.5.2        feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system                        instance-manager-e-3cf7ad0b                                       1/1     Running     0          2d7h   10.42.5.4        feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system                        instance-manager-r-bf10b574                                       1/1     Running     0          2d7h   10.42.5.5        feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system                        longhorn-csi-plugin-qxwk6                                         2/2     Running     0          2d7h   10.42.5.10       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system                        longhorn-manager-mbs49                                            1/1     Running     0          2d7h   10.42.5.3        feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+pod-reaper                             pod-reaper-27871790-rcg96                                         0/1     Completed   0          114m   10.42.5.57       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+pod-reaper                             pod-reaper-27871810-4774b                                         0/1     Completed   0          94m    10.42.5.58       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+vault-system                           vault-0                                                           1/1     Running     0          2d7h   10.42.5.11       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+warehouse-default-datalake-default     hue-query-processor-0                                             1/1     Running     0          2d5h   10.42.5.44       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+warehouse-default-datalake-default     metastore-0                                                       1/1     Running     0          124m   10.42.5.56       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+```
+- Shutdown node feng-ws4
+
+![](../../assets/images/ds/hatest15.png)
+
+- Confirm that only feng-ws4 is NotReady
+
+```bash
+$ kubectl get node
+NAME                                    STATUS     ROLES                       AGE    VERSION
+feng-ws1.sme-feng.athens.cloudera.com   Ready      control-plane,etcd,master   2d7h   v1.21.14+rke2r1
+feng-ws2.sme-feng.athens.cloudera.com   Ready      control-plane,etcd,master   2d7h   v1.21.14+rke2r1
+feng-ws3.sme-feng.athens.cloudera.com   Ready      control-plane,etcd,master   2d7h   v1.21.14+rke2r1
+feng-ws4.sme-feng.athens.cloudera.com   NotReady   <none>                      2d7h   v1.21.14+rke2r1
+feng-ws5.sme-feng.athens.cloudera.com   Ready      <none>                      2d7h   v1.21.14+rke2r1
+feng-ws6.sme-feng.athens.cloudera.com   Ready      <none>                      2d7h   v1.21.14+rke2r1
+```
+
+- As you can see from the HAProxy UI, all ECS server ports ( http port 80, https port 434) are green.
+
+![](../../assets/images/ds/hatest16.png)
+
+- As you can see from the CM UI, ECS server health/Control Plane Health/Kubernetes Health/Longhorn Health start to alarm.
+
+![](../../assets/images/ds/hatest17.png)
+
+- You can also see many pod failures on the k8s web UI.
+
+![](../../assets/images/ds/hatest18.png)
+
+- Most of the pods from feng-ws4 are stuck in terminating state after 300 seconds.
+
+```bash
+$ kubectl get pods -A -o wide --field-selector spec.nodeName=feng-ws4.sme-feng.athens.cloudera.com
+NAMESPACE                              NAME                                                              READY   STATUS        RESTARTS   AGE    IP               NODE                                    NOMINATED NODE   READINESS GATES
+cdp                                    cdp-release-dps-gateway-1.0-595cdcfcd6-kvp7f                      3/3     Terminating   0          2d7h   10.42.5.18       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cdp                                    cdp-release-grafana-6f577d4bdb-4ll59                              3/3     Terminating   0          2d5h   10.42.5.46       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cdp                                    cdp-release-monitoring-app-6c9794967-jcdrf                        2/2     Terminating   0          2d7h   10.42.5.32       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cdp                                    cdp-release-monitoring-metricproxy-6c46bb46d8-jgq62               2/2     Terminating   0          2d7h   10.42.5.33       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cdp                                    cdp-release-monitoring-pvcservice-5cdb55c9c5-rnp7g                2/2     Terminating   0          2d7h   10.42.5.31       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cdp                                    cdp-release-thunderhead-kerberosmgmt-api-7d484b8fd6-j9vb2         2/2     Terminating   0          2d7h   10.42.5.21       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cdp                                    cdp-release-thunderhead-sdx2-api-6f9989c764-8cqsj                 2/2     Terminating   0          2d7h   10.42.5.19       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cdp                                    echoserver-9dfbcd89b-h6z4n                                        1/1     Terminating   0          2d7h   10.42.5.17       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cml01                                  livelog-publisher-989hx                                           2/2     Running       2          2d5h   10.42.5.45       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cml01                                  mlx-cml01-pod-evaluator-6445d6946b-txlrq                          1/1     Terminating   0          2d5h   10.113.207.144   feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cml01                                  s2i-builder-58d875f44c-4zn4z                                      2/2     Terminating   6          2d5h   10.42.5.48       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cml01                                  s2i-builder-58d875f44c-ftqhl                                      2/2     Terminating   6          2d5h   10.42.5.49       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+cml01                                  s2i-builder-58d875f44c-kqkrk                                      2/2     Terminating   6          2d5h   10.42.5.50       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+compute-hive01                         huebackend-0                                                      1/1     Terminating   0          148m   10.42.5.55       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+default-ad522d9e-monitoring-platform   monitoring-logger-alert-receiver-7485d89576-vg6n4                 2/2     Terminating   0          2d7h   10.42.5.34       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+default-ad522d9e-monitoring-platform   monitoring-metrics-server-exporter-7f977ddff5-ht2n6               2/2     Terminating   0          2d7h   10.42.5.35       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+default-ad522d9e-monitoring-platform   monitoring-prometheus-server-664745446f-pw6jc                     3/3     Terminating   0          2d7h   10.42.5.37       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+impala-impala01                        impala-executor-000-0                                             1/1     Terminating   0          33h    10.42.5.54       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+infra-prometheus                       infra-prometheus-operator-1-1672115985-prometheus-node-expzhqf7   1/1     Running       0          2d7h   10.113.207.144   feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+infra-prometheus                       infra-prometheus-operator-operator-854bdc78b6-2whcf               1/1     Terminating   0          2d7h   10.42.5.15       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+kube-system                            kube-proxy-feng-ws4.sme-feng.athens.cloudera.com                  1/1     Running       0          2d7h   10.113.207.144   feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+kube-system                            nvidia-device-plugin-daemonset-j278f                              1/1     Running       0          2d7h   10.42.5.16       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+kube-system                            rke2-canal-kmtnv                                                  2/2     Running       0          2d7h   10.113.207.144   feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system                        csi-attacher-559b9bc796-2wv7w                                     1/1     Terminating   1          2d7h   10.42.5.6        feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system                        csi-provisioner-d7df997cf-g7wbj                                   1/1     Terminating   0          2d7h   10.42.5.8        feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system                        csi-resizer-9db78b867-zkb9k                                       1/1     Terminating   0          2d7h   10.42.5.7        feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system                        csi-snapshotter-74d97b97bf-nlqk2                                  1/1     Terminating   1          2d7h   10.42.5.9        feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system                        engine-image-ei-045573ad-knqc5                                    1/1     Running       0          2d7h   10.42.5.2        feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system                        instance-manager-e-3cf7ad0b                                       1/1     Terminating   0          2d7h   10.42.5.4        feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system                        instance-manager-r-bf10b574                                       1/1     Terminating   0          2d7h   10.42.5.5        feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system                        longhorn-csi-plugin-qxwk6                                         2/2     Running       0          2d7h   10.42.5.10       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system                        longhorn-manager-mbs49                                            1/1     Running       0          2d7h   10.42.5.3        feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+warehouse-default-datalake-default     hue-query-processor-0                                             1/1     Terminating   0          2d6h   10.42.5.44       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+warehouse-default-datalake-default     metastore-0                                                       1/1     Terminating   0          148m   10.42.5.56       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+```
+
+- CDW cluster failed with errors "504 Gateway Time-out".
+
+![](../../assets/images/ds/hatest19.png)
+
+- The root casue is that pod vault-0 automatically evict to feng-ws2 and it's status is sealed.
+
+$ kubectl get pod vault-0 -n vault-system -o wide
+NAME      READY   STATUS    RESTARTS   AGE     IP           NODE                                    NOMINATED NODE   READINESS GATES
+vault-0   0/1     Running   0          8m23s   10.42.1.89   feng-ws2.sme-feng.athens.cloudera.com   <none>           <none>
+
+$ curl -k https://vault.localhost.localdomain/v1/sys/seal-status
+{"type":"shamir","initialized":true,"sealed":false,"t":1,"n":1,"progress":0,"nonce":"","version":"1.9.0","migration":false,"cluster_name":"vault-cluster-15bfdf25","cluster_id":"f3e2c6f7-cffd-def5-830a-f4bef6522b01","recovery_seal":false,"storage_type":"file"}
+
+- You have to manually unseal vault via CM UI.
+
+![](../../assets/images/ds/hatest20.png)
+
+- Job pod-reaper forced deleting pods in terminating state after 18 minutes of service interruption.
+
+```bash
+$ kubectl logs -n pod-reaper pod-reaper-27871940-469b7
+Thu Dec 29 12:20:01 UTC 2022 Starting pod-reaper [Reap older than: 10 minute(s)][Namespace regex: *UNKNOWN*]
+Thu Dec 29 12:20:01 UTC 2022 processing namespace cdp
+Thu Dec 29 12:20:01 UTC 2022 processing namespace compute-hive01
+Thu Dec 29 12:20:01 UTC 2022 processing namespace cml01-user-1
+Thu Dec 29 12:20:01 UTC 2022 processing namespace cml01
+Thu Dec 29 12:20:01 UTC 2022 processing namespace default-ad522d9e-log-router
+Thu Dec 29 12:20:01 UTC 2022 processing namespace impala-impala01
+Thu Dec 29 12:20:01 UTC 2022 processing namespace infra-prometheus
+Thu Dec 29 12:20:01 UTC 2022 processing namespace default-ad522d9e-monitoring-platform
+Thu Dec 29 12:20:01 UTC 2022 processing namespace ecs-webhooks
+Thu Dec 29 12:20:01 UTC 2022 processing namespace default
+Thu Dec 29 12:20:01 UTC 2022 Force delete pod monitoring-logger-alert-receiver-7485d89576-vg6n4 in namespace default-ad522d9e-monitoring-platform with deletion timestamp: 2022-12-29T12:08:11Z
+Thu Dec 29 12:20:01 UTC 2022 Force delete pod infra-prometheus-operator-operator-854bdc78b6-2whcf in namespace infra-prometheus with deletion timestamp: 2022-12-29T12:08:11Z
+Thu Dec 29 12:20:01 UTC 2022 Force delete pod huebackend-0 in namespace compute-hive01 with deletion timestamp: 2022-12-29T12:08:11Z
+warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "monitoring-logger-alert-receiver-7485d89576-vg6n4" force deleted
+pod "infra-prometheus-operator-operator-854bdc78b6-2whcf" force deleted
+Thu Dec 29 12:20:01 UTC 2022 Successfully force deleted pod monitoring-logger-alert-receiver-7485d89576-vg6n4 in namespace default-ad522d9e-monitoring-platform
+Thu Dec 29 12:20:01 UTC 2022 Successfully force deleted pod infra-prometheus-operator-operator-854bdc78b6-2whcf in namespace infra-prometheus
+pod "huebackend-0" force deleted
+......
+```
+
+- The remaining 9 pods on feng-ws4 are basically daemonset type. Pod impala-impala01 is an exception.
+
+$ kubectl get pods -A -o wide --field-selector spec.nodeName=feng-ws4.sme-feng.athens.cloudera.com
+NAMESPACE          NAME                                                              READY   STATUS        RESTARTS   AGE    IP               NODE                                    NOMINATED NODE   READINESS GATES
+cml01              livelog-publisher-989hx                                           2/2     Running       2          2d6h   10.42.5.45       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+impala-impala01    impala-executor-000-0                                             1/1     Terminating   0          33h    10.42.5.54       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+infra-prometheus   infra-prometheus-operator-1-1672115985-prometheus-node-expzhqf7   1/1     Running       0          2d7h   10.113.207.144   feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+kube-system        kube-proxy-feng-ws4.sme-feng.athens.cloudera.com                  1/1     Running       0          2d7h   10.113.207.144   feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+kube-system        nvidia-device-plugin-daemonset-j278f                              1/1     Running       0          2d7h   10.42.5.16       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+kube-system        rke2-canal-kmtnv                                                  2/2     Running       0          2d7h   10.113.207.144   feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system    engine-image-ei-045573ad-knqc5                                    1/1     Running       0          2d7h   10.42.5.2        feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system    longhorn-csi-plugin-qxwk6                                         2/2     Running       0          2d7h   10.42.5.10       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+longhorn-system    longhorn-manager-mbs49                                            1/1     Running       0          2d7h   10.42.5.3        feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+
+- We also see the same result on k8s web UI with only 9 failed pods.
+
+![](../../assets/images/ds/hatest21.png)
+
+- Pod impala-impala01 has attached local storage pvc `scratch-cache-volume-impala-executor-000-0`. If you're using local volumes, and the node crashes, your pod cannot be rescheduled to a different node. It is scheduled to the same node by default. That is the caveat of using local storage, your pod becomes bound forever to one specific node. Both pvc and pod must be forced deleting according to [issue 61620](https://github.com/kubernetes/kubernetes/issues/61620).
+
+```bash
+$ kubectl delete pvc scratch-cache-volume-impala-executor-000-0 -n impala-impala01
+persistentvolumeclaim "scratch-cache-volume-impala-executor-000-0" deleted
+
+$ kubectl get pvc scratch-cache-volume-impala-executor-000-0 -n impala-impala01
+NAME                                         STATUS        VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+scratch-cache-volume-impala-executor-000-0   Terminating   pvc-a88fb425-55e5-49b8-b3d5-6b371bb6cb7b   94Gi       RWO            local-path     34h
+
+$ kubectl patch pvc scratch-cache-volume-impala-executor-000-0 -n impala-impala01 -p '{"metadata":{"finalizers":null}}'
+persistentvolumeclaim/scratch-cache-volume-impala-executor-000-0 patched
+
+$ kubectl get pvc scratch-cache-volume-impala-executor-000-0 -n impala-impala01
+Error from server (NotFound): persistentvolumeclaims "scratch-cache-volume-impala-executor-000-0" not found
+
+$ kubectl delete pod impala-executor-000-0 -n impala-impala01 --grace-period=0 --force
+warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "impala-executor-000-0" force deleted
+```
+
+- Confirm that CP/CDW/CML works well
+
+![](../../assets/images/ds/hatest10.png)
+
+![](../../assets/images/ds/hatest11.png)
+
+![](../../assets/images/ds/hatest12.png)
+
+![](../../assets/images/ds/hatest09.png)
+
+
+## 3. Conclusion
+
+- When an ECS node goes down, the pods on it will turn into terminating state by default after 300 seconds, and then the cronjob pod-reaper will force deleting them, so that these pods will be evict to other normal nodes immediately. But there are two exceptions that require manual intervention.
+    - Pod vault-0 can be automatically evicted, but you have to manually unseal vault via CM UI.
+    - Pods using local-storage (impala-executor/impala-coordinator/query-executor/query-coordinator) cannot be evicted, please manually delete pvc and pod at the same time.
