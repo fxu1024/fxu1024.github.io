@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Remove failed worker node from the existing ECS cluster
-nav_order: 9
+nav_order: 14
 parent: Operations
 grand_parent: Data Service
 ---

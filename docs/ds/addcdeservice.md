@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Add Cloudera Data Engineering service and demo it
-nav_order: 8
+nav_order: 13
 parent: Operations
 grand_parent: Data Service
 ---

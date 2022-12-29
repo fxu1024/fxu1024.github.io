@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Setting up Hadoop Client on MacOS
-nav_order: 4
+nav_order: 6
 parent: Operations
 grand_parent: Data Service
 ---

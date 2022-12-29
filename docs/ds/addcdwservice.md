@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Add Cloudera Data Warehouse service and demo it
-nav_order: 6
+nav_order: 11
 parent: Operations
 grand_parent: Data Service
 ---
@@ -63,6 +63,8 @@ grand_parent: Data Service
 |LDAP Group Search Base |DC=ecs,DC=openstack,DC=com|
 |LDAP Group Search Filter |(&(member={1})(objectClass=group))|
 |Sync Groups on Logon |enable|
+
+- Note: The meaning of {0} and {1} in `LDAP Group Search Filter` was fixed since release 1.4.1. So if someone swapped them as a workaround (to make Impala work) then they have to change it back now.
 
 ![](../../assets/images/ds/cdwfailover02.png)
 
@@ -716,5 +718,7 @@ SQLRowCount returns -1
 |LDAP Group Search Base |cn=groups,cn=accounts,dc=feng,dc=com|
 |LDAP Group Search Filter |(&(member={1})(objectClass=posixGroup))|
 |Sync Groups on Logon |enable|
+
+- Note: The meaning of {0} and {1} in `LDAP Group Search Filter` was fixed since release 1.4.1. So if someone swapped them as a workaround (to make Impala work) then they have to change it back now.
 
 ![](../../assets/images/ds/newinstall20.jpg)
