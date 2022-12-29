@@ -21,7 +21,7 @@ grand_parent: Data Service
 
 ## 2. Prerequisites
 
-![](../../assets/images/ds/ha01.png)
+![](../../assets/images/ds/hatest01.png)
 
 - The above figure shows two HAProxy servers, which are connected to an externally facing network (10.0.0/24) as 10.0.0.11 and 10.0.0.12 and to an internal network (192.168.1/24) as 192.168.1.11 and 192.168.1.12. One HAProxy server (10.0.0.11) is configured as a Keepalived master server with the virtual IP address 10.0.0.10 and the other (10.0.0.12) is configured as a Keepalived backup server. Three ECS servers, ecssvr1 (192.168.1.21) ecssvr2 (192.168.1.22)  and ecssvr3 (192.168.1.23), are accessible on the internal network. The IP address 10.0.0.10 is in the private address range 10.0.0/24, which cannot be routed on the Internet.
 
