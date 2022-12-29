@@ -69,7 +69,7 @@ grand_parent: Data Service
 
 - CronJob pod-reaper creates reaper job every 10 minutes. The reaper job will scan all namespaces and force deleting pods that have been in the terminating state for more than 10 minutes.
 
-## Case #1. An ECS Server is down
+## 3. Case #1. An ECS Server is unreachable
 
 - Check all ECS nodes
 
@@ -329,7 +329,7 @@ longhorn-system    longhorn-manager-h2vb2                                       
 ![](../../assets/images/ds/hatest09.png)
 
 
-## Case #2. An ECS Agent is down
+## 4. Case #2. An ECS Agent is unreachable
 
 - Check all ECS nodes
 
@@ -472,12 +472,14 @@ warehouse-default-datalake-default     metastore-0                              
 
 - The root casue is that pod vault-0 automatically evict to feng-ws2 and it's status is sealed.
 
+```bash
 $ kubectl get pod vault-0 -n vault-system -o wide
 NAME      READY   STATUS    RESTARTS   AGE     IP           NODE                                    NOMINATED NODE   READINESS GATES
 vault-0   0/1     Running   0          8m23s   10.42.1.89   feng-ws2.sme-feng.athens.cloudera.com   <none>           <none>
 
 $ curl -k https://vault.localhost.localdomain/v1/sys/seal-status
 {"type":"shamir","initialized":true,"sealed":false,"t":1,"n":1,"progress":0,"nonce":"","version":"1.9.0","migration":false,"cluster_name":"vault-cluster-15bfdf25","cluster_id":"f3e2c6f7-cffd-def5-830a-f4bef6522b01","recovery_seal":false,"storage_type":"file"}
+```
 
 - You have to manually unseal vault via CM UI.
 
@@ -514,6 +516,7 @@ pod "huebackend-0" force deleted
 
 - The remaining 9 pods on feng-ws4 are basically daemonset type. Pod impala-impala01 is an exception.
 
+```bash
 $ kubectl get pods -A -o wide --field-selector spec.nodeName=feng-ws4.sme-feng.athens.cloudera.com
 NAMESPACE          NAME                                                              READY   STATUS        RESTARTS   AGE    IP               NODE                                    NOMINATED NODE   READINESS GATES
 cml01              livelog-publisher-989hx                                           2/2     Running       2          2d6h   10.42.5.45       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
@@ -525,6 +528,7 @@ kube-system        rke2-canal-kmtnv                                             
 longhorn-system    engine-image-ei-045573ad-knqc5                                    1/1     Running       0          2d7h   10.42.5.2        feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
 longhorn-system    longhorn-csi-plugin-qxwk6                                         2/2     Running       0          2d7h   10.42.5.10       feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
 longhorn-system    longhorn-manager-mbs49                                            1/1     Running       0          2d7h   10.42.5.3        feng-ws4.sme-feng.athens.cloudera.com   <none>           <none>
+```
 
 - We also see the same result on k8s web UI with only 9 failed pods.
 
@@ -562,8 +566,8 @@ pod "impala-executor-000-0" force deleted
 ![](../../assets/images/ds/hatest09.png)
 
 
-## 3. Conclusion
+## 5. Conclusion
 
-- When an ECS node goes down, the pods on it will turn into terminating state by default after 300 seconds, and then the cronjob pod-reaper will force deleting them, so that these pods will be evict to other normal nodes immediately. But there are two exceptions that require manual intervention.
+- When an ECS node goes down, the workload pods on it will be forcibly deleted by cronjob pod-reaper and rescheduled to other normal nodes. But there are two exceptions that require manual intervention.
     - Pod vault-0 can be automatically evicted, but you have to manually unseal vault via CM UI.
     - Pods using local-storage (impala-executor/impala-coordinator/query-executor/query-coordinator) cannot be evicted, please manually delete pvc and pod at the same time.
