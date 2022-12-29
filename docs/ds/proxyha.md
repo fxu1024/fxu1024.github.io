@@ -16,33 +16,34 @@ grand_parent: Data Service
 
 ## 1. Introduction
 
-- The keepalived daemon can be used to monitor services or systems and to automatically failover to a standby if a failure occurs. VRRP (Virtual Router Redundancy Protocol) is a protocol for automatically assigning IP addresses to hosts. In this guide, we will demonstrate how to use keepalived to set up high availability for your load balancers. We will configure a floating IP address that can be moved between two capable load balancers. If the primary load balancer goes down, the floating IP will be moved to the second load balancer automatically, allowing Data Service to resume.
-
-![](../../assets/images/ds/ha001.jpg)
+- The keepalived daemon can be used to monitor services or systems and to automatically failover to a standby if a failure occurs. VRRP (Virtual Router Redundancy Protocol) is a protocol for automatically assigning IP addresses to hosts.
+- In this guide, we will demonstrate how to use keepalived to set up high availability for your load balancers. We will configure a floating IP address that can be moved between two capable load balancers. If the primary load balancer goes down, the floating IP will be moved to the second load balancer automatically, allowing Data Service to resume.
 
 ## 2. Prerequisites
 
-- Figure 1 shows two HAProxy servers, which are connected to an externally facing network (10.0.0/24) as 10.0.0.11 and 10.0.0.12 and to an internal network (192.168.1/24) as 192.168.1.11 and 192.168.1.12. One HAProxy server (10.0.0.11) is configured as a Keepalived master server with the virtual IP address 10.0.0.10 and the other (10.0.0.12) is configured as a Keepalived backup server. Three ECS servers, ecssvr1 (192.168.1.21) ecssvr2 (192.168.1.22)  and ecssvr3 (192.168.1.23), are accessible on the internal network. The IP address 10.0.0.10 is in the private address range 10.0.0/24, which cannot be routed on the Internet.
+![](../../assets/images/ds/ha01.png)
+
+- The above figure shows two HAProxy servers, which are connected to an externally facing network (10.0.0/24) as 10.0.0.11 and 10.0.0.12 and to an internal network (192.168.1/24) as 192.168.1.11 and 192.168.1.12. One HAProxy server (10.0.0.11) is configured as a Keepalived master server with the virtual IP address 10.0.0.10 and the other (10.0.0.12) is configured as a Keepalived backup server. Three ECS servers, ecssvr1 (192.168.1.21) ecssvr2 (192.168.1.22)  and ecssvr3 (192.168.1.23), are accessible on the internal network. The IP address 10.0.0.10 is in the private address range 10.0.0/24, which cannot be routed on the Internet.
 
 - In order to complete this guide, you will need to build two HAProxy servers and reserve a VIP (Virtual IP Address). On each of HAProxy servers, you will need a non-root user configured with sudo access. 
 
 
-## 3. Part 1  Configure a Virtual IP Address
+## 3. Configure a Virtual IP Address
 
 - For most cloud platforms, security modules like port security and security group will require that packets sent/received from a VM port must have the fixed IP/MAC address of this VM port. This rule prevents arp spoofing, but also causes the VIP to be unable to contact other VMs.
 
-- For example, on the Openstack platform, an allowed address pair is needed when you identify a specific MAC address, IP address, or both to allow network traffic to pass through a port regardless of the subnet. When you define allowed address pairs, you are able to use protocols like VRRP (Virtual Router Redundancy Protocol) that float an IP address between two VM instances to enable fast data plane failover. See [Creating Multi-Master BareMetal Cluster on Platform9 Managed OpenStack VMs](https://platform9.com/kb/kubernetes/creating-multi-master-baremetal-cluster-on-platform9-managed-op)
+- For example, on the Openstack platform, an allowed address pair is needed when you identify a specific MAC address, IP address, or both to allow network traffic to pass through a port regardless of the subnet. When you define allowed address pairs, you are able to use protocols like VRRP (Virtual Router Redundancy Protocol) that float an IP address between two VM instances to enable fast data plane failover. See [Creating Multi-Master BareMetal Cluster on Platform9 Managed OpenStack VMs](https://platform9.com/kb/kubernetes/creating-multi-master-baremetal-cluster-on-platform9-managed-op).
 
 - Please contact your system administrator for assistance in configuring VIP.
 
 
-## 4. Part 2  Install and Configure HAProxy
+## 4. Install and Configure HAProxy
 
 - Next, we will set up the HAProxy load balancers. These will each sit in front of ECS server and split requests between the three ECS servers. These load balancers are completely redundant. Only one will receive traffic at any given time.
 
 ### 4.1 Install HAProxy
 
-The first step we need to take on our load balancers will be to install the haproxy package. 
+- The first step we need to take on our load balancers will be to install the haproxy package. 
 
 ```bash
 sudo yum install -y haproxy
@@ -123,7 +124,7 @@ sudo systemctl enable haproxy
 sudo systemctl restart haproxy
 ```
 
-## 5. Part 3  Install and Configure Keepalived
+## 5. Install and Configure Keepalived
 
 ### 5.1 Install Keepalived
 
@@ -236,9 +237,9 @@ EOF
     - priority: This should be set to a lower value than the primary server. We will use the value 90 in this guide.
 
 
-## 6 Part 4 - Start Up the Keepalived Service and Test Failover
+## 6. Start Up the Keepalived Service and Test Failover
 
-### 6.1 STAGE 1. VIP was assigned to the Primary Load Balancer 
+### 6.1 VIP was assigned to the Primary Load Balancer 
 
 - The keepalived daemon and all of its companion scripts should now be completely configured. We can start the service on both of our load balancers by typing:
 
@@ -298,7 +299,7 @@ PING 10.0.0.10 (10.0.0.10) 56(84) bytes of data.
 rtt min/avg/max/mdev = 0.327/0.525/1.253/0.364 ms
 ```
 
-### 6.2 STAGE 2. VIP was took over by the Secondary Load Balancer 
+### 6.2 VIP was took over by the Secondary Load Balancer 
 
 - We can test failover in a simple way by simply turning off HAProxy on our primary load balancer:
 sudo systemctl stop haproxy
@@ -365,7 +366,7 @@ rtt min/avg/max/mdev = 0.327/0.525/1.253/0.364 ms
        valid_lft forever preferred_lft forever
 ```
 
-### 6.3 STAGE 3. VIP was regained by the Primary Load Balancer 
+### 6.3 VIP was regained by the Primary Load Balancer 
 
 - We can start HAProxy and Keepalived on the primary load balancer again:
 
