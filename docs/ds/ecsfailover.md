@@ -470,7 +470,7 @@ warehouse-default-datalake-default     metastore-0                              
 
 ![](../../assets/images/ds/hatest19.png)
 
-- The root casue is that pod vault-0 automatically evict to ds02 and it's status is sealed.
+- The root casue is that pod vault-0 automatically was reschedule to ds02 and it's status is sealed.
 
 ```bash
 $ kubectl get pod vault-0 -n vault-system -o wide
@@ -568,11 +568,12 @@ pod "impala-executor-000-0" force deleted
 
 ## 5. Conclusion
 
-- When an ECS node goes down, the workload pods on it will be forcibly deleted by cronjob pod-reaper and rescheduled to other normal nodes. But there are two exceptions that require manual intervention.
+- When an ECS node goes down, the workload pods on it will be forcibly deleted by cronjob pod-reaper and rescheduled to other normal nodes. But there are two exceptions that require manual intervention:
     - Pod vault-0 can be automatically evicted, but you have to manually unseal vault via CM UI.
-    - Pods using local-storage (impala-executor/impala-coordinator/query-executor/query-coordinator) cannot be evicted, please manually delete pvc and pod at the same time.
+    - Pods using local-storage (impala-executor/impala-coordinator/query-executor/query-coordinator) cannot be evicted, please manually delete both pvc and pod.
 - The maximum service interruption time is 25 minutes, where:
-    |No.|Timing Distribution |Default Value|Description|
-    |1|podEviction Timeout |5min|The Pods running on an unreachable Node enter the 'Terminating' or 'Unknown' state after podEviction timeout|
-    |2|Cronjob Execution Cycle |10min|CronJob pod-reaper launched reaper job every 10 minutes|
-    |3|REAP_OLDER_THAN |10min|The reaper job will scan all namespaces and force deleting pods that have been in the terminating state for more than 10 minutes|
+
+|No.|Timing Distribution |Default Value|Description|
+|1|podEviction Timeout |5min|The Pods running on an unreachable Node enter the 'Terminating' or 'Unknown' state after podEviction timeout|
+|2|Cronjob Execution Cycle |10min|CronJob pod-reaper launched reaper job every 10 minutes|
+|3|REAP_OLDER_THAN |10min|The reaper job will scan all namespaces and force deleting pods that have been in the terminating state for more than 10 minutes|
