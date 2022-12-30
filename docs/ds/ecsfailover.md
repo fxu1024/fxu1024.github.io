@@ -175,7 +175,7 @@ time="2022-12-29T17:14:47+08:00" level=error msg="Failed to connect to proxy" er
 time="2022-12-29T17:14:47+08:00" level=error msg="Remotedialer proxy error" error="dial tcp 192.168.8.142:9345: connect: no route to host"
 ```
 
-- ECS Agent (ds04, ds05, ds06 ) stderr.log indicated Updating load balancer server addresses and Stopped tunnel to 192.168.8.141.
+- ECS Agent (ds04, ds05, ds06 ) stderr.log indicated Updating load balancer server addresses and Stopped tunnel to 192.168.8.142.
 
 ```console 
 time="2022-12-29T17:13:37+08:00" level=error msg="Remotedialer proxy error" error="websocket: close 1006 (abnormal closure): unexpected EOF"
@@ -571,7 +571,7 @@ pod "impala-executor-000-0" force deleted
 - When an ECS node goes down, the workload pods on it will be forcibly deleted by cronjob pod-reaper and rescheduled to other normal nodes. But there are two exceptions that require manual intervention:
     - Pod vault-0 can be automatically evicted, but you have to manually unseal vault via CM UI.
     - Pods using local-storage (impala-executor/impala-coordinator/query-executor/query-coordinator) cannot be evicted, please manually delete both pvc and pod.
-- The maximum service interruption time is 25 minutes, where:
+- The maximum service interruption time is 25 minutes after node crash, where:
 
 |No.|Timing Distribution |Default Value|Description|
 |1|podEviction Timeout |5min|The Pods running on an unreachable Node enter the 'Terminating' or 'Unknown' state after podEviction timeout|
