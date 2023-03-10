@@ -1,0 +1,45 @@
+---
+layout: default
+title: CDSW Migration
+nav_order: 15
+parent: Operations
+grand_parent: Data Service
+---
+
+# CDSW Migration
+{: .no_toc }
+
+- TOC
+{:toc}
+
+---
+
+## 1. Introduction to the test environment
+
+|CDP Runtime version |CDP PvC Base 7.1.7 SP1|
+|CM version |Cloudera Manager 7.9.5|
+|ECS version |CDP PvC DataServices 1.5.0|
+|OS version |Centos 7.9|
+|K8S version |RKE 1.21|
+|Whether to enable Kerberos |Yes|
+|Whether to enable TLS |Yes|
+|Auto-TLS |No, using Manual TLS|
+|Kerberos |AD|
+|LDAP |AD|
+|DB Configuration |Embedded Postgres|
+|Vault |Embedded|
+|Docker registry |Embedded|
+|Install Method |Internet|
+
+|IP addresss |hostname |description|
+|10.113.207.140	|feng-base.sme-feng.athens.cloudera.com  |CDP Base master/worker node 1|
+|10.113.207.147	|feng-data1.sme-feng.athens.cloudera.com |CDP Base worker node 2|
+|10.113.207.148	|feng-data2.sme-feng.athens.cloudera.com |CDP Base worker node 3|
+|10.113.207.141	|feng-ws1.sme-feng.athens.cloudera.com |ECS master node 1|
+|10.113.207.142	|feng-ws2.sme-feng.athens.cloudera.com |ECS worker node 1|
+|10.113.207.143	|feng-ws3.sme-feng.athens.cloudera.com |ECS worker node 2|
+|10.113.207.144	|feng-ws4.sme-feng.athens.cloudera.com |ECS worker node 3|
+|10.113.207.145	|feng-ws5.sme-feng.athens.cloudera.com |ECS worker node 4|
+
+## 2. 
+

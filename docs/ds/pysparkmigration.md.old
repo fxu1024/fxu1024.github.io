@@ -1,0 +1,211 @@
+---
+layout: default
+title: Spark Migration to CDE
+nav_order: 16
+parent: Operations
+grand_parent: Data Service
+---
+
+# Spark Migration to CDE
+{: .no_toc }
+
+- TOC
+{:toc}
+
+---
+
+## 1. Introduction to the test environment
+
+|CDP Runtime version |CDP PvC Base 7.1.7 SP1|
+|CM version |Cloudera Manager 7.9.5|
+|ECS version |CDP PvC DataServices 1.5.0|
+|OS version |Centos 7.9|
+|K8S version |RKE 1.23|
+|Whether to enable Kerberos |Yes|
+|Whether to enable TLS |Yes|
+|Auto-TLS |No, using Manual TLS|
+|Kerberos |AD|
+|LDAP |AD|
+|DB Configuration |Embedded Postgres|
+|Vault |Embedded|
+|Docker registry |Embedded|
+|Install Method |Internet|
+
+|IP addresss |hostname |description|
+|10.113.207.140	|feng-base.sme-feng.athens.cloudera.com  |CDP Base master/worker node 1|
+|10.113.207.147	|feng-data1.sme-feng.athens.cloudera.com |CDP Base worker node 2|
+|10.113.207.148	|feng-data2.sme-feng.athens.cloudera.com |CDP Base worker node 3|
+|10.113.207.141	|feng-ws1.sme-feng.athens.cloudera.com |ECS master node 1|
+|10.113.207.142	|feng-ws2.sme-feng.athens.cloudera.com |ECS worker node 1|
+|10.113.207.143	|feng-ws3.sme-feng.athens.cloudera.com |ECS worker node 2|
+|10.113.207.144	|feng-ws4.sme-feng.athens.cloudera.com |ECS worker node 3|
+|10.113.207.145	|feng-ws5.sme-feng.athens.cloudera.com |ECS worker node 4|
+
+## 2. Auto-translation spark-submit tool -- cde-env
+
+. Cloudera Data Engineering (CDE) provides a command line tool cde-env to help migrate your CDP Spark workloads running on CDP Private Cloud Base (spark-on-YARN) to CDE without having to completely rewrite your existing spark-submit command-lines.
+
+. You can use the migration tool in the following platforms:
+    . Linux
+    . MacOS
+
+## 3. Downloading the cde-env tool
+
+. In the Home page, click the CDE-Env Tool link under Docs & Downloads to download the migration tool.
+
+![](../../assets/images/ds/cdemigrate01.png)
+
+. The folder contains README.md, cde(binary format), cde-env.sh, spark-submit-cde, and spark3-submit-cde(shell script) files. 
+
+```bash
+feng.xu@MacBook-Pro-5:~/work/cde/cde-env-tool$ ls
+README.md         cde-env.sh        spark-submit-cde
+cde               img               spark3-submit-cde
+
+feng.xu@MacBook-Pro-5:~/work/cde/cde-env-tool$ file cde
+cde: Mach-O 64-bit executable x86_64
+
+feng.xu@MacBook-Pro-5:~/work/cde/cde-env-tool$ file spark3-submit-cde
+spark3-submit-cde: Bourne-Again shell script text executable, ASCII text
+```
+
+## 4. Installing the cde-env tool as a normal user
+
+- The binary and script files will be installed in the $HOME/bin folder
+
+```bash
+feng.xu@MacBook-Pro-5:~/work/cde/cde-env-tool$ pwd
+/Users/feng.xu/work/cde/cde-env-tool
+
+feng.xu@MacBook-Pro-5:~/work/cde/cde-env-tool$ sed -i '' "s#CLOUDERA_BIN=/opt/cloudera/bin#CLOUDERA_BIN=$HOME/bin#g" cde-env.sh
+
+feng.xu@MacBook-Pro-5:~/work/cde/cde-env-tool$ ./cde-env.sh enable-spark-submit-proxy -f private
+os type: Darwin
+cde installed at /Users/feng.xu/bin/cde
+cde-env.sh installed at /Users/feng.xu/bin/cde-env.sh
+spark-submit-cde installed at /Users/feng.xu/bin/spark-submit-cde
+spark3-submit-cde installed at /Users/feng.xu/bin/spark3-submit-cde
+about to create symlinks
+finish creating symlinks
+
+feng.xu@MacBook-Pro-5:~/work/cde/cde-env-tool$ ls ~/bin
+cde               spark-submit      spark3-submit
+cde-env.sh        spark-submit-cde  spark3-submit-cde
+
+feng.xu@MacBook-Pro-5:~$ echo "export PATH=\$HOME/bin:\$PATH" >> ~/.bash_profilefeng.xu@MacBook-Pro-5:~$ vi ~/.bash_profile
+
+feng.xu@MacBook-Pro-5:~$ source ~/.bash_profile
+```
+
+## 5. Configuring the cde-env tool
+
+. The CDE env-tool uses the ~/.cde/config.yaml configuration file to manage jobs in CDE virtual clusters. You must manually edit the ~/.cde/config.yaml file and update the profiles with the required information.
+
+. In the Virtual Clusters section, navigate to the virtual cluster for which you want to interact with, and click Cluster Details.
+    . Click JOBS API URL to copy the link to your clipboard.
+    
+![](../../assets/images/ds/cdemigrate02.png)
+
+```bash
+cat > ~/.cde/config.yaml  << EOF
+vcluster-endpoint: https://q2cwch7m.cde-2xms6rfs.apps.ecs.sme-feng.athens.cloudera.com/dex/api/v1
+user: feng.xu
+
+profiles:
+- name: vc001
+  vcluster-endpoint: https://q2cwch7m.cde-2xms6rfs.apps.ecs.sme-feng.athens.cloudera.com/dex/api/v1
+  user: feng.xu
+
+- name: vc002
+  vcluster-endpoint: https://g7f9bnv2.cde8x.dev.cldr.work/dex/api/v1
+  user: cdpuser
+EOF
+```
+
+## 6. Using the cde-env tool
+
+. You can run the spark-submit command after installing the cde-env tool. You can use the cde-env tool even without administrator privileges.
+
+. Run spark jobs on YARN by activating the yarn profile. yarn is a reserved profile name here.
+
+```bash
+feng.xu@MacBook-Pro-5:~$ cde-env.sh activate -p yarn
+os type: Darwin
+
+
+spark3-submit --class org.apache.spark.examples.SparkPi --master yarn --conf spark.port.maxRetries=10 --num-executors 1 --driver-memory 2g --executor-memory 4g --executor-cores 1 $SPARK_HOME/examples/jars/spark-examples_*.jar 10
+
+
+
+spark3-submit \
+--name pt_rpt_streams \
+--master=yarn --deploy-mode=cluster
+--driver-memory 4G \
+--executor-memory 4G --executor-cores 3 \
+--num-executors 4 \
+--files "$HOME/spark-sql.py" \
+--conf "spark.executor.extraJavaOptions=-Djava.security.auth.login.config=/home/hdpsparkprd/spark-hdpsparkprdkeytab-jaas.conf -Djava.security.krb5.conf=/etc/krb5.conf -Djavax.security.auth.useSubjectCredsOnly=true" \
+--conf "spark.driver.extraJavaOptions=-Djava.security.auth.login.config=/home/hdpsparkprd/spark-hdpsparkprdkeytab-jaas.conf -Djava.security.krb5.conf=/etc/krb5.conf -Djavax.security.auth.useSubjectCredsOnly=true" \
+--conf "spark.io.compression.codec=org.apache.spark.io.LZ4CompressionCodec" \
+$HOME/Work/cde/spark-sql.py
+
+
+
+
+
+## 7. Run sample spark-submit command
+After you activate the profile using the cdp-env tool, you can run your spark-submit commands on CDE without completely rewriting your existing spark-on-yarn command lines.
+
+
+
+
+
+
+docker run -it docker-sandbox.infra.cloudera.com/xhu/dex-migration-tool:1.19.0-dex-8961-3
+
+
+
+Inside the docker interactive session, try the following
+cde-env.sh activate -p vc-1
+
+
+spark-submit \
+--master yarn \
+--deploy-mode cluster \
+--num-executors 12 \
+--executor-cores 1 \
+--executor-memory 8G \
+--driver-memory 8G \
+--driver-cores 1 \
+--queue default \
+--class org.hw.qe.hcube.BatchSparkSQLExecutor \
+--files /etc/hive/conf/hive-site.xml,/etc/hadoop/conf/hdfs-site.xml,/etc/hadoop/conf/core-site.xml \
+--conf spark.dynamicAllocation.enabled=false \
+--conf spark.dynamicAllocation.shuffleTracking.enabled=false \
+--conf spark.locality.wait=0s \
+--conf spark.yarn.access.hadoopFileSystems=hdfs://xhu-cm795-4.xhu-cm795.root.hwx.site:8020/ \
+--conf spark.sql.optimizer.dynamicPartitionPruning.enabled=true \
+--conf spark.driver.memoryOverhead=4g \
+--conf spark.executor.memoryOverhead=4g \
+hdfs://xhu-cm795-4.xhu-cm795.root.hwx.site:8020/tmp/spark-query-executor-2.4.7-1.0.jar \
+--hdfs hdfs://xhu-cm795-4.xhu-cm795.root.hwx.site:8020/tmp \
+--path hdfs://xhu-cm795-4.xhu-cm795.root.hwx.site:8020/datasets/tpcds/queries \
+--metricsPath hdfs://xhu-cm795-4.xhu-cm795.root.hwx.site:8020/tmp/ \
+--metricsFs HDFS \
+-q query32 \
+-q query90 \
+-q query79 \
+--database dex_tpcds_sf2_withdecimal_withdate_withnulls \
+--sequential \
+--iterations 1 \
+--warmupIterations 0
+
+
+
+go to this url to check the job run:
+https://console-cdp.apps.vd1335.halxg.cloudera.com
+
+credentials:
+cdpuser1/Test123
+
+
