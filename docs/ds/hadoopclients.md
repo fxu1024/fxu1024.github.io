@@ -14,7 +14,7 @@ grand_parent: Data Service
 
 ---
 
-This topic would allow you to connect to hive using beeline, connect to impala using impala-shell.
+This topic would allow you to connect to hive using beeline, connect to impala using impala-shell on MacOS.
 
 |MAC OS|13.1 (22C65)|
 |Processor|Intel Core i7|
@@ -176,8 +176,8 @@ source $HOME/.bash_profile
 ```bash
 sudo vi /etc/hosts
 
-172.27.80.65 ccycloud-1.tiger.root.hwx.site
-10.113.207.140 feng-base.sme-feng.athens.cloudera.com
+172.27.xx.xx ccycloud-1.tiger.root.hwx.site
+10.113.xx.xx feng-base.sme-feng.athens.cloudera.com
 ```
 
 - Please add all realms into /etc/krb5.conf. In the realms section we have to properly define both the ATHENS.CLOUDERA.COM and FENG.COM realms.
