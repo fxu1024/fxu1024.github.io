@@ -240,7 +240,7 @@ OpenJDK Runtime Environment Homebrew (build 11.0.18+0)
 OpenJDK 64-Bit Server VM Homebrew (build 11.0.18+0, mixed mode)
 ```
 
-- Download the trustore (.JKS) File from the CDP Base cluster.
+- Download the trustore (.JKS) File from the CDP Base cluster. This file corresponds to `sslTrustStore` in the beeline command for connecting to Hive/impala in CDP Base cluster.
     - For Auto-TLS enabled cluster, the location of trustore file is `/var/lib/cloudera-scm-agent/agent-cert/cm-auto-in_cluster_truststore.jks`.
     - For Manual TLS setup, the location of trustore file is `/opt/cloudera/security/pki/truststore.jks`.
 
@@ -273,14 +273,27 @@ beeline -u 'jdbc:hive2://hs2-hive01.apps.ecs.sme-feng.athens.cloudera.com/defaul
 ![](../../assets/images/ds/gateway004.jpg)
 
 
-- Connect to Hive VW in PvC CDW using LDAP authentication with CA.
+- Connect to Hive VW in PvC CDW using LDAP authentication with CA from Manual TLS setup.
+    - Please use the same trustore (.jks) file as connecting to hive in the Base cluster.
+    - Please retrieve truststorePassword via CM API. It corresponds to `trustStorePassword` in the beeline command. e.g. `curl -k --insecure -u admin:password -X GET https://ccycloud-1.tiger.root.hwx.site:7183/api/v42/certs/truststorePassword`
 
 ```bash
-beeline -u 'jdbc:hive2://hs2-hive01.apps.ecs.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=true;sslTrustStore=./truststore.jks;trustStorePassword=xxxx;retries=3' -n feng.xu -p
+beeline -u 'jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=true;sslTrustStore=./truststore.jks;trustStorePassword=xxxx;retries=3' -n feng.xu -p
 ```
 
 ![](../../assets/images/ds/gateway011.jpg)
 
+- Connect to Hive VW in PvC CDW using LDAP authentication with CA from Auto TLS setup.
+    - Please retrieve vault.ca by a kubectl call: `kubectl get secret -n vault-system vault-server-tls -o json | jq -r '.data."vault.ca"' | base64 -d > vault.ca`
+    - Please generate vault.jks by a keytool call: `keytool -import -alias vault -file vault.ca -keystore vault.jks`
+    
+```bash
+kubectl get secret -n vault-system vault-server-tls -o json | jq -r '.data."vault.ca"' | base64 -d > vault.ca
+keytool -import -alias vault -file vault.ca -keystore vault.jks
+beeline -u 'jdbc:hive2://hs2-hive01.apps.ecs.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=true;sslTrustStore=./vault.jks;trustStorePassword=xxxx;retries=3' -n admin -p
+```
+
+![](../../assets/images/ds/gateway013.jpg)
 
 - Connect to Impala in CDP Base cluster B [realm=FENG.COM] using Kerberos authentication.
 
@@ -292,26 +305,25 @@ beeline -d 'com.cloudera.impala.jdbc41.Driver' -u 'jdbc:impala://ccycloud-3.tige
 
 ![](../../assets/images/ds/gateway005.jpg)
 
-- Connect to Impala VW in PvC CDW using LDAP authentication.
-
+- Connect to Impala VW in PvC CDW using LDAP authentication with CA from Manual TLS setup.
+    - Note: It returned error messages "Error setting/closing session: HTTP Response code: 401". This shows that beeline does not support direct access to impala VW. Please use impala-shell instead of beelne.
+    
 ```bash
 export HIVE_AUX_JARS_PATH=$HOME/work/projects/ImpalaJDBC41.jar
-beeline -d "com.cloudera.impala.jdbc41.Driver" -u "jdbc:impala://coordinator-impala01.apps.ecs.sme-feng.athens.cloudera.com:443/default;AuthMech=3;transportMode=http;httpPath=cliservice;ssl=1;sslTrustStore=./truststore.jks"
+beeline -d "com.cloudera.impala.jdbc41.Driver" -u "jdbc:impala://coordinator-impala01.apps.ecs.sme-feng.athens.cloudera.com:443/default;AuthMech=3;transportMode=http;httpPath=cliservice;ssl=1;sslTrustStore=./truststore.jks;"
 ```
 
 ![](../../assets/images/ds/gateway006.jpg)
-
-    - Note: It returned error messages "Error setting/closing session: HTTP Response code: 401". This shows that beeline does not support direct access to impala VW. Please use impala-shell instead of beelne.
 
 
 
 ## 9. Validate impala-shell 
 
-- Download the trustore (.pem) File from the CDP Base cluster.
+- Download the trustore (.pem) File from the CDP Base cluster. This file corresponds to `--ca_cert` in the impala-shell command.
     - For Auto-TLS enabled cluster, the location of trustore file is `/var/lib/cloudera-scm-agent/agent-cert/cm-auto-in_cluster_ca_cert.pem`.
     - For Manual TLS setup, the location of trustore file is `/opt/cloudera/security/pki/chain.pem`.
 
-- Connect to Impala in CDP Base cluster using kerberos authentication.
+- Connect to Impala in CDP Base cluster using kerberos authentication. This is Auto-TLS enabled cluster.
 
 ```bash
 kinit admin@FENG.COM
@@ -320,13 +332,15 @@ impala-shell --ssl -k -i ccycloud-3.tiger.root.hwx.site --ca_cert=./cm-auto-in_c
 
 ![](../../assets/images/ds/gateway009.jpg)
 
-- Connect to Impala VW in PvC CDW using LDAP authentication with CA.
+- Connect to Impala VW in PvC CDW using LDAP authentication without CA.
 
 ```bash
 impala-shell --protocol='hs2-http' --ssl -i 'coordinator-impala01.apps.ecs.sme-feng.athens.cloudera.com:443' -u feng.xu -l
 ```
 
-- Connect to Impala VW in PvC CDW using LDAP authentication without CA.
+
+- Connect to Impala VW in PvC CDW using LDAP authentication with CA from Manual TLS setup. 
+    - Please use the same trustore (.pem) file as connecting to Impala in the Base cluster.
 
 ![](../../assets/images/ds/gateway007.jpg)
 
@@ -335,3 +349,14 @@ impala-shell --protocol='hs2-http' --ssl --ca_cert ./chain.pem -i 'coordinator-i
 ```
 
 ![](../../assets/images/ds/gateway008.jpg)
+
+
+- Connect to Impala VW in PvC CDW using LDAP authentication with CA from Auto TLS setup. 
+    - Please retrieve vault.ca by a kubectl call: `kubectl get secret -n vault-system vault-server-tls -o json | jq -r '.data."vault.ca"' | base64 -d > vault.ca`
+
+```bash
+kubectl get secret -n vault-system vault-server-tls -o json | jq -r '.data."vault.ca"' | base64 -d > vault.ca   
+impala-shell --protocol='hs2-http' --ssl --ca_cert ./vault.ca -i 'coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com:443' -u admin  -l
+```
+
+![](../../assets/images/ds/gateway012.jpg)
