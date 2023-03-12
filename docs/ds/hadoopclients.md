@@ -244,6 +244,7 @@ OpenJDK 64-Bit Server VM Homebrew (build 11.0.18+0, mixed mode)
     - For Auto-TLS enabled cluster, the location of trustore file is `/var/lib/cloudera-scm-agent/agent-cert/cm-auto-in_cluster_truststore.jks`.
     - For Manual TLS setup, the location of trustore file is `/opt/cloudera/security/pki/truststore.jks`.
 
+
 - Connect to Hive in CDP Base cluster A [realm=ATHENS.CLOUDERA.COM] using Kerberos authentication.
 
 ```bash
@@ -338,11 +339,11 @@ impala-shell --ssl -k -i ccycloud-3.tiger.root.hwx.site --ca_cert=./cm-auto-in_c
 impala-shell --protocol='hs2-http' --ssl -i 'coordinator-impala01.apps.ecs.sme-feng.athens.cloudera.com:443' -u feng.xu -l
 ```
 
+![](../../assets/images/ds/gateway007.jpg)
 
 - Connect to Impala VW in PvC CDW using LDAP authentication with CA from Manual TLS setup. 
     - Please use the same trustore (.pem) file as connecting to Impala in the Base cluster.
 
-![](../../assets/images/ds/gateway007.jpg)
 
 ```bash
 impala-shell --protocol='hs2-http' --ssl --ca_cert ./chain.pem -i 'coordinator-impala01.apps.ecs.sme-feng.athens.cloudera.com:443' -u feng.xu  -l
