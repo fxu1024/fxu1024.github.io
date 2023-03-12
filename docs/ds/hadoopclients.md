@@ -285,11 +285,11 @@ beeline -u 'jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/def
 ![](../../assets/images/ds/gateway011.jpg)
 
 - Connect to Hive VW in PvC CDW using LDAP authentication with CA from Auto TLS setup.
-    - Please retrieve vault.ca by a kubectl call: `kubectl get secret -n vault-system vault-server-tls -o json | jq -r '.data."vault.ca"' | base64 -d > vault.ca`
+    - Please retrieve vault.ca by a kubectl call: `kubectl get secret -n vault-system vault-server-tls -o jsonpath="{.data['vault\.ca']}"| base64 --decode > vault.ca`
     - Please generate vault.jks by a keytool call: `keytool -import -alias vault -file vault.ca -keystore vault.jks`
     
 ```bash
-kubectl get secret -n vault-system vault-server-tls -o json | jq -r '.data."vault.ca"' | base64 -d > vault.ca
+kubectl get secret -n vault-system vault-server-tls -o jsonpath="{.data['vault\.ca']}"| base64 --decode > vault.ca
 keytool -import -alias vault -file vault.ca -keystore vault.jks
 beeline -u 'jdbc:hive2://hs2-hive01.apps.ecs.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=true;sslTrustStore=./vault.jks;trustStorePassword=xxxx;retries=3' -n admin -p
 ```
@@ -353,10 +353,10 @@ impala-shell --protocol='hs2-http' --ssl --ca_cert ./chain.pem -i 'coordinator-i
 
 
 - Connect to Impala VW in PvC CDW using LDAP authentication with CA from Auto TLS setup. 
-    - Please retrieve vault.ca by a kubectl call: `kubectl get secret -n vault-system vault-server-tls -o json | jq -r '.data."vault.ca"' | base64 -d > vault.ca`
+    - Please retrieve vault.ca by a kubectl call: `kubectl get secret -n vault-system vault-server-tls -o jsonpath="{.data['vault\.ca']}"| base64 --decode > vault.ca`
 
 ```bash
-kubectl get secret -n vault-system vault-server-tls -o json | jq -r '.data."vault.ca"' | base64 -d > vault.ca   
+kubectl get secret -n vault-system vault-server-tls -o jsonpath="{.data['vault\.ca']}"| base64 --decode > vault.ca   
 impala-shell --protocol='hs2-http' --ssl --ca_cert ./vault.ca -i 'coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com:443' -u admin  -l
 ```
 
