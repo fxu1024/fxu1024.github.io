@@ -22,6 +22,7 @@ grand_parent: Data Service
 |Viz role|System Admin/Database Admin/Analyst/Visual Consumer|Restrict Access to Viz connection/dataset/dashboard|
 
 - Note: There are no CDW-related roles in the above table, but Viz in CDW is actually restricted by built-in groups as following:
+
 |Group Type|Description|
 |user groups|The Non-Administrator user group specified when deploying CDV instance|
 |admin groups|The Administrator user group specified when deploying CDV instance|
