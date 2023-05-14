@@ -14,14 +14,14 @@ grand_parent: Data Service
 
 ---
 
-- SSO will be enabled for Cloudera Viz being launched as either an app within CML or an instance within CDW. SSO users will have various types of roles:
+- SSO will be enabled for Cloudera Viz after being launched as an application within CML or an instance within CDW. SSO users will have various types of roles:
 
 |Role Type|Role Name|Description|
 |Environment role|MLUser/MLAdmin/DWUser/DWAdmin|Provide permissions to perform tasks on a specific resource, such as a CDW virtual warehouse/CML workspace|
 |CML workspace role|Owner/Contributor/Operator/Viewer|Restrict Access to CML Project/Session/Job|
 |Viz role|System Admin/Database Admin/Analyst/Visual Consumer|Restrict Access to Viz connection/dataset/dashboard|
 
-- Note: There are no CDW-related roles in the above table, but Viz in CDW is actually restricted by built-in groups as following:
+- Note: There are no CDW-related roles, however Viz in CDW is actually restricted by built-in groups as following:
 
 |Group Type|Description|
 |user groups|The Non-Administrator user group specified when deploying CDV instance|
@@ -49,28 +49,28 @@ grand_parent: Data Service
 
 ## 2. Preparation for test environment
 
-- Let's add three LDAP user groups(i.e. `cdwusers`/`cmlusers`/`cdeusers`), each group contains 2 users. Please select the `Sync Groups on Login` option from Management Console > Administration > Authentication, so that the associated LDAP groups can be imported when you log in to CDV. 
+- Let's add three LDAP user groups, i.e. `cdwusers`,`cmlusers`,`cdeusers`, each group contains 2 users. Please select the `Sync Groups on Login` option from Management Console > Administration > Authentication, so that the associated LDAP groups can be imported when you log in to CDV. 
 
 ![](../../assets/images/ds/cdvsso01.png)
 
 ![](../../assets/images/ds/cdvsso02.png)
 
-- For example: cdwusers group contains two users `cdw01` and `cdw02`.
+- For example: group `cdwusers` contains two users `cdw01` and `cdw02`.
 
 ![](../../assets/images/ds/cdvsso03.png)
 
-- Assign the Environment `DWUser`+`MLUser` role to all three groups.
+- Assign the Environment role `DWUser` + `MLUser` to all three groups.
 
 ![](../../assets/images/ds/cdvsso04.png)
 
 
 ## 3. Viz in CDW test
 
-- The cdv application is created by the user `admin`, the `user groups` are set to `cmlusers`, and the `admin groups` are set to `cdwusers`.
+- The cdv application is created by the user `admin`, with the group setting `user groups` =  `cmlusers`, and `admin groups` = `cdwusers`.
  
 ![](../../assets/images/ds/cdvsso05.png)
 
-- Log in as `admin`, even if `admin` is the project owner, because `admin` neither belongs to `user groups` nor `admin groups`, you still cannot log in to CDV UI.
+- Log in as `admin`, even if `admin` is the project owner, you still cannot log in to CDV UI because `admin` neither belongs to `user groups` nor `admin groups`.
 
 ![](../../assets/images/ds/cdvsso06.png)
 
@@ -82,7 +82,7 @@ grand_parent: Data Service
 
 ![](../../assets/images/ds/cdvsso08.png)
 
-- Log in as `cde01`. you cannot log in to the CDV UI since `cde01` does not belong to either `user groups` or `admin groups`.
+- Log in as `cde01`. you cannot log in to the CDV UI since `cde01` does not belong to either `user groups` or `admin groups`. user `cde01` and `admin` have the same behavior.
 
 ![](../../assets/images/ds/cdvsso06.png)
 
@@ -113,7 +113,7 @@ grand_parent: Data Service
 
 ![](../../assets/images/ds/cdvsso13.png)
 
-- Since the CDV application belongs to the project `test01`, it can only be accessed by the owner `admin`. The other users(`cdw01`/`cml01`/`cde01`) must be added as project collaborators.
+- Since the CDV application belongs to the project `test01`, it can only be accessed by the project owner `admin`. The other users(`cdw01`,`cml01`,`cde01`) must be added as project collaborators.
 
 ![](../../assets/images/ds/cdvsso14.png)
 
@@ -121,7 +121,7 @@ grand_parent: Data Service
 
 ![](../../assets/images/ds/cdvsso15.png)
 
-- `cdw01`/`cml01`/`cde01` are also the Normal users and cannot see the Site Administration menu.
+- `cdw01`/`cml01`/`cde01` are also the Viz Normal users and cannot see the Site Administration menu.
 
 - Log in as the built-in administration user `vizapps_admin`(password=vizapps_admin) and view all user and user group permissions.
 
@@ -141,7 +141,7 @@ grand_parent: Data Service
 
 ![](../../assets/images/ds/cdvsso20.png)
 
-- Other users become Viz administrator as well.
+- Other users(such as cde01) become Viz administrator as well.
 
 ![](../../assets/images/ds/cdvsso21.png)
 
@@ -152,7 +152,7 @@ grand_parent: Data Service
 
 - For Viz in CDW:
     - SSO users must have permission to access CDW resources, i.e. they need to be assigned the role `DWUser`/`DWAdmin`.
-    - SSO users are filtered by user groups and admin groups in the definition of CDV instance. 
+    - SSO users are filtered by `user groups` and `admin groups` in the definition of CDV instance. 
         - If the SSO user belongs to `admin groups`, it will automatically become a Viz administrator.
         - If the SSO user belongs to `user groups`, it is automatically assigned to the group `viz_guest_group` which has role `Database Admin`. You can grant them other Viz permissions through Viz Administrator.
         - The SSO Users outside these groups cannot access the Viz application, and Viz permissions are invalid for them.
