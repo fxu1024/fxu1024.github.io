@@ -1,0 +1,46 @@
+select 
+ta.sos_tmnl_sk
+,ta.scd_valid_ind,
+CAST(STA.STATION_ID AS  STRING ) AS STATION_ID
+FROM ${DL_ODS_SOS}.S_VCS_VCS_STATION_ID sta –主表
+left join ${DH_CDM_SOS}.t03_mh_sos_tmnl_attr ta –从表
+on CAST(STA.STATION_ID AS STRING) = ta.sos_tmnl_id 
+and ta.scd_valid_ind = 1
+where sta.STATION_ID = '106065543';
+
+
+| CREATE EXTERNAL TABLE `DL_ODS_SOS_PROD.S_VCS_VCS_STATION_ID`( |
+|   `station_id` decimal(38,0))                           |
+| ROW FORMAT SERDE                                   |
+|   'org.apache.hadoop.hive.ql.io.orc.OrcSerde'      |
+| STORED AS INPUTFORMAT                              |
+|   'org.apache.hadoop.hive.ql.io.orc.OrcInputFormat'  |
+| OUTPUTFORMAT                                       |
+|   'org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat' |
+| LOCATION                                           |
+|   'hdfs://nameservice1/user/hive/warehouse_ext/DL/ods_sos_prod/s_vcs_vcs_station_id' |
+| TBLPROPERTIES (                                    |
+|   'bucketing_version'='2',                         |
+|   'transient_lastDdlTime'='1653039078')            |
++----------------------------------------------------+
+
+CREATE EXTERNAL TABLE S_VCS_VCS_STATION_ID (
+   `station_id` decimal(38,0)
+)
+stored as orc;
+
+
+CREATE TABLE t03_mh_sos_tmnl_attr ( 
+  `sos_tmnl_sk` decimal(38,0),
+  `sos_tmnl_id` string,
+  `scd_valid_ind` decimal(38,0)
+);
+
+insert into S_VCS_VCS_STATION_ID values(106065543);
+
+insert into t03_mh_sos_tmnl_attr values(37202305125387,'106065543',1),(3720221022601,' 106065543',1),(3720221022602,'106065543 ',1);
+
+select sos_tmnl_id 
+from `DH_CDM_SOS_PROD.t03_mh_sos_tmnl_attr` ta
+where ta.sos_tmnl_sk=3720221022601
+and ta.scd_valid_ind = 1;

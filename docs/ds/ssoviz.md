@@ -87,11 +87,11 @@ grand_parent: Data Service
 ![](../../assets/images/ds/cdvsso06.png)
 
 - Log in again as `cdw01`, and view user and user group permissions.
-    - It shows that `cdw01` is Viz Administrator, and cml01 is Viz Normal user. 
+    - It shows that `cdw01` is Viz Administrator, and cml01 is Viz Normal Permissions user. 
 
 ![](../../assets/images/ds/cdvsso09.png)
 
-- The Normal user `cml01` is automatically assigned to the group `viz_guest_group` which has the role `Database admin`. This can be confirmed from the figure below.
+- The Normal Permissions user `cml01` is automatically assigned to the group `viz_guest_group` which has the role `Database admin`. This can be confirmed from the figure below.
 
 ![](../../assets/images/ds/cdvsso10.png)
  
@@ -103,7 +103,7 @@ grand_parent: Data Service
 
 ![](../../assets/images/ds/cdvsso06.png)
 
-- Log in as `cml01`, you can see the site administrator menu although `cml01` is a Viz Normal user.
+- Log in as `cml01`, you can see the site administrator menu although `cml01` is a Viz Normal Permissions user.
 
 ![](../../assets/images/ds/cdvsso12.png)
 
@@ -117,11 +117,11 @@ grand_parent: Data Service
 
 ![](../../assets/images/ds/cdvsso14.png)
 
-- Log in as `admin` and it is only a Viz Normal user. 
+- Log in as `admin` and it is only a Viz Normal Permissions user. 
 
 ![](../../assets/images/ds/cdvsso15.png)
 
-- `cdw01`/`cml01`/`cde01` are also the Viz Normal users and cannot see the Site Administration menu.
+- `cdw01`/`cml01`/`cde01` are also the Viz Normal Permissions users and cannot see the Site Administration menu.
 
 - Log in as the built-in administration user `vizapps_admin`(password=vizapps_admin) and view all user and user group permissions.
 
