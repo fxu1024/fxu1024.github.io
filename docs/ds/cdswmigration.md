@@ -16,7 +16,7 @@ grand_parent: Data Service
 
 - The CDSW service is deployed on the gateway nodes of the CDP Base cluster, while the CML is deployed on the ECS cluster which is attached to the CDP Base cluster. Therefore, the migration of CDSW to CML is not equivalent. A seperate ECS cluster must be built at first and require at least 3 HA master nodes in production environment. 
 
-|CDSW size |ECS cluster initial size|Comment|
+|CDSW size |ECS Cluster initial size|Comment|
 |1 CDSW master |1 ECS master|only for PoC|
 |1 CDSW master + 1 CDSW worker |3 ECS master|Repurposing CDP Base Nodes for ECS cluster|
 |1 CDSW master + 2 CDSW worker |3 ECS master|Repurposing CDP Base Nodes for ECS cluster|
@@ -25,9 +25,11 @@ grand_parent: Data Service
 |1 CDSW master + 5 CDSW worker |3 ECS master + 2 ECS worker|Repurposing CDSW worker Nodes for ECS cluster|
 
 - Note: If there are no more than 3 CDSW worker nodes, CDP Base nodes have to be repurposed for side-car CDSW migration.
-- The following demonstration is the migration steps from 2 CDSW nodes to 3 ECS master nodes.
 
 ![](../../assets/images/ds/cdswmig01.png)
+
+- The following demonstration is the migration steps from 2 CDSW nodes to 3 ECS master nodes.
+
 
 ## 1. Introduction to the test environment
 
@@ -86,21 +88,21 @@ kubectl taint nodes <ECS Master03 Hostname> node-role.kubernetes.io/control-plan
 - Execute the following script to create external nfs for CML
 
 ```bash
-mkdir -p /vfs
-echo "/vfs *(rw,sync,no_root_squash,no_all_squash,no_subtree_check)" > /etc/exports
+mkdir -p /mnt/vfs
+echo "/mnt/vfs *(rw,sync,no_root_squash,no_all_squash,no_subtree_check)" > /etc/exports
 exportfs -rv
 showmount -e
 
-mkdir /vfs/workspace1
-chown 8536:8536 /vfs/workspace1
-chmod g+srwx /vfs/workspace1
+mkdir /mnt/vfs/workspace1
+chown 8536:8536 /mnt/vfs/workspace1
+chmod g+srwx /mnt/vfs/workspace1
 
 yum install nfs-utils.x86_64 -y
 systemctl start nfs-server.service
 systemctl enable nfs-server.service
-mkdir -p /nfs
-mount -t nfs -o vers=4.1 feng-ws5.sme-feng.athens.cloudera.com:/vfs/workspace1 /nfs
-nfsstat -m|grep /nfs
+mkdir -p /mnt/nfs
+mount -t nfs -o vers=4.1 feng-ws5.sme-feng.athens.cloudera.com:/mnt/vfs/workspace1 /mnt/nfs
+nfsstat -m|grep /mnt/nfs
 ```
 
 ![](../../assets/images/ds/cdswmig05.png)
@@ -111,15 +113,15 @@ nfsstat -m|grep /nfs
 
 ![](../../assets/images/ds/cdswmig06.png)
 
-- After migration, the CDSW returns to a working state. The CML workspace is stopped.
+- After migration, the CDSW returns to a working state. The CML workspace is ready.
 
 ![](../../assets/images/ds/cdswmig07.png)
 
 
 ## 3. Conclusion
 
-- If there are no more than 3 CDSW worker nodes, CDP Base nodes have to be repurposed for side-car CDSW migration. CDSW and CDP Private Cloud clusters must run side-by-side during migration.
-- The ECS Cluster requires at least 3 master nodes for HA purpose, and no worker nodes are required, because the master nodes can also serve as worker nodes by disabling taint policy.
+- If there are no more than 3 CDSW worker nodes, CDP Base nodes have to be repurposed for side-car CDSW migration. CDSW and ECS clusters must run side-by-side during migration.
+- ECS Cluster requires at least 3 master nodes for HA purpose, and no worker nodes are required, because the master nodes can also serve as worker nodes by disabling taint policy.
 - Limitations of CDSW to CML migration in PvC 1.5.0:
 	- Migration to CDP Private Cloud OpenShift Container Platform (OCP) is not supported.
 	- Incremental Migration of projects is not supported.
