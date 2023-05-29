@@ -38,7 +38,7 @@ grand_parent: Data Service
 
 ![](../../assets/images/ds/cdswmig10.png)
 
-- Cloudera recommends adding three ECS masters for the CDSW migration project. However, customers often do not have the budget to purchase hardware, so they can deploy the ECS master node as the ECS worker node.
+- Cloudera recommends adding three new ECS masters for the CDSW migration project. However, customers often do not have the budget to purchase hardware, so they expect that the ECS master node can serve as the ECS worker node.
 
 - Note: 
     - If there are no more than 3 CDSW worker nodes, CDP Base nodes have to be repurposed for side-car CDSW migration. 
@@ -53,9 +53,9 @@ grand_parent: Data Service
 |1 CDSW master + 4 CDSW worker |3 ECS master + 1 ECS worker|Repurposing CDSW worker Nodes for ECS cluster|
 |1 CDSW master + 5 CDSW worker |3 ECS master + 2 ECS worker|Repurposing CDSW worker Nodes for ECS cluster|
 
-![](../../assets/images/ds/cdswmig01.png)
-
 - The following demonstration is the migration steps from 2 CDSW nodes to 3 ECS master nodes.
+
+![](../../assets/images/ds/cdswmig01.png)
 
 ## 3. CDSW Migration
 
@@ -67,7 +67,7 @@ grand_parent: Data Service
 
 ### 3.2 Install ECS Cluster
 
-- The ECS Cluster requires at least 3 master nodes for HA purpose, and no worker nodes are required, because the master nodes can also serve as worker nodes. Please see [Installing ECS HA cluster](https://fxu1024.github.io/docs/ds/freshinstall/)
+- The ECS Cluster consists of 3 master nodes without any other worker nodes, because the master nodes can also serve as worker nodes. Please see [Installing ECS HA cluster](https://fxu1024.github.io/docs/ds/freshinstall/)
 
 ![](../../assets/images/ds/cdswmig08.png)
 
@@ -129,8 +129,8 @@ nfsstat -m|grep /mnt/nfs
 
 ## 4. Conclusion
 
-- If there are no more than 3 CDSW worker nodes, CDP Base nodes have to be repurposed for side-car CDSW migration. CDSW and ECS clusters must run side-by-side during migration.
-- ECS Cluster requires at least 3 master nodes for HA purpose, and no worker nodes are required, because the master nodes can also serve as worker nodes by disabling taint policy.
+- If there are no more than 3 CDSW worker nodes, CDP Base nodes have to be repurposed for side-car CDSW migration since CDSW and ECS clusters must run side-by-side during migration.
+- ECS master node can serve as worker node by disabling taint policy.
 - Limitations of CDSW to CML migration in PvC 1.5.0:
 	- Migration to CDP Private Cloud OpenShift Container Platform (OCP) is not supported.
 	- Incremental Migration of projects is not supported.
