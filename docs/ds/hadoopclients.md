@@ -22,8 +22,8 @@ This topic would allow you to connect to hive using beeline, connect to impala u
 |Python|3.8.13|
 |Hadoop|3.1.1|
 |Beeline|3.1.3000|
-|Impala-shell|4.1.0a2|
-|Data Service|1.5.0|
+|Impala-shell|4.3.0a2|
+|Data Service|1.5.1|
 
 
 ## 1. Install OpenJDK 11
@@ -285,13 +285,11 @@ beeline -u 'jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/def
 ![](../../assets/images/ds/gateway011.jpg)
 
 - Connect to Hive VW in PvC CDW using LDAP authentication with CA from Auto TLS setup.
-    - Please retrieve vault.ca by a kubectl call: `kubectl get secret -n vault-system vault-server-tls -o jsonpath="{.data['vault\.ca']}"| base64 --decode > vault.ca`
-    - Please generate vault.jks by a keytool call: `keytool -import -alias vault -file vault.ca -keystore vault.jks`
+    - Please retrieve vault.ca by a kubectl call: `kubectl get configmap -n cdp vault-jks -o jsonpath="{.binaryData['truststore\.jks']}"| base64 --decode > truststore.jks`
     
 ```bash
-kubectl get secret -n vault-system vault-server-tls -o jsonpath="{.data['vault\.ca']}"| base64 --decode > vault.ca
-keytool -import -alias vault -file vault.ca -keystore vault.jks
-beeline -u 'jdbc:hive2://hs2-hive01.apps.ecs.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=true;sslTrustStore=./vault.jks;trustStorePassword=xxxx;retries=3' -n admin -p
+kubectl get configmap -n cdp vault-jks -o jsonpath="{.binaryData['truststore\.jks']}"| base64 --decode > truststore.jks
+beeline -u 'jdbc:hive2://hs2-hive01.apps.ecs.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=true;sslTrustStore=./truststore.jks;trustStorePassword=changeit;retries=3' -n cdw01 -p
 ```
 
 ![](../../assets/images/ds/gateway013.jpg)
@@ -357,7 +355,27 @@ impala-shell --protocol='hs2-http' --ssl --ca_cert ./chain.pem -i 'coordinator-i
 
 ```bash
 kubectl get secret -n vault-system vault-server-tls -o jsonpath="{.data['vault\.ca']}"| base64 --decode > vault.ca   
-impala-shell --protocol='hs2-http' --ssl --ca_cert ./vault.ca -i 'coordinator-impala01.apps.ecs-lb.sme-feng.athens.cloudera.com:443' -u admin  -l
+impala-shell --protocol='hs2-http' --ssl --ca_cert ./vault.ca -i 'coordinator-impala01.apps.ecs.sme-feng.athens.cloudera.com:443' -u cdw01  -l
 ```
 
 ![](../../assets/images/ds/gateway012.jpg)
+
+
+- Connect to Impala VW in PvC CDW using Kerberos authentication with CA from Auto TLS setup. 
+    - Please upgrade impala-shell to 4.3.0a2 at first
+    - You can enable kerberos debug logging for impala-shell
+
+```bash
+pip install --upgrade pip==18.1
+yum install gcc-c++ python-devel.x86_64 cyrus-sasl-devel.x86_64
+pip install --upgrade impala-shell==4.3.0a2
+
+export HADOOP_OPTS="-Dsun.security.krb5.debug=true"
+export KRB5_TRACE=/dev/stdout
+export HADOOP_ROOT_LOGGER=TRACE,console
+
+kinit cdw01 
+impala-shell --protocol='hs2-http' --ssl -i 'coordinator-impala01.apps.ecs.sme-feng.athens.cloudera.com:443' -s hive -k --kerberos_host_fqdn=dwx-env-ecs.cdp.local.
+```
+
+![](../../assets/images/ds/gateway014.jpg)
