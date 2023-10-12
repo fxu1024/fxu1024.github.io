@@ -35,15 +35,20 @@ brew install openjdk@11
 ## 2. Install Python 3.8.13
 
 ```bash
+pyenv install --list
+rm -rf $(pyenv root)
+brew uninstall pyenv
 brew install pyenv
-pyenv install 3.8.13
-pyenv global 3.8.13
+pyenv install 3.8.12
+pyenv global 3.8.12
 pyenv version
 ```
 
 ## 3. Install Beeline 3.1.3
 
-- In order to connect to Hive VW via beeline shell, the first step is to download Beeline CLI software. Click on the 3 dots beside the HUE button, and click on the ["Download Beeline CLI"](https://cdw-ui.s3.amazonaws.com/hive3/beeline-standalone/apache-hive-beeline-3.1.3000.tar.gz).
+- Note: To use Kerberos auth in PvC DS you must use the latest beeline CLI(3.1.3000.2023.0.14.0-84) downloaded from the PVC DS DW UI.
+
+- In order to connect to Hive VW via beeline shell, the first step is to download Beeline CLI software. "Guides and More" is on the Cloudera Data Warehouse Overview. Navigate to "Guides and More" and click on the "see more" button, you can see ["Downloads - Beeline CLI"](https://cdw-ui.s3.amazonaws.com/hive3/beeline-standalone/apache-hive-beeline-3.1.3000.tar.gz).
 
 ![](../../assets/images/ds/gateway001.jpg)
 
@@ -52,7 +57,7 @@ pyenv version
 mkdir -p $HOME/hadoop-clients
 tar xvzf apache-hive-beeline-3.1.3000.tar.gz -C $HOME/hadoop-clients
 cd $HOME/hadoop-clients
-ln -s apache-hive-beeline-3.1.3000.2022.0.8.0-3 beeline
+ln -s apache-hive-beeline-3.1.3000.2023.0.14.0-84 beeline
 ```
 ![](../../assets/images/ds/gateway002.jpg)
 
@@ -60,6 +65,7 @@ ln -s apache-hive-beeline-3.1.3000.2022.0.8.0-3 beeline
 ## 4. Install Impala-shell 4.1
 
 - Impala shell can be invoked on a remote client machine by installing the impala-shell package. It is a python package that can be installed using pip.
+    - Note: Kerberos authentication requires impala-shell version 4.2.0 or later (https://pypi.org/project/impala-shell/4.2.0/). 
 
 ```console
 $ python -V
@@ -68,33 +74,37 @@ Python 3.8.13
 $ pip --version
 pip 22.0.4 from /Users/feng.xu/.pyenv/versions/3.8.13/lib/python3.8/site-packages/pip (python 3.8)
 
-$ sudo pip install impala-shell==4.1.0a2
-Password:
-Collecting impala-shell==4.1.0a2
-  Downloading impala_shell-4.1.0a2.tar.gz (484 kB)
-      484.7/484.7 KB 639.3 kB/s eta 0:00:00
+$ sudo pip install impala-shell==4.2.0
+
+```bash
+Collecting impala-shell==4.2.0
+  Downloading impala_shell-4.2.0.tar.gz (464 kB)
+      464.1/464.1 KB 465.4 kB/s eta 0:00:00
   Preparing metadata (setup.py) ... done
 Collecting bitarray==2.3.0
   Downloading bitarray-2.3.0.tar.gz (87 kB)
-      87.1/87.1 KB 4.8 MB/s eta 0:00:00
+      87.1/87.1 KB 2.1 MB/s eta 0:00:00
   Preparing metadata (setup.py) ... done
 Collecting configparser==4.0.2
   Downloading configparser-4.0.2-py2.py3-none-any.whl (22 kB)
+Collecting kerberos==1.3.1
+  Downloading kerberos-1.3.1-cp38-cp38-macosx_10_15_x86_64.whl (33 kB)
 Collecting prettytable==0.7.2
   Downloading prettytable-0.7.2.zip (28 kB)
   Preparing metadata (setup.py) ... done
-Collecting sasl==0.2.1
-  Downloading sasl-0.2.1.tar.gz (30 kB)
+Collecting sasl==0.3.1
+  Downloading sasl-0.3.1.tar.gz (44 kB)
+      44.7/44.7 KB 96.5 MB/s eta 0:00:00
   Preparing metadata (setup.py) ... done
-Requirement already satisfied: setuptools>=36.8.0 in ./.pyenv/versions/3.8.13/lib/python3.8/site-packages (from impala-shell==4.1.0a2) (56.0.0)
+Requirement already satisfied: setuptools>=36.8.0 in ./.pyenv/versions/3.8.13/lib/python3.8/site-packages (from impala-shell==4.2.0) (56.0.0)
 Collecting six==1.14.0
   Downloading six-1.14.0-py2.py3-none-any.whl (10 kB)
 Collecting sqlparse==0.3.1
   Downloading sqlparse-0.3.1-py2.py3-none-any.whl (40 kB)
-      40.8/40.8 KB 117.6 MB/s eta 0:00:00
-Collecting thrift==0.11.0
-  Downloading thrift-0.11.0.tar.gz (52 kB)
-      52.5/52.5 KB 10.6 MB/s eta 0:00:00
+      40.8/40.8 KB 17.3 MB/s eta 0:00:00
+Collecting thrift==0.14.2
+  Downloading thrift-0.14.2.tar.gz (59 kB)
+      59.4/59.4 KB 17.2 MB/s eta 0:00:00
   Preparing metadata (setup.py) ... done
 Collecting thrift_sasl==0.4.3
   Downloading thrift_sasl-0.4.3-py2.py3-none-any.whl (8.3 kB)
@@ -107,21 +117,21 @@ Using legacy 'setup.py install' for prettytable, since package 'wheel' is not in
 Using legacy 'setup.py install' for sasl, since package 'wheel' is not installed.
 Using legacy 'setup.py install' for thrift, since package 'wheel' is not installed.
 Using legacy 'setup.py install' for pure-sasl, since package 'wheel' is not installed.
-Installing collected packages: pure-sasl, prettytable, bitarray, sqlparse, six, configparser, thrift, sasl, thrift_sasl, impala-shell
+Installing collected packages: pure-sasl, prettytable, kerberos, bitarray, sqlparse, six, configparser, thrift, sasl, thrift_sasl, impala-shell
   Running setup.py install for pure-sasl ... done
   Running setup.py install for prettytable ... done
   Running setup.py install for bitarray ... done
   Running setup.py install for thrift ... done
   Running setup.py install for sasl ... done
   Running setup.py install for impala-shell ... done
-Successfully installed bitarray-2.3.0 configparser-4.0.2 impala-shell-4.1.0a2 prettytable-0.7.2 pure-sasl-0.6.2 sasl-0.2.1 six-1.14.0 sqlparse-0.3.1 thrift-0.11.0 thrift_sasl-0.4.3
+Successfully installed bitarray-2.3.0 configparser-4.0.2 impala-shell-4.2.0 kerberos-1.3.1 prettytable-0.7.2 pure-sasl-0.6.2 sasl-0.3.1 six-1.14.0 sqlparse-0.3.1 thrift-0.14.2 thrift_sasl-0.4.3
 ```
 
 - The following are the artifacts added by impala-shell installation.
 ```console
-    $HOME/.pyenv/versions/3.8.13/lib/python3.8/site-packages/impala_shell-4.1.0a2-py3.8.egg-info/*
+    $HOME/.pyenv/versions/3.8.13/bin/impala-shell
+    $HOME/.pyenv/versions/3.8.13/lib/python3.8/site-packages/impala_shell-4.2.0-py3.8.egg-info
     $HOME/.pyenv/versions/3.8.13/lib/python3.8/site-packages/impala_shell/*
-    /usr/local/bin/impala-shell
 ```
 
 
@@ -285,7 +295,7 @@ beeline -u 'jdbc:hive2://hs2-hive01.apps.ecs-lb.sme-feng.athens.cloudera.com/def
 ![](../../assets/images/ds/gateway011.jpg)
 
 - Connect to Hive VW in PvC CDW using LDAP authentication with CA from Auto TLS setup.
-    - Please retrieve vault.ca by a kubectl call: `kubectl get configmap -n cdp vault-jks -o jsonpath="{.binaryData['truststore\.jks']}"| base64 --decode > truststore.jks`
+    - Please retrieve truststore.jks by a kubectl call: `kubectl get configmap -n cdp vault-jks -o jsonpath="{.binaryData['truststore\.jks']}"| base64 --decode > truststore.jks`. The default password is `changeit`.
     
 ```bash
 kubectl get configmap -n cdp vault-jks -o jsonpath="{.binaryData['truststore\.jks']}"| base64 --decode > truststore.jks
@@ -293,6 +303,33 @@ beeline -u 'jdbc:hive2://hs2-hive01.apps.ecs.sme-feng.athens.cloudera.com/defaul
 ```
 
 ![](../../assets/images/ds/gateway013.jpg)
+
+
+- Connect to Hive VW in PvC CDW using Kerberos authentication without CA.
+	- You must use the latest beeline CLI(3.1.3000.2023.0.14.0-84) downloaded from the PVC DS DW UI. Otherwise the connection will fail with errors "HTTP Response code: 404 (state=08S01,code=0)".
+    - You must add the kerberosEnableCanonicalHostnameCheck=false option in the jdbc url. The kerberosEnableCanonicalHostnameCheck option disables the reverse dns check implemented in the jdbc driver. There is no need for this in PVC Base, because the reverse dns records must be correct there for the cluster nodes (otherwise Kerberos does not work between cluster services). So this is a DS specific functionality and it was not backported from the upstream hive code to the PVC Base jdbc drivers, which is why Kerberos auth does not work with the drivers installed on Base nodes towards PVC DS Virtual Warehouses.
+    - You must set JAVA_TOOL_OPTIONS=-Djavax.security.auth.useSubjectCredsOnly=false prop in the java env (this allows jvm to use kerberos tickets from the system ticket cache).
+
+```bash
+kinit cdw01
+JAVA_TOOL_OPTIONS="-Djavax.security.auth.useSubjectCredsOnly=false" beeline -u "jdbc:hive2://hs2-hive01.apps.ecstest.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;socketTimeout=60;ssl=false;retries=3;kerberosEnableCanonicalHostnameCheck=false;principal=hive/dwx-env-ecstest.cdp.local@FENG.COM"
+```
+
+![](../../assets/images/ds/gateway016.jpg)
+
+- Connect to Hive VW in PvC CDW using Kerberos authentication with CA from Auto TLS setup.
+   - You must use the latest beeline CLI(3.1.3000.2023.0.14.0-84) downloaded from the PVC DS DW UI. Otherwise the connection will fail with errors "HTTP Response code: 404 (state=08S01,code=0)".
+   - You must add the kerberosEnableCanonicalHostnameCheck=false option in the jdbc url. The kerberosEnableCanonicalHostnameCheck option disables the reverse dns check implemented in the jdbc driver. There is no need for this in PVC Base, because the reverse dns records must be correct there for the cluster nodes (otherwise Kerberos does not work between cluster services). So this is a DS specific functionality and it was not backported from the upstream hive code to the PVC Base jdbc drivers, which is why Kerberos auth does not work with the drivers installed on Base nodes towards PVC DS Virtual Warehouses.
+    - You must set JAVA_TOOL_OPTIONS=-Djavax.security.auth.useSubjectCredsOnly=false prop in the java env (this allows jvm to use kerberos tickets from the system ticket cache).
+    - Please retrieve truststore.jks by a kubectl call: `kubectl get configmap -n cdp vault-jks -o jsonpath="{.binaryData['truststore\.jks']}"| base64 --decode > truststore.jks`. The default password is `changeit`.
+
+```bash
+kubectl get configmap -n cdp vault-jks -o jsonpath="{.binaryData['truststore\.jks']}"| base64 --decode > truststore.jks
+kinit cdw01
+JAVA_TOOL_OPTIONS="-Djavax.security.auth.useSubjectCredsOnly=false" beeline -u "jdbc:hive2://hs2-hive01.apps.ecstest.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;socketTimeout=60;ssl=true;sslTrustStore=truststore.jks;trustStorePassword=changeit;retries=3;kerberosEnableCanonicalHostnameCheck=false;principal=hive/dwx-env-ecstest.cdp.local@FENG.COM"
+```
+
+![](../../assets/images/ds/gateway015.jpg)
 
 - Connect to Impala in CDP Base cluster B [realm=FENG.COM] using Kerberos authentication.
 
@@ -313,6 +350,19 @@ beeline -d "com.cloudera.impala.jdbc41.Driver" -u "jdbc:impala://coordinator-imp
 ```
 
 ![](../../assets/images/ds/gateway006.jpg)
+
+
+- Connect to Impala VW in PvC CDW using Kerberos authentication with CA from Auto TLS setup.
+    - Please retrieve truststore.jks by a kubectl call: `kubectl get configmap -n cdp vault-jks -o jsonpath="{.binaryData['truststore\.jks']}"| base64 --decode > truststore.jks`. The default password is `changeit`.
+
+```bash
+kubectl get configmap -n cdp vault-jks -o jsonpath="{.binaryData['truststore\.jks']}"| base64 --decode > truststore.jks
+kinit cdw01
+export HIVE_AUX_JARS_PATH=~/work/projects/ImpalaJDBC41.jar
+beeline -u "jdbc:impala://coordinator-impala01.apps.ecstest.sme-feng.athens.cloudera.com:443/default;AuthMech=1;transportMode=http;httpPath=cliservice;ssl=1;KrbHostFQDN=dwx-env-ecstest.cdp.local.;KrbServiceName=hive;sslTrustStore=truststore.jks;trustStorePassword=changeit"
+```
+
+![](../../assets/images/ds/gateway017.jpg)
 
 
 
@@ -362,19 +412,15 @@ impala-shell --protocol='hs2-http' --ssl --ca_cert ./vault.ca -i 'coordinator-im
 
 
 - Connect to Impala VW in PvC CDW using Kerberos authentication with CA from Auto TLS setup. 
-    - Please upgrade impala-shell to 4.3.0a2 at first
+    - Please upgrade impala-shell to 4.2.0 or later
     - You can enable kerberos debug logging for impala-shell
 
 ```bash
-pip install --upgrade pip==18.1
-yum install gcc-c++ python-devel.x86_64 cyrus-sasl-devel.x86_64
-pip install --upgrade impala-shell==4.3.0a2
-
 export HADOOP_OPTS="-Dsun.security.krb5.debug=true"
 export KRB5_TRACE=/dev/stdout
 export HADOOP_ROOT_LOGGER=TRACE,console
 
-kinit cdw01 
+kinit cdw01
 impala-shell --protocol='hs2-http' --ssl -i 'coordinator-impala01.apps.ecs.sme-feng.athens.cloudera.com:443' -s hive -k --kerberos_host_fqdn=dwx-env-ecs.cdp.local.
 ```
 
