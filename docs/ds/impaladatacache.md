@@ -183,11 +183,12 @@ LIMIT 100;
 
 ![](../../assets/images/ds/datacache05.png)
 
-- The previous query will run normally.
+- The previous queries still run normally.
+    - The cache item won't expire as long as the same file metadata is used in the query. The reason is that the cache key is (filename, mtime, file offset) where mtime is the last modified time of the file. When the mtime in the file metadata doesn't change, the scan request could always hit the cache (if capacity is enough). Please see [IMPALA-12491](https://issues.apache.org/jira/browse/IMPALA-12491).
 
 ![](../../assets/images/ds/datacache06.png)
 
-- New query gets stuck, even if the query is very simple
+- New query gets stuck, even if the query is very simple. 
 
 ![](../../assets/images/ds/datacache07.png)
 
@@ -198,4 +199,4 @@ LIMIT 100;
 ## 5. Conclusion
 
 - Impala Data Cache saves the data files from the remote storage layer in local storage on the node on which the impala daemon is running. Subsequent queries that require the same data or a subset thereof will not require IO from the remote storage layer to access the data. 
-- The default evict policy is LRU (Least Recently Used), if no new query writes any more result sets into the data cache(such as the scenario when CDP Base Cluster is down), the data cache will never exceed the max capacity, so the current data cache exists permanently.
+- The default evict policy is LRU (Least Recently Used), if no new query writes any more result sets into the data cache(i.e. the scenario when CDP Base Cluster is down), the data cache will never exceed the max capacity, so the scan request of old queries could always hit the cache.
