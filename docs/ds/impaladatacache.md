@@ -6,7 +6,7 @@ parent: Operations
 grand_parent: Data Service
 ---
 
-# ECS Server HA Failure Domain Testing
+# Impala Data Cache Testing
 {: .no_toc }
 
 - TOC
@@ -61,7 +61,7 @@ impala-statestore-flagfile                    2      47h
 ```
 
 - Get data cache settings in Impala Daemon start-up flag.
-    - The target data cache directory is `/opt/impala/cache` and it's quota is 48GB.
+    - The target data cache directory is `/opt/impala/cache` and it's quota is `48GB`.
     - The cache eviction policy is `LRU`.
 
 ```bash
@@ -98,7 +98,7 @@ pvc-f9a4403c-caad-4d8e-aa6f-dc4ca496d3e8   94Gi       RWO            Delete     
 
 - Get the host and the local storage path.
     - The target host is `feng-ws4.sme-feng.athens.cloudera.com`
-    - The target path is `/mnt/ecs/local-storage/pvc-f9a4403c-caad-4d8e-aa6f-dc4ca496d3e8_impala-impala01_scratch-cache-volume-impala-executor-000-0`.
+    - The target path is `/mnt/ecs/local-storage/pvc-f9a4403c-caad-4d8e-aa6f-dc4ca496d3e8_impala-impala01_scratch-cache-volume-impala-executor-000-0` and it's max capacity is `94GB`.
 
 ```bash
 $ kubectl describe pv pvc-f9a4403c-caad-4d8e-aa6f-dc4ca496d3e8
@@ -116,8 +116,8 @@ Events:            <none>
 ```
 
 - Open SSH terminal for the host `feng-ws4.sme-feng.athens.cloudera.com` and list the cache files.
-    - data_cache: to cache the working set read from remote HDFS data node
-    - srcatch_dirs: to store intermediate files
+    - data_cache: `impala-cache-file-f0464322167cea8e:7c5b604bc879efb7`to cache the working set read from remote HDFS data node
+    - srcatch_dirs: `impala-scratch` to store intermediate files
 
 ```bash
 [root@feng-ws4 ~]# ll /mnt/ecs/local-storage/pvc-f9a4403c-caad-4d8e-aa6f-dc4ca496d3e8_impala-impala01_scratch-cache-volume-impala-executor-000-0
@@ -131,7 +131,7 @@ drwxr-xr-x 2 centos centos     4096 Oct 12 10:31 impala-scratch
 
 ## 4. Run Demo Queries
 
-- On the Overview page under Virtual Warehouses, click the options menu in the upper right corner of an Impala Virtual Warehouse tile, and select `Open Hue`.
+- On the Overview page under Virtual Warehouses, click the options menu in the upper right corner of an Impala Virtual Warehouse tile, and select `SQL Editor`.
 
 ![](../../assets/images/ds/datacache02.png)
 
@@ -198,4 +198,4 @@ LIMIT 100;
 ## 5. Conclusion
 
 - Impala Data Cache saves the data files from the remote storage layer in local storage on the node on which the impala daemon is running. Subsequent queries that require the same data or a subset thereof will not require IO from the remote storage layer to access the data. 
-- The default evict policy is LRU (Least Recently Used), if no new query writes any more result sets into the data cache(such as the scenario when base cluster is down), the data cache will never exceed the max capacity, so the current data cache exists permanently.
+- The default evict policy is LRU (Least Recently Used), if no new query writes any more result sets into the data cache(such as the scenario when CDP Base Cluster is down), the data cache will never exceed the max capacity, so the current data cache exists permanently.
