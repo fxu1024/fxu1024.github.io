@@ -35,12 +35,12 @@ grand_parent: Data Service
 
 - When Impala compute nodes and its storage are not co-located, the network bandwidth requirement goes up as the network traffic includes the data fetch as well as the shuffling exchange traffic of intermediate results. To mitigate the pressure on the network, you can enable the compute nodes to cache the working set read from remote filesystems, such as, remote HDFS data node, S3, ABFS, ADLS.
 
-- To enable remote data cache, set the --data_cache Impala Daemon start-up flag as below: --data_cache=dir1,dir2,dir3,...:quota
+- To enable remote data cache, set the --data_cache Impala Daemon start-up flag as below: `--data_cache=dir1,dir2,dir3,...:quota`
     - The flag is set to a list of directories, separated by ,, followed by a :, and a capacity quota per directory.
     - Cached data is stored in the specified directories. The specified directories must exist in the local filesystem of each Impala Daemon, or Impala will fail to start.
     - The cache can consume up to the quota bytes for each of the directories specified.
 
-- You configure a cache eviction policy using the --data_cache_eviction_policy Impala Daemon start-up flag: --data_cache_eviction_policy=policy.
+- You configure a cache eviction policy using the --data_cache_eviction_policy Impala Daemon start-up flag: `--data_cache_eviction_policy=policy`.
     - In Impala 3.4 and higher, you can configure one of the following cache eviction policies for the data cache:
         - LRU (Least Recently Used -- the default)
         - LIRS (Inter-referenece Recency Set)
@@ -49,6 +49,7 @@ grand_parent: Data Service
 ## 3. List Data cache files
 
 - Get all start-up flagfile in CDW impala.
+    - The target configmap is `impala-executor-000-flagfile`.
 
 ```bash
 $ kubectl get configmap -n impala-impala01|grep flagfile
@@ -60,6 +61,8 @@ impala-statestore-flagfile                    2      47h
 ```
 
 - Get data cache settings in Impala Daemon start-up flag.
+    - The target data cache directory is `/opt/impala/cache` and it's quota is 48GB.
+    - The cache eviction policy is `LRU`.
 
 ```bash
 $ kubectl describe configmap impala-executor-000-flagfile -n impala-impala01 |grep data_cache
@@ -68,6 +71,7 @@ $ kubectl describe configmap impala-executor-000-flagfile -n impala-impala01 |gr
 ```
 
 - Get data cache volume name in impala executor definition.
+    - The target volume is `scratch-cache-volume`.
 
 ```bash
 $ kubectl describe pod impala-executor-000-0 -n impala-impala01|grep /opt/impala/cache
@@ -75,6 +79,7 @@ $ kubectl describe pod impala-executor-000-0 -n impala-impala01|grep /opt/impala
 ```
 
 - Get pvc name in impala executor definition.
+    - The target pvc is `scratch-cache-volume-impala-executor-000-0`.
 
 ```bash
 $ kubectl describe pod impala-executor-000-0 -n impala-impala01|grep -A3 scratch-cache-volume:
@@ -84,7 +89,7 @@ $ kubectl describe pod impala-executor-000-0 -n impala-impala01|grep -A3 scratch
     ReadOnly:   false
 ```
 
-- Get pv name for scratch-cache-volume-impala-executor-000-0.
+- Get the target pv name which is `pvc-f9a4403c-caad-4d8e-aa6f-dc4ca496d3e8`.
 
 ```bash
 $ kubectl get pv|grep scratch-cache-volume-impala-executor-000-0
@@ -92,8 +97,8 @@ pvc-f9a4403c-caad-4d8e-aa6f-dc4ca496d3e8   94Gi       RWO            Delete     
 ```
 
 - Get the host and the local storage path.
-    - The hostname is `feng-ws4.sme-feng.athens.cloudera.com`
-    - The path is `/mnt/ecs/local-storage/pvc-f9a4403c-caad-4d8e-aa6f-dc4ca496d3e8_impala-impala01_scratch-cache-volume-impala-executor-000-0`.
+    - The target host is `feng-ws4.sme-feng.athens.cloudera.com`
+    - The target path is `/mnt/ecs/local-storage/pvc-f9a4403c-caad-4d8e-aa6f-dc4ca496d3e8_impala-impala01_scratch-cache-volume-impala-executor-000-0`.
 
 ```bash
 $ kubectl describe pv pvc-f9a4403c-caad-4d8e-aa6f-dc4ca496d3e8
@@ -110,7 +115,9 @@ Source:
 Events:            <none>
 ```
 
-- Open SSH terminal for the host `feng-ws4.sme-feng.athens.cloudera.com` and list the files.
+- Open SSH terminal for the host `feng-ws4.sme-feng.athens.cloudera.com` and list the cache files.
+    - data_cache: to cache the working set read from remote HDFS data node
+    - srcatch_dirs: to store intermediate files
 
 ```bash
 [root@feng-ws4 ~]# ll /mnt/ecs/local-storage/pvc-f9a4403c-caad-4d8e-aa6f-dc4ca496d3e8_impala-impala01_scratch-cache-volume-impala-executor-000-0
