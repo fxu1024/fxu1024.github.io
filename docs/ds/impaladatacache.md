@@ -183,7 +183,7 @@ LIMIT 100;
 
 ![](../../assets/images/ds/datacache05.png)
 
-- The previous queries still run normally.
+- The previous queries still run normally. This is true even if the Base cluster has been stopped for more than 1 day.
     - The cache item won't expire as long as the same file metadata is used in the query. The reason is that the cache key is (filename, mtime, file offset) where mtime is the last modified time of the file. When the mtime in the file metadata doesn't change, the scan request could always hit the cache (if capacity is enough). Please see [IMPALA-12491](https://issues.apache.org/jira/browse/IMPALA-12491).
 
 ![](../../assets/images/ds/datacache06.png)
