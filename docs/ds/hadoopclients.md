@@ -19,7 +19,7 @@ This topic would allow you to connect to hive using beeline, connect to impala u
 |MAC OS|13.1 (22C65)|
 |Processor|Intel Core i7|
 |Java|11.0.18|
-|Python|3.8.13|
+|Python|3.8.12|
 |Hadoop|3.1.1|
 |Beeline|3.1.3000|
 |Impala-shell|4.3.0a2|
@@ -32,7 +32,7 @@ This topic would allow you to connect to hive using beeline, connect to impala u
 brew install openjdk@11
 ```
 
-## 2. Install Python 3.8.13
+## 2. Install Python 3.8.12
 
 ```bash
 pyenv install --list
@@ -62,7 +62,7 @@ ln -s apache-hive-beeline-3.1.3000.2023.0.14.0-84 beeline
 ![](../../assets/images/ds/gateway002.jpg)
 
 
-## 4. Install Impala-shell 4.1
+## 4. Install Impala-shell 4.2
 
 - Impala shell can be invoked on a remote client machine by installing the impala-shell package. It is a python package that can be installed using pip.
     - Note: Kerberos authentication requires impala-shell version 4.2.0 or later (https://pypi.org/project/impala-shell/4.2.0/). 
