@@ -2,8 +2,7 @@
 layout: default
 title: Iceberg replication using Cloudera Replication Manager
 nav_order: 1
-parent: Operations
-grand_parent: CDP Base
+parent: CDP Base
 ---
 
 # Iceberg replication using Cloudera Replication Manager
@@ -125,8 +124,7 @@ grand_parent: CDP Base
 
 ## 6. Conclusion
 
-
-
+- Iceberg replication policies replicate Iceberg tables between CDP Private Cloud Base 7.1.9 or higher clusters using Cloudera Manager 7.11.3 or higher versions.
 - Current Limitations:
     - Iceberg replication does not support tables stored on ozone
     - A bug exists when there are tables saved as ozone on the source & target cluster
