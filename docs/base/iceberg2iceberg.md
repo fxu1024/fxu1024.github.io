@@ -51,8 +51,10 @@ grand_parent: CDP Base
 ![](../../assets/images/base/ice2ice005.png)
 
 - Add `dfs.nfs.keytab.file` in core-site.xml safety valves on both the clusters. Note: iceberg replication jobs run the distcp command by the `hdfs` user.
-    - Name: dfs.nfs.keytab.file
-    - Value: {{CMF_CONF_DIR}}/hdfs.keytab
+```bash
+    Name: dfs.nfs.keytab.file
+    Value: {{CMF_CONF_DIR}}/hdfs.keytab
+```
 
 ![](../../assets/images/base/ice2ice011.png)
 
@@ -105,9 +107,9 @@ grand_parent: CDP Base
 
 - Click Actions > Show History for a replication policy on the Replication Policies page to view the Replication History page.
 
-![](../../assets/images/base/ice2ice021.png)
-
 ![](../../assets/images/base/ice2ice022.png)
+
+![](../../assets/images/base/ice2ice023.png)
 
 - We can see the high-level steps on the All Recent Commands window.
     - Determines the tables to replicate depending on the choice you made during the Iceberg replication policy creation process.
@@ -121,7 +123,7 @@ grand_parent: CDP Base
 
 - The following graph is the low Level Architecture.
 
-![](../../assets/images/base/ice2ice018.png)
+![](../../assets/images/base/ice2ice019.png)
 
 ## 6. Conclusion
 
