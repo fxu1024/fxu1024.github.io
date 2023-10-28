@@ -2,7 +2,8 @@
 layout: default
 title: Iceberg replication using Cloudera Replication Manager
 nav_order: 1
-parent: CDP Base
+parent: Operations
+grand_parent: CDP Base
 ---
 
 # Iceberg replication using Cloudera Replication Manager
