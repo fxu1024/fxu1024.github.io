@@ -23,7 +23,7 @@ grand_parent: CDP Base
 
 - Replication Manager is a service in Cloudera Manager. You can create replication policies in this service to replicate HDFS data/Hive tables/Iceberg tables/Ozone buckets/Ranger Policies across data centers. You can also create HDFS, HBase, or Ozone snapshot policies to take snapshots of HDFS directories, HBase tables, or Ozone buckets respectively.
 
-- (Iceberg replication policies)[https://docs.cloudera.com/cdp-private-cloud-base/latest/replication-manager/topics/rm-dc-create-iceberg-replication-policy.html] replicate Iceberg tables between CDP Private Cloud Base 7.1.9 or higher clusters using Cloudera Manager 7.11.3 or higher versions. Iceberg replication policies can:
+- [Iceberg replication policies](https://docs.cloudera.com/cdp-private-cloud-base/latest/replication-manager/topics/rm-dc-create-iceberg-replication-policy.html) replicate Iceberg tables between CDP Private Cloud Base 7.1.9 or higher clusters using Cloudera Manager 7.11.3 or higher versions. Iceberg replication policies can:
     - replicate metadata and catalog from the source cluster Hive Metastore (HMS) to target cluster HMS. The catalog is an HDFS file that has a list of data files and manifest files to copy from the source cluster to the target cluster. The manifest files contain the metadata for the data files.
     - replicate data files in the HDFS storage system from the source cluster to the target cluster. The Iceberg replication policy can replicate only between HDFS storage systems. 
     - replicate all the snapshots from the source cluster by default. This allows you to run time travel queries on the target cluster.
