@@ -30,7 +30,7 @@ grand_parent: CDP Base
 
 ## 3. Prerequisites
 
-- It is recommended that the source cluster and target cluster use the same DNS server and KDC server.
+- It is recommended that the source cluster and target cluster share the same DNS server and KDC server.
 
 - Ensure that the source cluster and target cluster versions are CDP Private Cloud Base 7.1.9 or higher using Cloudera Manager version 7.11.3 or higher versions.
 
@@ -77,7 +77,7 @@ grand_parent: CDP Base
 
 ![](../../assets/images/base/ice2ice009.png)
 
-    - Note: Please tick the checkbox "Create User With Admin Role" which means to add the peer as an admin peer. This option is mandatory to create Ranger replication policies.
+    Note: Please tick the checkbox "Create User With Admin Role" which means to add the peer as an admin peer. This option is mandatory to create Ranger replication policies.
 
 - Go to the Cloudera Manager > Replication > Replication Policies page in the target cluster where the peer is set up. 
 
@@ -89,7 +89,7 @@ grand_parent: CDP Base
 
 ![](../../assets/images/base/ice2ice016.png)
 
-- The options on the Resources tab can remain as default. Click Save. 
+- The options on the Resources tab can stay as default. Click Save. 
 
 ![](../../assets/images/base/ice2ice017.png)
 
@@ -97,7 +97,7 @@ grand_parent: CDP Base
 
 ![](../../assets/images/base/ice2ice018.png)
 
-- After the replication is completed, let's compare the number of records for table `tiger_airlines.countries_kafka_iceberg` on both the clusters. The results are both 252. It shows that `tiger_airlines.countries_kafka_iceberg` is the only table that meets the filter conditions and has been successfully synchronized to the target cluster.
+- After the replication is completed, let's compare the number of records for table `tiger_airlines.countries_kafka_iceberg` on both the clusters. The results are both 252. It shows that `tiger_airlines.countries_kafka_iceberg` is the only table that meets the replication filter and has been successfully transferred to the target cluster.
 
 ![](../../assets/images/base/ice2ice020.png)
 
@@ -121,7 +121,7 @@ grand_parent: CDP Base
 
 ![](../../assets/images/base/ice2ice012.png)
 
-- The following graph is the low Level Architecture.
+- The following graph is the low level architecture.
 
 ![](../../assets/images/base/ice2ice019.png)
 
