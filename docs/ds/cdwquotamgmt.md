@@ -144,7 +144,7 @@ db-resourcepoolmanager=# select path,metadata from pools order by created_at;
 
 ![](../../assets/images/ds/cdwquota19.png)
 
-- The `query-executor-0-0` pod was stuck on pending status even if it's deleted.
+- The `query-executor-0-0` pod was stuck on pending status even after it's deleted.
 
 ![](../../assets/images/ds/cdwquota20.png)
 
