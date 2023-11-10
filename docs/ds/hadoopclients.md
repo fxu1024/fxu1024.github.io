@@ -30,7 +30,6 @@ grand_parent: Data Service
     - You must use impala-shell(`4.2.0` or later) on python 2.7 to access Impala virtual warehouse when using Kerberos authentication. I verified that this limitation still exists in PvC 1.5.2, impala-shell client has compatibility issues in a python 3.x environment for Kerberos principal. However, LDAP authentication does not have any compatibility issues.
     - Long story short: please do `NOT` use the built-in beeline or impala-shell client in PvC Base Cluster to access hive/impala virtual warehouses with Kerberos authentication.
 
-- 
 
 ## 2. Introduction to the test environment
 
@@ -61,8 +60,8 @@ OpenJDK 64-Bit Server VM Homebrew (build 11.0.18+0, mixed mode)
 
 ### 3.2. Install Python 2.7.18 & 3.8.10
 
-- Python 2.7.18 is the last release of Python 2. To install python 2.7.18 on MacOS, please download the installer from [python website](https://www.python.org/downloads/release/python-2718rc1/).
-  Note: The command `brew install python@2` doesn't work because python 2.7 is deprecated.
+- Python 2.7.18 is the last release of Python 2. To install python 2.7.18 on MacOS, please download the installer from [python official download site](https://www.python.org/downloads/release/python-2718rc1/).
+    - Note: The command `brew install python@2` doesn't work because macOS remove the support of python 2.
 
 - You can install [Python 3.8.10](https://www.python.org/downloads/release/python-3810/) by the same way.
 
