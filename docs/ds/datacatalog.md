@@ -38,6 +38,7 @@ grand_parent: Data Service
 ## 3. Prerequisites
 
 - Navigate to Cloudera Manager > Clusters > Atlas > Configuration, search `conf/atlas-application.properties_role_safety_valve` and enter the values for the Atlas service:
+
 ```bash
 atlas.proxyuser.dpprofiler.hosts=*
 atlas.proxyuser.dpprofiler.users=*
@@ -47,6 +48,7 @@ atlas.proxyuser.dpprofiler.groups=*
 ![](../../assets/images/ds/catalog01.png)
 
 - Navigate to Cloudera Manager > Clusters > Ranger > Configuration, search `conf/ranger-admin-site.xml` and enter the values for the Atlas service:
+
 ```bash
 Name: ranger.proxyuser.dpprofiler.hosts
 Value: *

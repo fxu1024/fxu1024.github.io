@@ -83,35 +83,41 @@ db-resourcepoolmanager=# select path,metadata from pools order by created_at;
 
 ![](../../assets/images/ds/cdwquota01.png)
 
-- Activate the environment and select the resource pool `root.default.high`.
-    - Note: If you enable the quota management feature, you must select a resource pool while activating the environment.
+- Activate the environment.
 
 ![](../../assets/images/ds/cdwquota06.png)
+
+- Select the resource pool `root.default.high`.
+    - Note: If you enable the quota management feature, you must select a resource pool while activating the environment.
 
 ![](../../assets/images/ds/cdwquota07.png)
 
 - Turn back to the resource pool UI. the resource pool `root.default.high` has two new level 4 branches, namely `root.default.high.ecstest-c51569f2-log-router` and `root.default.high.warehouse-ecstest`.
-    - `ecstest-c51569f2-log-router` and `warehouse-ecstest` are the new namespaces added by the activation environment step.
+
+![](../../assets/images/ds/cdwquota13.png)
+
+- `ecstest-c51569f2-log-router` and `warehouse-ecstest` are the new namespaces added by the activation environment step.
     - The pool `root.default.high.ecstest-c51569f2-log-router` consumed 4 cores, 2GB memory.
     - The pool `root.default.high.warehouse-ecstest`consumed 6 cores, 16GB memory.
     - Total cpu and memory consumption is below quota, so there are no warnings so far.
 
-![](../../assets/images/ds/cdwquota13.png)
-
 ![](../../assets/images/ds/cdwquota14.png)
  
-- Create new virtual warehouse `hive01`. The resource pool has only one option `root.default.high`, indicating that it is inherited from environment.
+- Create new virtual warehouse `hive01`.
 
 ![](../../assets/images/ds/cdwquota08.png)
+
+- The resource pool has only one option `root.default.high`, indicating that it is inherited from environment.
 
 ![](../../assets/images/ds/cdwquota09.png)
 
 - Turn back to the resource pool UI. We can see the new resource pool `root.default.high.compute-hive01`.
-    - `compute-hive01`is the namespace of hive virtual warehouse.
-    - The pool `root.default.high.compute-hive01` consumed 12 cores, 128GB memory.
-    - Total cpu and memory consumption is still below quota, so there are no warnings so far.
 
 ![](../../assets/images/ds/cdwquota15.png)
+
+- `compute-hive01`is the namespace of hive virtual warehouse.
+    - The pool `root.default.high.compute-hive01` consumed 12 cores, 128GB memory.
+    - Total cpu and memory consumption is still below quota, so there are no warnings so far.
 
 ![](../../assets/images/ds/cdwquota16.png)
 
@@ -121,17 +127,31 @@ db-resourcepoolmanager=# select path,metadata from pools order by created_at;
 
 ![](../../assets/images/ds/cdwquota11.png)
 
-- The pod logs showed the root cause `compute-hive02/query-executor-0-0 is queued and waiting for allocation`. Two VWs will consume 256GB of memory, which .
+- The pod logs showed the root cause `compute-hive02/query-executor-0-0 is queued and waiting for allocation`.
 
 ![](../../assets/images/ds/cdwquota12.png)
 
 - Turn back to the resource pool UI. We can see the new resource pool `root.default.high.compute-hive02`.
     - `compute-hive02`is the namespace of hive virtual warehouse.
     - The pool `root.default.high.compute-hive02` consumed 12 cores, 128GB memory.
-    - Total cpu and memory consumption exceeds the resource pool `root.default.high` quota limit.
+    - Total cpu and memory consumption exceeds the quota of the parent resource pool `root.default.high`.
 
-![](../../assets/images/ds/cdwquota12.png)
+![](../../assets/images/ds/cdwquota17.png)
 
-## 4. Conclusion
+- Let's increase the memory quota from 200GB to 300GB.
 
+![](../../assets/images/ds/cdwquota18.png)
 
+![](../../assets/images/ds/cdwquota19.png)
+
+- The `query-executor-0-0` pod was stuck on pending status even if it's deleted.
+
+![](../../assets/images/ds/cdwquota20.png)
+
+- Rebuilding the virtual warehouse `hive02` didn't work too.
+
+![](../../assets/images/ds/cdwquota21.png)
+
+- It's still stuck after deleting the virtual warehouse `hive02` and then creating it again.
+
+![](../../assets/images/ds/cdwquota22.png)
