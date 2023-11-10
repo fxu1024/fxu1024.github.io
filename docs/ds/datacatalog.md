@@ -48,7 +48,14 @@ atlas.proxyuser.dpprofiler.groups=*
 
 - Navigate to Cloudera Manager > Clusters > Ranger > Configuration, search `conf/ranger-admin-site.xml` and enter the values for the Atlas service:
 ```bash
-<property><name>ranger.proxyuser.dpprofiler.hosts</name><value>*</value></property><property><name>ranger.proxyuser.dpprofiler.users</name><value>*</value></property><property><name>ranger.proxyuser.dpprofiler.groups</name><value>*</value></property>
+Name: ranger.proxyuser.dpprofiler.hosts
+Value: *
+
+Name: ranger.proxyuser.dpprofiler.users
+Value: *
+
+Name: ranger.proxyuser.dpprofiler.groups
+Value: *
 ```
 
 ![](../../assets/images/ds/catalog02.png)
