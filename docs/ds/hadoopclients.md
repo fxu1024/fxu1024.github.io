@@ -28,8 +28,9 @@ grand_parent: Data Service
     - You must use the beeline CLI(`3.1.3000.2023.0.14.0-84` or later) downloaded from the PVC DS DW UI. Otherwise the connection will fail with errors "HTTP Response code: 404 (state=08S01,code=0)". The downloaded Beeline itself already contains the open source Hive JDBC driver. The open source Hive JDBC driver uses Java Authentication and Authorization Service (JAAS) standard, which requires either a config file OR the use of a JVM property (`-Djavax.security.auth.useSubjectCredsOnly=false`) to enable the use of the Kerberos ticket cache.
     - You must add the `kerberosEnableCanonicalHostnameCheck=false` option in the hive jdbc url. The `kerberosEnableCanonicalHostnameCheck` option disables the reverse dns check implemented in the jdbc driver. There is no need for this in PVC Base, because the reverse dns records must be correct there for the cluster nodes (otherwise Kerberos does not work between cluster services). So this is a DS specific functionality and it was not backported from the upstream hive code to the PVC Base jdbc drivers, which is why Kerberos auth does not work with the drivers installed on Base nodes towards PVC DS Virtual Warehouses.
     - You must use impala-shell(`4.2.0` or later) on python 2.7 to access Impala virtual warehouse when using Kerberos authentication. I verified that this limitation still exists in PvC 1.5.2, impala-shell client has compatibility issues in a python 3.x environment for Kerberos principal. However, LDAP authentication does not have any compatibility issues.
-    - Long story short: please do `NOT` use the built-in beeline or impala-shell client in PvC Base Clsuter to access hive/impala virtual warehouses with Kerberos authentication.
+    - Long story short: please do `NOT` use the built-in beeline or impala-shell client in PvC Base Cluster to access hive/impala virtual warehouses with Kerberos authentication.
 
+- 
 
 ## 2. Introduction to the test environment
 
@@ -272,13 +273,19 @@ Name: feng.xu@ATHENS.CLOUDERA.COM to feng.xu
 |Case 06 |Impala(Base Cluster) |LDAP |Successful |
 |Case 07 |Impala(CDW) |Kerberos |Successful |
 |Case 08 |Impala(CDW) |LDAP |Successful |
+|Case 09 |Unified Analytics(CDW) |Kerberos |Successful |
+|Case 10 |Unified Analytics(CDW) |LDAP |Successful |
 
 - Please use the beeline CLI(3.1.3000.2023.0.14.0-84 or later) downloaded from the PVC DS DW UI.
 
 - How to get the JDBC URL?
     -  Go to Hive Virtual Warehouse > more (...) and click `Copy JDBC URL(LDAP)` or `Copy JDBC URL(Kerberos)`.
-
-![](../../assets/images/ds/hadoopclient19.png)
+    -  Hive LLAP(CDW)
+    ![](../../assets/images/ds/hadoopclient19.png)
+    -  Impala(CDW)
+    ![](../../assets/images/ds/hadoopclient20.png)
+    -  Unified Analytics(CDW)
+    ![](../../assets/images/ds/hadoopclient23.png)
 
 - How to get `sslTrustStore` and `trustStorePassword` for the JDBC URL?
     - For Auto-TLS enabled Base cluster, please download `sslTrustStore` from the location `/var/lib/cloudera-scm-agent/agent-cert/cm-auto-in_cluster_truststore.jks`. You can retrieve `trustStorePassword` via CM API. e.g. `curl -k --insecure -u admin:password -X GET https://ccycloud-1.tiger.root.hwx.site:7183/api/v42/certs/truststorePassword`
@@ -427,14 +434,74 @@ select logged_in_user();
 ![](../../assets/images/ds/hadoopclient10.png)
 
 
+- Case 09. Connect to Unified Analytics VW in PvC CDW using Kerberos authentication.
+
+- 1) ssl=false
+
+```bash
+kinit admin
+
+JAVA_TOOL_OPTIONS="-Djavax.security.auth.useSubjectCredsOnly=false" beeline -u "jdbc:hive2://hs2-ua01.apps.ecstest.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=false;retries=3;kerberosEnableCanonicalHostnameCheck=false;principal=hive/dwx-env-ecstest.cdp.local@FENG.COM"
+
+select logged_in_user();
+```
+
+![](../../assets/images/ds/hadoopclient24.png)
+
+
+- 2) ssl=true
+
+```bash
+kubectl get configmap -n cdp vault-jks -o jsonpath="{.binaryData['truststore\.jks']}"| base64 --decode > truststore.jks
+
+kinit admin
+
+JAVA_TOOL_OPTIONS="-Djavax.security.auth.useSubjectCredsOnly=false" beeline -u "jdbc:hive2://hs2-ua01.apps.ecstest.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=true;sslTrustStore=truststore.jks;trustStorePassword=changeit;retries=3;kerberosEnableCanonicalHostnameCheck=false;principal=hive/dwx-env-ecstest.cdp.local@FENG.COM"
+
+select logged_in_user();
+```
+
+![](../../assets/images/ds/hadoopclient25.png)
+
+
+- Case 10. Connect to Unified Analytics VW in PvC CDW using LDAP authentication.
+
+- 1) ssl=false
+
+```bash
+beeline -u 'jdbc:hive2://hs2-ua01.apps.ecstest.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=false;retries=3' -n cdw01 -p
+
+select logged_in_user();
+```
+
+![](../../assets/images/ds/hadoopclient26.png)
+
+
+- 2) ssl=true
+
+```bash
+kubectl get configmap -n cdp vault-jks -o jsonpath="{.binaryData['truststore\.jks']}"| base64 --decode > truststore.jks
+
+beeline -u 'jdbc:hive2://hs2-ua01.apps.ecstest.sme-feng.athens.cloudera.com/default;transportMode=http;httpPath=cliservice;ssl=true;sslTrustStore=truststore.jks;trustStorePassword=changeit;retries=3' -n cdw01 -p
+
+select logged_in_user();
+```
+
+![](../../assets/images/ds/hadoopclient27.png)
+
+
+
+
 
 ## 5. Validate impala-shell
 
 |Test Cases |Connect To | Authentication Type | Status |
-|Case 09 |Impala(Base Cluster) |Kerberos |Successful |
-|Case 10 |Impala(Base Cluster) |LDAP |Successful |
-|Case 11 |Impala(CDW) |Kerberos |Successful |
-|Case 12 |Impala(CDW) |LDAP |Successful |
+|Case 11 |Impala(Base Cluster) |Kerberos |Successful |
+|Case 12 |Impala(Base Cluster) |LDAP |Successful |
+|Case 13 |Impala(CDW) |Kerberos |Successful |
+|Case 14 |Impala(CDW) |LDAP |Successful |
+|Case 15 |Unified Analytics(CDW) |Kerberos |Successful |
+|Case 16 |Unified Analytics(CDW) |LDAP |Successful |
 
 
 - Please use impala-shell on python 2.7 to access Impala virtual warehouse when using Kerberos authentication. 
@@ -449,17 +516,15 @@ export KRB5_TRACE=/dev/stdout
 export HADOOP_ROOT_LOGGER=TRACE,console
 ```
 
-- How to get the JDBC URL and Impala shell command?
-    -  Go to Impala Virtual Warehouse > more (...) and click `Copy JDBC URL` or `Copy Impala shell command`.
-
-![](../../assets/images/ds/hadoopclient20.png)
+- How to get the Impala shell command?
+    -  Go to Impala Virtual Warehouse > more (...) and click `Copy Impala shell command`.
 
 - How to get `ca_cert` for the JDBC URL?
     - For Auto-TLS enabled Base cluster, please download `ca_cert` from the location `/var/lib/cloudera-scm-agent/agent-cert/cm-auto-in_cluster_ca_cert.pem`.
     - For Impala Virtual Warehouse, please retrieve `ca_cert` by a kubectl call: `kubectl get secret -n vault-system vault-server-tls -o jsonpath="{.data['vault\.ca']}"| base64 --decode > vault.ca`.
 
 
-- Case 09. Connect to Impala in CDP Base cluster using kerberos authentication.
+- Case 11. Connect to Impala in CDP Base cluster using kerberos authentication.
 
 - 1) NOT Verify Impala server certificates
 
@@ -486,7 +551,7 @@ select logged_in_user();
 ![](../../assets/images/ds/hadoopclient12.png)
 
 
-- Case 10. Connect to Impala in CDP Base cluster using LDAP authentication.
+- Case 12. Connect to Impala in CDP Base cluster using LDAP authentication.
 
 - 1) NOT Verify Impala server certificates
 
@@ -509,7 +574,7 @@ select logged_in_user();
 ![](../../assets/images/ds/hadoopclient14.png)
 
 
-- Case 11. Connect to Impala VW in PvC CDW using Kerberos authentication.
+- Case 13. Connect to Impala VW in PvC CDW using Kerberos authentication.
 
 - 1) NOT Verify Impala server certificates
 
@@ -538,7 +603,7 @@ select logged_in_user();
 ![](../../assets/images/ds/hadoopclient16.png)
 
 
-- Case 12. Connect to Impala VW in PvC CDW using LDAP authentication.
+- Case 14. Connect to Impala VW in PvC CDW using LDAP authentication.
 
 - 1) NOT Verify Impala server certificates
 
@@ -561,4 +626,58 @@ select logged_in_user();
 ```
 
 ![](../../assets/images/ds/hadoopclient18.png)
+
+
+- Case 15. Connect to Unified Analytics VW in PvC CDW using Kerberos authentication.
+
+- 1) NOT Verify UA server certificates
+
+```bash
+kinit admin
+
+impala-shell --protocol='hs2-http' --strict_hs2_protocol --ssl -i 'hs2-ua01.apps.ecstest.sme-feng.athens.cloudera.com:443' -s hive -k -b dwx-env-ecstest.cdp.local.
+
+select logged_in_user();
+```
+
+![](../../assets/images/ds/hadoopclient28.png)
+
+- 2) Verify UA server certificates
+    
+```bash
+kubectl get secret -n vault-system vault-server-tls -o jsonpath="{.data['vault\.ca']}"| base64 --decode > vault.ca
+
+kinit admin
+
+impala-shell --protocol='hs2-http' --strict_hs2_protocol --ssl -i 'hs2-ua01.apps.ecstest.sme-feng.athens.cloudera.com:443' -s hive -k -b dwx-env-ecstest.cdp.local. --ca_cert=./vault.ca
+
+select logged_in_user();
+```
+
+![](../../assets/images/ds/hadoopclient29.png)
+
+
+- Case 16. Connect to Unified Analytics VW in PvC CDW using LDAP authentication.
+
+- 1) NOT Verify UA server certificates
+
+```bash
+impala-shell --protocol='hs2-http' --strict_hs2_protocol --ssl -i 'hs2-ua01.apps.ecstest.sme-feng.athens.cloudera.com:443' -u cdw01 -l
+
+select logged_in_user();
+```
+
+![](../../assets/images/ds/hadoopclient30.png)
+
+- 2) Verify UA server certificates
+    
+```bash
+kubectl get secret -n vault-system vault-server-tls -o jsonpath="{.data['vault\.ca']}"| base64 --decode > vault.ca
+
+impala-shell --protocol='hs2-http' --strict_hs2_protocol --ssl -i 'hs2-ua01.apps.ecstest.sme-feng.athens.cloudera.com:443' -u cdw01 -l --ca_cert=./vault.ca
+
+select logged_in_user();
+```
+
+![](../../assets/images/ds/hadoopclient31.png)
 
