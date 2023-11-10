@@ -52,7 +52,7 @@ db-resourcepoolmanager=# select path,metadata from pools order by created_at;
 
 - There are five built-in pools post DS environment initiation. 
     - Note: The top resource pool is root which have unrestricted access to all resources available within your cluster.
-    - Note: quota_cpu=2000 means 2 CPU cores, quota_memory=1000000000 means 1GB.
+    - Note: quota_cpu=2000 means 2 CPU cores, quota_memory=1000000000 means 1GB memory.
 
 |No.|PATH|quota_cpu|quota_memory|validity|distribution|order|queueing|clusterId|namespace|
 |1|root|null|null|null|ELASTIC|FIFO|false|||
