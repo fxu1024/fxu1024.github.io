@@ -14,24 +14,7 @@ grand_parent: Data Service
 
 ---
 
-## 1. Basic Concept
-
-- In a secured CDP environment there are different alternatives available for clients to authenticate with the cluster. In this article we will look into the different authentication mechanisms and their configuration details:
-    - Kerberos authentication
-        - Kerberos is by far the most common option we see being used in the field to secure CDP clusters. It enables users to use their corporate identities, stored in services like Active Directory and RedHat IPA/FreeIPA, which simplifies identity management. A kerberized CDP cluster also makes it easier to integrate with other services in the Hadoop ecosystem, which also use Kerberos for strong authentication. Kerberos uses shared key cryptography through a ticket-based authentication system, whereby tickets are issued, encrypted, and decrypted by a key distribution center (KDC).
-    - LDAP authentication
-        - LDAP authentication can also be used for authentication with the CDP cluster, instead of Kerberos. This eliminates some of the complexity related to Kerberos, like requiring  Kerberos libraries to be installed for the client and issues when Load Balancers are used. When LDAP is used for authentication, differently from the Kerberos protocol, the beeline/impala-shell client needs to send the username and password over the network. Password files are often used to avoid password leaks.
-    - JWT(JSON Web Token)-based authentication
-        - JWT-based authentication uses a signed token to sign in or authenticate using a service instead of entering user credentials every time. Tokens are usually bound by a lifespan and can be shared or decommissioned when they are no longer in use. It's not supported yet in PvC CDW as [DWX-15370](https://jira.cloudera.com/browse/DWX-15370) described.
-
-- Hive and Impala virtual warehouses support Kerberos authentication from PvC 1.5.0 (Jan 2023), so there are many limitations on beeline version, impala version, python version and command attributes.
-    - You must use the beeline CLI(`3.1.3000.2023.0.14.0-84` or later) downloaded from the PVC DS DW UI. Otherwise the connection will fail with errors "HTTP Response code: 404 (state=08S01,code=0)". The downloaded Beeline itself already contains the open source Hive JDBC driver. The open source Hive JDBC driver uses Java Authentication and Authorization Service (JAAS) standard, which requires either a config file OR the use of a JVM property (`-Djavax.security.auth.useSubjectCredsOnly=false`) to enable the use of the Kerberos ticket cache.
-    - You must add the `kerberosEnableCanonicalHostnameCheck=false` option in the hive jdbc url. The `kerberosEnableCanonicalHostnameCheck` option disables the reverse dns check implemented in the jdbc driver. There is no need for this in PVC Base, because the reverse dns records must be correct there for the cluster nodes (otherwise Kerberos does not work between cluster services). So this is a DS specific functionality and it was not backported from the upstream hive code to the PVC Base jdbc drivers, which is why Kerberos auth does not work with the drivers installed on Base nodes towards PVC DS Virtual Warehouses.
-    - You must use impala-shell(`4.2.0` or later) on python 2.7 to access Impala virtual warehouse when using Kerberos authentication. I verified that this limitation still exists in PvC 1.5.2, impala-shell client has compatibility issues in a python 3.x environment for Kerberos principal. However, LDAP authentication does not have any compatibility issues.
-    - Long story short: please do `NOT` use the built-in beeline or impala-shell client in PvC Base Cluster to access hive/impala virtual warehouses with Kerberos authentication.
-
-
-## 2. Introduction to the test environment
+## 1. Introduction to the test environment
 
 |MAC OS version |13.1 (22C65)|
 |Processor Type |Intel Core i7|
@@ -40,8 +23,23 @@ grand_parent: Data Service
 |Beeline version |3.1.3000|
 |Impala-shell version |4.3.0a4|
 |CDP Runtime version |CDP PvC Base 7.1.7 SP2|
-|CM version |Cloudera Manager 7.11.3|
+|CM version |Cloudera Manager 7.11.3.2|
 |ECS version |CDP PvC DataServices 1.5.2|
+
+## 2. Basic Concept
+
+- In a secured CDP environment there are different alternatives available for clients to authenticate with the cluster. In this article we will look into the different authentication mechanisms and their configuration details:
+    - Kerberos authentication
+        - Kerberos is by far the most common option we see being used in the field to secure CDP clusters. It enables users to use their corporate identities, stored in services like Active Directory and RedHat IPA/FreeIPA, which simplifies identity management. A kerberized CDP cluster also makes it easier to integrate with other services in the Hadoop ecosystem, which also use Kerberos for strong authentication. Kerberos uses shared key cryptography through a ticket-based authentication system, whereby tickets are issued, encrypted, and decrypted by a key distribution center (KDC).
+    - LDAP authentication
+        - LDAP authentication can also be used for authentication with the CDP cluster, instead of Kerberos. This eliminates some of the complexity related to Kerberos, like requiring  Kerberos libraries to be installed for the client and issues when Load Balancers are used. When LDAP is used for authentication, differently from the Kerberos protocol, the beeline/impala-shell client needs to send the username and password over the network. Password files are often used to avoid password leaks.
+
+- Hive and Impala virtual warehouses support Kerberos authentication from PvC 1.5.0 (Jan 2023), unfortunately there are many limitations on beeline version, impala version, python version and command attributes.
+    - You must use the beeline CLI(`3.1.3000.2023.0.14.0-84` or later) downloaded from the PVC DS DW UI. Otherwise the connection will fail with errors "HTTP Response code: 404 (state=08S01,code=0)". The downloaded Beeline itself already contains the open source Hive JDBC driver. The open source Hive JDBC driver uses Java Authentication and Authorization Service (JAAS) standard, which requires either a config file OR the use of a JVM property (`-Djavax.security.auth.useSubjectCredsOnly=false`) to enable the use of the Kerberos ticket cache.
+    - You must add the `kerberosEnableCanonicalHostnameCheck=false` option in the hive jdbc url. The `kerberosEnableCanonicalHostnameCheck` option disables the reverse dns check implemented in the jdbc driver. There is no need for this in PVC Base, because the reverse dns records must be correct there for the cluster nodes (otherwise Kerberos does not work between cluster services). So this is a DS specific functionality and it was not backported from the upstream hive code to the PVC Base jdbc drivers, which is why Kerberos auth does not work with the drivers installed on Base nodes towards PVC DS Virtual Warehouses.
+    - You must use impala-shell(`4.2.0` or later) on python 2.7 to access Impala virtual warehouse when using Kerberos authentication. I verified that this limitation still exists in PvC 1.5.2, impala-shell client has compatibility issues in a python 3.x environment for Kerberos principal. However, LDAP authentication does not have any compatibility issues.
+    - Long story short: please do `NOT` use the built-in beeline or impala-shell client in PvC Base Cluster to access hive/impala virtual warehouses with Kerberos authentication.
+
 
 ## 3. Hadoop Clients Setup on MacOSX
 
@@ -179,7 +177,7 @@ PS1='\[\e[0;33m\]\u\[\e[0m\]@\[\e[0;32m\]\h\[\e[0m\]:\[\e[0;34m\]\w\[\e[0m\]\$ '
 export JAVA_HOME=/usr/local/Cellar/openjdk@11/11.0.18/libexec/openjdk.jdk/Contents/Home/
 export SPARK_HOME=$HOME/hadoop-clients/spark
 export BEELINE_HOME=$HOME/hadoop-clients/beeline
-export HADOOP_CONF_DIR=$HOME/hadoop-clients/conf.cloudera.hive_on_tez
+export HIVE_CONF_DIR=$HOME/hadoop-clients/conf.cloudera.hive_on_tez
 PATH=$PATH:$BEELINE_HOME/bin:$SPARK_HOME/sbin:$SPARK_HOME/bin
 export PATH="/Library/Frameworks/Python.framework/Versions/2.7/bin:/Library/Frameworks/Python.framework/Versions/3.8/bin:${PATH}"
 
@@ -234,10 +232,10 @@ sme-feng.athens.cloudera.com = ATHENS.CLOUDERA.COM
 tiger.root.hwx.site = FENG.COM
 ```
 
-- Please add the mapping rules into the `hadoop.security.auth_to_local` property of $HADOOP_CONF_DIR/core-site.xml.
+- Please add the mapping rules into the `hadoop.security.auth_to_local` property of $HIVE_CONF_DIR/core-site.xml.
 
 ```bash
-vi $HADOOP_CONF_DIR/core-site.xml
+vi $HIVE_CONF_DIR/core-site.xml
 
   <property>
     <name>hadoop.security.auth_to_local</name>
@@ -291,7 +289,9 @@ Name: feng.xu@ATHENS.CLOUDERA.COM to feng.xu
     - For Hive/Impala Virtual Warehouse, please retrieve `sslTrustStore` by a kubectl call: `kubectl get configmap -n cdp vault-jks -o jsonpath="{.binaryData['truststore\.jks']}"| base64 --decode > truststore.jks`. The default `trustStorePassword` is `changeit`.
 
 
-- Case 01. Connect to Hive in CDP Base cluster[realm=FENG.COM] using Kerberos authentication.
+### 4.1 Case 01 - Hive on Tez(Base Cluster) + Kerberos auth
+
+- Connect to Hive in CDP Base cluster[realm=FENG.COM] using Kerberos authentication.
     - Note: You must set `JAVA_TOOL_OPTIONS=-Djavax.security.auth.useSubjectCredsOnly=false` property in the java env which allows jvm to use kerberos tickets from the system ticket cache.
 
 ```bash
@@ -305,7 +305,9 @@ select logged_in_user();
 ![](../../assets/images/ds/hadoopclient01.png)
 
 
-- Case 02. Connect to Hive in CDP Base cluster[realm=FENG.COM] using LDAP authentication.
+### 4.2 Case 02 - Hive on Tez(Base Cluster) + LDAP auth
+
+- Connect to Hive in CDP Base cluster[realm=FENG.COM] using LDAP authentication.
 
 ```bash
 beeline -u 'jdbc:hive2://ccycloud-1.tiger.root.hwx.site:10000/default;ssl=true;sslTrustStore=./cm-auto-in_cluster_truststore.jks' -n cdw01 -p
@@ -316,7 +318,9 @@ select logged_in_user();
 ![](../../assets/images/ds/hadoopclient02.png)
 
 
-- Case 03. Connect to Hive VW in PvC CDW using Kerberos authentication.
+### 4.3 Case 03 - Hive LLAP(CDW) + Kerberos auth
+
+- Connect to Hive VW in PvC CDW using Kerberos authentication.
 
 - 1) ssl=false
 
@@ -346,7 +350,9 @@ select logged_in_user();
 ![](../../assets/images/ds/hadoopclient04.png)
 
 
-- Case 04. Connect to Hive VW in PvC CDW using LDAP authentication.
+### 4.4 Case 04 - Hive LLAP(CDW) + LDAP auth
+
+- Connect to Hive VW in PvC CDW using LDAP authentication.
 
 - 1) ssl=false
 
@@ -372,8 +378,9 @@ select logged_in_user();
 ![](../../assets/images/ds/hadoopclient06.png)
 
 
+### 4.5 Case 05 - Impala(Base Cluster) + Kerberos auth
 
-- Case 05. Connect to Impala in CDP Base cluster B [realm=FENG.COM] using Kerberos authentication.
+- Connect to Impala in CDP Base cluster B [realm=FENG.COM] using Kerberos authentication.
 
 ```bash
 kinit admin@FENG.COM
@@ -387,8 +394,9 @@ select logged_in_user();
 
 ![](../../assets/images/ds/hadoopclient07.png)
 
+### 4.6 Case 06 - Impala(Base Cluster) + LDAP auth
 
-- Case 06. Connect to Impala in CDP Base cluster B [realm=FENG.COM] using LDAP authentication.
+- Connect to Impala in CDP Base cluster B [realm=FENG.COM] using LDAP authentication.
 
 ```bash
 export HIVE_AUX_JARS_PATH=$HOME/work/projects/ImpalaJDBC41.jar
@@ -400,8 +408,9 @@ select logged_in_user();
 
 ![](../../assets/images/ds/hadoopclient08.png)
 
+### 4.7 Case 07 - Impala(CDW) + Kerberos auth
 
-- Case 07. Connect to Impala VW in PvC CDW using Kerberos authentication.
+- Connect to Impala VW in PvC CDW using Kerberos authentication.
 
 ```bash
 kubectl get configmap -n cdp vault-jks -o jsonpath="{.binaryData['truststore\.jks']}"| base64 --decode > truststore.jks
@@ -417,8 +426,9 @@ select logged_in_user();
 
 ![](../../assets/images/ds/hadoopclient09.png)
 
+### 4.8 Case 08 - Impala(CDW) + LDAP auth
 
-- Case 08. Connect to Impala VW in PvC CDW using LDAP authentication.
+- Connect to Impala VW in PvC CDW using LDAP authentication.
 
 ```bash
 kubectl get configmap -n cdp vault-jks -o jsonpath="{.binaryData['truststore\.jks']}"| base64 --decode > truststore.jks
@@ -432,8 +442,9 @@ select logged_in_user();
 
 ![](../../assets/images/ds/hadoopclient10.png)
 
+### 4.9 Case 09 - Unified Analytics(CDW) + Kerberos auth
 
-- Case 09. Connect to Unified Analytics VW in PvC CDW using Kerberos authentication.
+- Connect to Unified Analytics VW in PvC CDW using Kerberos authentication.
 
 - 1) ssl=false
 
@@ -462,8 +473,9 @@ select logged_in_user();
 
 ![](../../assets/images/ds/hadoopclient25.png)
 
+### 4.10 Case 10 - Unified Analytics(CDW) + LDAP auth
 
-- Case 10. Connect to Unified Analytics VW in PvC CDW using LDAP authentication.
+- Connect to Unified Analytics VW in PvC CDW using LDAP authentication.
 
 - 1) ssl=false
 
@@ -522,8 +534,9 @@ export HADOOP_ROOT_LOGGER=TRACE,console
     - For Auto-TLS enabled Base cluster, please download `ca_cert` from the location `/var/lib/cloudera-scm-agent/agent-cert/cm-auto-in_cluster_ca_cert.pem`.
     - For Impala Virtual Warehouse, please retrieve `ca_cert` by a kubectl call: `kubectl get secret -n vault-system vault-server-tls -o jsonpath="{.data['vault\.ca']}"| base64 --decode > vault.ca`.
 
+### 5.1 Case 11 - Impala(Base Cluster) + Kerberos auth
 
-- Case 11. Connect to Impala in CDP Base cluster using kerberos authentication.
+- Connect to Impala in CDP Base cluster using kerberos authentication.
 
 - 1) NOT Verify Impala server certificates
 
@@ -550,7 +563,9 @@ select logged_in_user();
 ![](../../assets/images/ds/hadoopclient12.png)
 
 
-- Case 12. Connect to Impala in CDP Base cluster using LDAP authentication.
+### 5.2 Case 12 - Impala(Base Cluster) + LDAPLDAP auth
+
+- Connect to Impala in CDP Base cluster using LDAP authentication.
 
 - 1) NOT Verify Impala server certificates
 
@@ -573,7 +588,9 @@ select logged_in_user();
 ![](../../assets/images/ds/hadoopclient14.png)
 
 
-- Case 13. Connect to Impala VW in PvC CDW using Kerberos authentication.
+### 5.3 Case 13 - Impala(CDW) + Kerberos auth
+
+- Connect to Impala VW in PvC CDW using Kerberos authentication.
 
 - 1) NOT Verify Impala server certificates
 
@@ -601,8 +618,9 @@ select logged_in_user();
 
 ![](../../assets/images/ds/hadoopclient16.png)
 
+### 5.4 Case 14 - Impala(CDW) + LDAP auth
 
-- Case 14. Connect to Impala VW in PvC CDW using LDAP authentication.
+- Connect to Impala VW in PvC CDW using LDAP authentication.
 
 - 1) NOT Verify Impala server certificates
 
@@ -627,7 +645,9 @@ select logged_in_user();
 ![](../../assets/images/ds/hadoopclient18.png)
 
 
-- Case 15. Connect to Unified Analytics VW in PvC CDW using Kerberos authentication.
+### 5.5 Case 15 - Unified Analytics(CDW) + Kerberos auth
+
+- Connect to Unified Analytics VW in PvC CDW using Kerberos authentication.
 
 - 1) NOT Verify UA server certificates
 
@@ -656,7 +676,9 @@ select logged_in_user();
 ![](../../assets/images/ds/hadoopclient29.png)
 
 
-- Case 16. Connect to Unified Analytics VW in PvC CDW using LDAP authentication.
+### 5.6 Case 16 - Unified Analytics(CDW) + LDAP auth
+
+- Connect to Unified Analytics VW in PvC CDW using LDAP authentication.
 
 - 1) NOT Verify UA server certificates
 
