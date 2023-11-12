@@ -563,7 +563,7 @@ select logged_in_user();
 ![](../../assets/images/ds/hadoopclient12.png)
 
 
-### 5.2 Case 12 - Impala(Base Cluster) + LDAPLDAP auth
+### 5.2 Case 12 - Impala(Base Cluster) + LDAP auth
 
 - Connect to Impala in CDP Base cluster using LDAP authentication.
 
