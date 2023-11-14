@@ -390,6 +390,7 @@ $ curl http://localhost:9889/ws/v1/partition/default/nodes| jq 'sort_by(.nodeID)
   "pods": 471,
   "vcore": 10688
 }
+```
 
 - Let's create the impala virtual warehouse `impala01`. check the available resource again after it's successfully built.
 
@@ -458,43 +459,3 @@ impala-executor-000-1
 statestored-f96f8bc6-85hx4
               yunikorn.apache.org/ignore-application: true
 ```
-
-
-
-
-
-$ curl http://localhost:9889/ws/v1/partition/default/nodes| jq 'sort_by(.nodeID)'| jq '.[] | .nodeID,.available'
-
-"feng-ws2.sme-feng.athens.cloudera.com"
-{
-  "ephemeral-storage": 101994496125,
-  "hugepages-2Mi": 0,
-  "memory": 41116037120,
-  "pods": 481,
-  "vcore": 10465
-}
-"feng-ws3.sme-feng.athens.cloudera.com"
-{
-  "ephemeral-storage": 101994496125,
-  "hugepages-2Mi": 0,
-  "memory": 66800169984,
-  "pods": 483,
-  "vcore": 12440
-}
-"feng-ws4.sme-feng.athens.cloudera.com"
-{
-  "ephemeral-storage": 101994496125,
-  "hugepages-2Mi": 0,
-  "memory": 82634317312,
-  "pods": 466,
-  "vcore": 11319
-}
-"feng-ws5.sme-feng.athens.cloudera.com"
-{
-  "ephemeral-storage": 101994496125,
-  "hugepages-2Mi": 0,
-  "memory": 24896907264,
-  "pods": 474,
-  "vcore": 10088
-}
-
