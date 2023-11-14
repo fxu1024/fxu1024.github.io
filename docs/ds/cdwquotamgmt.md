@@ -152,7 +152,7 @@ db-resourcepoolmanager=# select path,metadata from pools order by created_at;
 
 - However it works if you delete the hive virtual warehouse `hive02` and then create the impala virtual warehouse `impala01`.
 
-![](../../assets/images/ds/cdwquota20.png)
+![](../../assets/images/ds/cdwquota23.png)
 
 - We can compare these two queue definition from the database, and the difference is only in the memory quota: root.default.high.compute-hive02 is 128GB (134400000000), root.default.high.impala-impala01 is 121GB (126976000000). It is obvious that whether it is `compute-hive02` or `impala-impala01`, their total request resources don't exceed 300GB, which shows that quota is not the cause for the unsuccessful deployment of the virtual warehouse `hive02`.
 
