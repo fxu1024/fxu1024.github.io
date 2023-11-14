@@ -67,7 +67,7 @@ OpenJDK 64-Bit Server VM Homebrew (build 11.0.18+0, mixed mode)
 
 - Note: To use Kerberos auth in PvC DS you must use the latest beeline CLI(3.1.3000.2023.0.14.0-84) downloaded from the PVC DS DW UI.
 
-- In order to connect to Hive VW via beeline shell, the first step is to download Beeline CLI software. "Guides and More" is on the Cloudera Data Warehouse Overview. Navigate to "Guides and More" and click on the "see more" button, you can see ["Downloads - Beeline CLI"](https://cdw-ui.s3.amazonaws.com/hive3/beeline-standalone/apache-hive-beeline-3.1.3000.tar.gz).
+- In order to connect to Hive VW via beeline shell, the first step is to download Beeline CLI software. "Guides and More" is on the Cloudera Data Warehouse Overview. Navigate to Cloudera Data Warehouse > Overveiw > Resources and Downloads and click on the "see more" button, you can see "Downloads - Beeline CLI". You can also download it from [Hive3 website](https://cdw-ui.s3.amazonaws.com/hive3/beeline-standalone/apache-hive-beeline-3.1.3000.tar.gz).
 
 ![](../../assets/images/ds/hadoopclient21.png)
 
@@ -82,7 +82,25 @@ ln -s apache-hive-beeline-3.1.3000.2023.0.14.0-84 beeline
 ![](../../assets/images/ds/hadoopclient22.png)
 
 
-### 3.4. Install Impala-shell 4.3.0a4
+### 3.4 Download Hive/Impala jdbc drivers
+
+- You can download hive/impala jdbc drivers from the same location as Beeline CLI.
+    - Hive jdbc Jar is Cloudera provided enterprise driver `hive-jdbc-3.1.0-SNAPSHOT-standalone.jar`.
+    - Impala JDBC/ODBC Driver is `impala_driver_odbc_jdbc.zip`. You can extract it and get the latest impala jdbc driver `ImpalaJDBC42.jar`.
+    - Unified Analytics JDBC Driver is same as Hive jdbc Jar.
+
+```bash
+mkdir -p $HOME/hadoop-clients/drivers
+
+ls -l $HOME/hadoop-clients/drivers
+
+total 200624
+-rw-rw-r--@ 1 feng.xu  staff  11597118 Jul  7 08:18 ImpalaJDBC42.jar
+-rw-r--r--@ 1 feng.xu  staff  91116291 Nov 11 22:04 hive-jdbc-3.1.0-SNAPSHOT-standalone.jar
+```
+
+
+### 3.5. Install Impala-shell 4.3.0a4
 
 - Impala shell can be invoked on a remote client machine by installing the impala-shell package. It is a python package that can be installed using pip.
     - Note: Kerberos authentication requires impala-shell version 4.2.0 or later (https://pypi.org/project/impala-shell/4.3.0a4/). 
@@ -146,7 +164,7 @@ ln -s /Library/Frameworks/Python.framework/Versions/2.7/bin/impala-shell /usr/lo
 ```
 
 
-### 3.5. Download config files from CDP Base cluster
+### 3.6. Download config files from CDP Base cluster
 
 - Please download config files from CDP Base cluster(/etc/hive/conf.cloudera.hive_on_tez, /etc/spark3/conf.cloudera.spark3_on_yarn)
 
@@ -165,7 +183,7 @@ tar xvf hiveconf.tar -C $HOME/hadoop-clients
 tar xvf spark3conf.tar -C $HOME/hadoop-clients
 ```
 
-### 3.6. Update bash_profile
+### 3.7. Update bash_profile
 
 - Modify `$HOME/.bash_profile`
 
@@ -184,7 +202,7 @@ export PATH="/Library/Frameworks/Python.framework/Versions/2.7/bin:/Library/Fram
 source $HOME/.bash_profile
 ```
 
-### 3.7. Update /etc/hosts,/etc/krb5.conf and core-site.xml
+### 3.8. Update /etc/hosts,/etc/krb5.conf and core-site.xml
 
 - Please add the remote hiveserver2 hosts into /etc/hosts.
     - ccycloud-1.tiger.root.hwx.site has the realm `FENG.COM`.
