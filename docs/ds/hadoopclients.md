@@ -156,7 +156,8 @@ You should consider upgrading via the '/Library/Frameworks/Python.framework/Vers
 ```
 
 - Please ensure that impala-shell runs on python 3.8 environment.
-```console
+
+```bash
 $ which impala-shell
 /Library/Frameworks/Python.framework/Versions/3.8/bin/impala-shell
 
