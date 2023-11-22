@@ -61,10 +61,10 @@ db-resourcepoolmanager=# select path,metadata from pools order by created_at;
 |4|root.default.ecstest-c51569f2|4000|30000000000|-1|ELASTIC|FIFO|true|liftie-8wqkf202||
 |5|root.default.ecstest-c51569f2.monitoring-namespace|4000|30000000000|-1|ELASTIC|FIFO|true|liftie-8wqkf202|ecstest-c51569f2-monitoring-platform|
 
-- Add three new pools for CDW workloads. 
+- Add three new pools for Data Services workloads. 
     - Note: please keep advanced properties no changed. 
 
-|No.|PATH|quota_cpu|quota_memory|validity|distribution|order|queueing|clusterId|namespace|
+|No.|PATH|quota_cores|quota_memory|validity|distribution|order|queueing|clusterId|namespace|
 |1|root.default.high|48|200GB||ELASTIC|FIFO|true|||
 |2|root.default.medium|24|100GB||ELASTIC|FIFO|true|||
 |3|root.default.low|12|50GB||ELASTIC|FIFO|true|||

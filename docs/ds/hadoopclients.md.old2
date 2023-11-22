@@ -19,9 +19,9 @@ grand_parent: Data Service
 |MAC OS version |13.1 (22C65)|
 |Processor Type |Intel Core i7|
 |Java version |11.0.18|
-|Python version |3.8.10|
+|Python version |2.7.18rc1 & 3.8.10|
 |Beeline version |3.1.3000|
-|Impala-shell version |4.4.0a1|
+|Impala-shell version |4.3.0a4|
 |CDP Runtime version |CDP PvC Base 7.1.7 SP2|
 |CM version |Cloudera Manager 7.11.3.2|
 |ECS version |CDP PvC DataServices 1.5.2|
@@ -34,10 +34,10 @@ grand_parent: Data Service
     - LDAP authentication
         - LDAP authentication can also be used for authentication with the CDP cluster, instead of Kerberos. This eliminates some of the complexity related to Kerberos, like requiring  Kerberos libraries to be installed for the client and issues when Load Balancers are used. When LDAP is used for authentication, differently from the Kerberos protocol, the beeline/impala-shell client needs to send the username and password over the network. Password files are often used to avoid password leaks.
 
-- PvC CDW virtual warehouses support Kerberos authentication from PvC 1.5.0 (Jan 2023), there are some limitations about beeline version, impala-shell version and commandline attributes.
+- PvC CDW virtual warehouses support Kerberos authentication from PvC 1.5.0 (Jan 2023), unfortunately there are many limitations on beeline version, impala version, python version and commandline attributes.
     - You must use the beeline CLI(`3.1.3000.2023.0.14.0-84` or later) downloaded from the PVC DS DW UI. Otherwise the connection will fail with errors "HTTP Response code: 404 (state=08S01,code=0)". The downloaded Beeline itself already contains the open source Hive JDBC driver. The open source Hive JDBC driver uses Java Authentication and Authorization Service (JAAS) standard, which requires either a config file OR the use of a JVM property (`-Djavax.security.auth.useSubjectCredsOnly=false`) to enable the use of the Kerberos ticket cache.
     - You must add the `kerberosEnableCanonicalHostnameCheck=false` option in the hive jdbc url. The `kerberosEnableCanonicalHostnameCheck` option disables the reverse dns check implemented in the jdbc driver. There is no need for this in PVC Base, because the reverse dns records must be correct there for the cluster nodes (otherwise Kerberos does not work between cluster services). So this is a DS specific functionality and it was not backported from the upstream hive code to the PVC Base jdbc drivers, which is why Kerberos auth does not work with the drivers installed on Base nodes towards PVC DS Virtual Warehouses.
-    - You must use impala-shell(`4.4.0a1` or later) to access Impala virtual warehouse when using Kerberos authentication.
+    - You must use impala-shell(`4.2.0` or later) on python 2.7 to access Impala virtual warehouse when using Kerberos authentication. I verified that this limitation still exists in PvC 1.5.2, impala-shell client has compatibility issues in a python 3.x environment for Kerberos principal. However, LDAP authentication does not have any compatibility issues on python 3.x.
     - Long story short: please do `NOT` use the built-in beeline or impala-shell client in PvC Base Cluster to access CDW virtual warehouses with Kerberos authentication.
 
 
@@ -56,13 +56,12 @@ OpenJDK Runtime Environment Homebrew (build 11.0.18+0)
 OpenJDK 64-Bit Server VM Homebrew (build 11.0.18+0, mixed mode)
 ```
 
-### 3.2. Install Python 3.8.10
+### 3.2. Install Python 2.7.18 & 3.8.10
 
-- To install python 3.8.10 on MacOS, please download the installer from [python official download site](https://www.python.org/downloads/release/python-3810/).
+- Python 2.7.18 is the last release of Python 2. To install python 2.7.18 on MacOS, please download the installer from [python official download site](https://www.python.org/downloads/release/python-2718rc1/).
+    - Note: The command `brew install python@2` doesn't work because macOS remove the support of python 2.
 
-![](../../assets/images/ds/hadoopclient32.png)
-
-![](../../assets/images/ds/hadoopclient33.png)
+- You can install [Python 3.8.10](https://www.python.org/downloads/release/python-3810/) by the same way.
 
 ### 3.3 Install Beeline 3.1.3
 
@@ -101,67 +100,67 @@ total 200624
 ```
 
 
-### 3.5. Install Impala-shell 4.4.0a1
+### 3.5. Install Impala-shell 4.3.0a4
 
 - Impala shell can be invoked on a remote client machine by installing the impala-shell package. It is a python package that can be installed using pip.
-    - Note: Kerberos authentication requires impala-shell version 4.4.0a1 or later (https://pypi.org/project/impala-shell/4.4.0a1/). 
+    - Note: Kerberos authentication requires impala-shell version 4.2.0 or later (https://pypi.org/project/impala-shell/4.3.0a4/). 
 
 ```console
-$ which python3
-/Library/Frameworks/Python.framework/Versions/3.8/bin/python3
+$ which python
+/usr/local/bin/python
 
-$ python3 -V
-Python 3.8.10
+$ ls -l /usr/local/bin/python
+lrwxr-xr-x  1 root  wheel  68 Nov  8 20:38 /usr/local/bin/python -> ../../../Library/Frameworks/Python.framework/Versions/2.7/bin/python
 
-$ pip3 -V
-pip 21.1.1 from /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages/pip (python 3.8)
+$ python -V
+Python 2.7.18rc1
 
-$ pip3 install impala-shell==4.4.0a1
-Collecting impala-shell==4.4.0a1
-  Downloading impala_shell-4.4.0a1.tar.gz (489 kB)
-     || 489 kB 320 kB/s
-Collecting bitarray==2.3.0
-  Using cached bitarray-2.3.0.tar.gz (87 kB)
-Collecting configparser==4.0.2
-  Using cached configparser-4.0.2-py2.py3-none-any.whl (22 kB)
-Collecting kerberos==1.3.1
-  Using cached kerberos-1.3.1-cp38-cp38-macosx_10_15_x86_64.whl (33 kB)
-Collecting prettytable==0.7.2
-  Using cached prettytable-0.7.2-py3-none-any.whl
-Collecting sasl==0.3.1
-  Using cached sasl-0.3.1.tar.gz (44 kB)
-Requirement already satisfied: setuptools>=36.8.0 in /Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/site-packages (from impala-shell==4.4.0a1) (56.0.0)
-Collecting six==1.14.0
-  Using cached six-1.14.0-py2.py3-none-any.whl (10 kB)
-Collecting sqlparse==0.3.1
-  Using cached sqlparse-0.3.1-py2.py3-none-any.whl (40 kB)
-Collecting thrift==0.16.0
-  Using cached thrift-0.16.0.tar.gz (59 kB)
-Collecting thrift_sasl==0.4.3
-  Using cached thrift_sasl-0.4.3-py2.py3-none-any.whl (8.3 kB)
-Collecting pure-sasl>=0.6.2
-  Using cached pure_sasl-0.6.2-py3-none-any.whl
-Using legacy 'setup.py install' for impala-shell, since package 'wheel' is not installed.
-Using legacy 'setup.py install' for bitarray, since package 'wheel' is not installed.
-Using legacy 'setup.py install' for sasl, since package 'wheel' is not installed.
-Using legacy 'setup.py install' for thrift, since package 'wheel' is not installed.
-Installing collected packages: six, thrift, pure-sasl, thrift-sasl, sqlparse, sasl, prettytable, kerberos, configparser, bitarray, impala-shell
-    Running setup.py install for thrift ... done
-    Running setup.py install for sasl ... done
-    Running setup.py install for bitarray ... done
-    Running setup.py install for impala-shell ... done
-Successfully installed bitarray-2.3.0 configparser-4.0.2 impala-shell-4.4.0a1 kerberos-1.3.1 prettytable-0.7.2 pure-sasl-0.6.2 sasl-0.3.1 six-1.14.0 sqlparse-0.3.1 thrift-0.16.0 thrift-sasl-0.4.3
-WARNING: You are using pip version 21.1.1; however, version 23.3.1 is available.
-You should consider upgrading via the '/Library/Frameworks/Python.framework/Versions/3.8/bin/python3.8 -m pip install --upgrade pip' command.
+$ pip -V
+pip 19.2.3 from /Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/pip (python 2.7)
+
+$ pip install impala-shell==4.3.0a4
+DEPRECATION: Python 2.7 will reach the end of its life on January 1st, 2020. Please upgrade your Python as Python 2.7 won't be maintained after that date. A future version of pip will drop support for Python 2.7. More details about Python 2 support in pip, can be found at https://pip.pypa.io/en/latest/development/release-process/#python-2-support
+Collecting impala-shell==4.3.0a4
+  Using cached https://files.pythonhosted.org/packages/c6/db/5346489ed196dd5ce3ac9b885a4d6c16417f1d03ca7168aeb6f7c85af7d5/impala_shell-4.3.0a4.tar.gz
+Collecting bitarray==2.3.0 (from impala-shell==4.3.0a4)
+  Using cached https://files.pythonhosted.org/packages/92/43/4ddd1efaf5ed7913847624248f7888a55dbacab8daf07787aebf9e9a51f7/bitarray-2.3.0.tar.gz
+Collecting configparser==4.0.2 (from impala-shell==4.3.0a4)
+  Using cached https://files.pythonhosted.org/packages/7a/2a/95ed0501cf5d8709490b1d3a3f9b5cf340da6c433f896bbe9ce08dbe6785/configparser-4.0.2-py2.py3-none-any.whl
+Collecting kerberos==1.3.1 (from impala-shell==4.3.0a4)
+  Using cached https://files.pythonhosted.org/packages/39/cd/f98699a6e806b9d974ea1d3376b91f09edcb90415adbf31e3b56ee99ba64/kerberos-1.3.1.tar.gz
+Collecting prettytable==0.7.2 (from impala-shell==4.3.0a4)
+  Using cached https://files.pythonhosted.org/packages/ef/30/4b0746848746ed5941f052479e7c23d2b56d174b82f4fd34a25e389831f5/prettytable-0.7.2.tar.bz2
+Collecting sasl==0.3.1 (from impala-shell==4.3.0a4)
+  Using cached https://files.pythonhosted.org/packages/df/ae/d8dda9ef1636f548935c271910d3b35afbf1782df582fda88a13ea48de53/sasl-0.3.1.tar.gz
+Requirement already satisfied: setuptools>=36.8.0 in /Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages (from impala-shell==4.3.0a4) (41.2.0)
+Collecting six==1.14.0 (from impala-shell==4.3.0a4)
+  Using cached https://files.pythonhosted.org/packages/65/eb/1f97cb97bfc2390a276969c6fae16075da282f5058082d4cb10c6c5c1dba/six-1.14.0-py2.py3-none-any.whl
+Collecting sqlparse==0.3.1 (from impala-shell==4.3.0a4)
+  Using cached https://files.pythonhosted.org/packages/85/ee/6e821932f413a5c4b76be9c5936e313e4fc626b33f16e027866e1d60f588/sqlparse-0.3.1-py2.py3-none-any.whl
+Collecting thrift==0.16.0 (from impala-shell==4.3.0a4)
+  Using cached https://files.pythonhosted.org/packages/e4/23/dd951c9883cb49a73b750bdfe91e39d78e8a3f1f7175608634f381a197d5/thrift-0.16.0.tar.gz
+Collecting thrift_sasl==0.4.3 (from impala-shell==4.3.0a4)
+  Using cached https://files.pythonhosted.org/packages/c3/9e/636c24ce1c0d46ce3020c5836c5a375d8e862fa81a240e0e352cc991dcf8/thrift_sasl-0.4.3-py2.py3-none-any.whl
+Collecting pure-sasl>=0.6.2 (from thrift_sasl==0.4.3->impala-shell==4.3.0a4)
+  Using cached https://files.pythonhosted.org/packages/37/b2/ef1124540ee2c0b417be8d0f74667957e6aa084a3f26621aa67e2e77f3fb/pure_sasl-0.6.2-py2-none-any.whl
+Installing collected packages: bitarray, configparser, kerberos, prettytable, six, sasl, sqlparse, thrift, pure-sasl, thrift-sasl, impala-shell
+  Running setup.py install for bitarray ... done
+  Running setup.py install for kerberos ... done
+  Running setup.py install for prettytable ... done
+  Running setup.py install for sasl ... done
+  WARNING: The script sqlformat is installed in '/Library/Frameworks/Python.framework/Versions/2.7/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  Running setup.py install for thrift ... done
+  Running setup.py install for impala-shell ... done
+Successfully installed bitarray-2.3.0 configparser-4.0.2 impala-shell-4.3.0a4 kerberos-1.3.1 prettytable-0.7.2 pure-sasl-0.6.2 sasl-0.3.1 six-1.14.0 sqlparse-0.3.1 thrift-0.16.0 thrift-sasl-0.4.3
+WARNING: You are using pip version 19.2.3, however version 20.3.4 is available.
+You should consider upgrading via the 'pip install --upgrade pip' command.
 ```
 
-- Please ensure that impala-shell runs on python 3.8 environment.
+- Please ensure that impala-shell runs on python 2.7 environment by default.
 ```console
-$ which impala-shell
-/Library/Frameworks/Python.framework/Versions/3.8/bin/impala-shell
-
-$ impala-shell -v
-Impala Shell v4.4.0a1 (04bdb4d) built on Mon Nov 20 10:49:35 PST 2023
+rm -f /usr/local/bin/impala-shell
+ln -s /Library/Frameworks/Python.framework/Versions/2.7/bin/impala-shell /usr/local/bin/impala-shell
 ```
 
 
@@ -404,9 +403,9 @@ select logged_in_user();
 ```bash
 kinit admin@FENG.COM
 
-export HIVE_AUX_JARS_PATH=$HOME/hadoop-clients/drivers/ImpalaJDBC42.jar
+export HIVE_AUX_JARS_PATH=$HOME/work/projects/ImpalaJDBC41.jar
 
-beeline -d 'com.cloudera.impala.jdbc42.Driver' -u 'jdbc:impala://ccycloud-3.tiger.root.hwx.site:21050;AuthMech=1;KrbHostFQDN=ccycloud-3.tiger.root.hwx.site;KrbServiceName=impala;SSL=1;sslTrustStore=./cm-auto-in_cluster_truststore.jks'
+beeline -d 'com.cloudera.impala.jdbc41.Driver' -u 'jdbc:impala://ccycloud-3.tiger.root.hwx.site:21050;AuthMech=1;KrbHostFQDN=ccycloud-3.tiger.root.hwx.site;KrbServiceName=impala;SSL=1;sslTrustStore=./cm-auto-in_cluster_truststore.jks'
 
 select logged_in_user();
 ```
@@ -418,9 +417,9 @@ select logged_in_user();
 - Connect to Impala in CDP Base cluster B [realm=FENG.COM] using LDAP authentication.
 
 ```bash
-export HIVE_AUX_JARS_PATH=$HOME/hadoop-clients/drivers/ImpalaJDBC42.jar
+export HIVE_AUX_JARS_PATH=$HOME/work/projects/ImpalaJDBC41.jar
 
-beeline -d 'com.cloudera.impala.jdbc.Driver' -u 'jdbc:impala://ccycloud-3.tiger.root.hwx.site:21050;AuthMech=3;SSL=1;sslTrustStore=./cm-auto-in_cluster_truststore.jks' -n cdw01 -p
+beeline -d 'com.cloudera.impala.jdbc41.Driver' -u 'jdbc:impala://ccycloud-3.tiger.root.hwx.site:21050;AuthMech=3;SSL=1;sslTrustStore=./cm-auto-in_cluster_truststore.jks' -n cdw01 -p
 
 select logged_in_user();
 ```
@@ -436,7 +435,7 @@ kubectl get configmap -n cdp vault-jks -o jsonpath="{.binaryData['truststore\.jk
 
 kinit admin
 
-export HIVE_AUX_JARS_PATH=$HOME/hadoop-clients/drivers/ImpalaJDBC42.jar
+export HIVE_AUX_JARS_PATH=~/work/projects/ImpalaJDBC41.jar
 
 beeline -u "jdbc:impala://coordinator-impala01.apps.ecstest.sme-feng.athens.cloudera.com:443/default;AuthMech=1;transportMode=http;httpPath=cliservice;ssl=1;KrbHostFQDN=dwx-env-ecstest.cdp.local.;KrbServiceName=hive;sslTrustStore=truststore.jks;trustStorePassword=changeit"
 
@@ -452,7 +451,7 @@ select logged_in_user();
 ```bash
 kubectl get configmap -n cdp vault-jks -o jsonpath="{.binaryData['truststore\.jks']}"| base64 --decode > truststore.jks
 
-export HIVE_AUX_JARS_PATH=$HOME/hadoop-clients/drivers/ImpalaJDBC42.jar
+export HIVE_AUX_JARS_PATH=~/work/projects/ImpalaJDBC41.jar
 
 beeline -u "jdbc:impala://coordinator-impala01.apps.ecstest.sme-feng.athens.cloudera.com:443/default;AuthMech=3;transportMode=http;httpPath=cliservice;ssl=1;sslTrustStore=truststore.jks;trustStorePassword=changeit" -n cdw01 -p
 
@@ -534,7 +533,9 @@ select logged_in_user();
 |Case 16 |Unified Analytics(CDW) |LDAP |Successful |
 
 
-- Please upgrade impala-shell to 4.4.0a1 or later.
+- Please use impala-shell on python 2.7 to access Impala virtual warehouse when using Kerberos authentication. 
+
+- Please upgrade impala-shell to 4.2.0 or later.
 
 - You can enable kerberos debug logging for impala-shell.
 
