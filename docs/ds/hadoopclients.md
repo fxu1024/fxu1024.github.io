@@ -58,7 +58,7 @@ OpenJDK 64-Bit Server VM Homebrew (build 11.0.18+0, mixed mode)
 
 ### 3.2. Install Python 3.8.10
 
-- To install python 3.8.10 on MacOS, please download the installer from [python official download site](https://www.python.org/downloads/release/python-3810/).
+- To install python 3.8.10 on MacOS, please download the installer from [python official download site](https://www.python.org/downloads/release/python-3810/).
 
 ![](../../assets/images/ds/hadoopclient32.png)
 
@@ -199,7 +199,7 @@ export SPARK_HOME=$HOME/hadoop-clients/spark
 export BEELINE_HOME=$HOME/hadoop-clients/beeline
 export HIVE_CONF_DIR=$HOME/hadoop-clients/conf.cloudera.hive_on_tez
 PATH=$PATH:$BEELINE_HOME/bin:$SPARK_HOME/sbin:$SPARK_HOME/bin
-export PATH="/Library/Frameworks/Python.framework/Versions/2.7/bin:/Library/Frameworks/Python.framework/Versions/3.8/bin:${PATH}"
+export PATH="/Library/Frameworks/Python.framework/Versions/3.8/bin:${PATH}"
 
 source $HOME/.bash_profile
 ```

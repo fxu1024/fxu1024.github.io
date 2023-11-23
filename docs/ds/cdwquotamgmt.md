@@ -35,7 +35,9 @@ grand_parent: Data Service
 
 - By enabling quota management in Cloudera Data Warehouse (CDW) on Private Cloud, you can assign quota-managed resource pools for environments, Data Catalogs, Virtual Warehouses, and Data Visualization instances.
 
-## 3. Know more about resource pools 
+## 3. Know more about Resouce Pool Manager
+
+- RPM (Resouce Pool Manager) is tracking resources across K8s clusters through resource pool objects. Resouce pool objects allow for defining a hierarchical structure for purposes of ownership and quota management.
 
 - Navigate to Cloduera Management Console > Resource Utilization > Quotas, you can see four-level resource pools: root ->  root.default -> root.default.ecstest-c51569f2 -> root.default.ecstest-c51569f2.monitoring-namespace.
 
@@ -172,11 +174,11 @@ db-resourcepoolmanager=# select path,metadata from pools order by created_at;
     $ kubectl get pods -n yunikorn
     NAME                                             READY   STATUS    RESTARTS   AGE
     yunikorn-admission-controller-6bc647d6c5-xnzr4   1/1     Running   0          5d4h
-    yunikorn-scheduler-66c9984b6-smq42               2/2     Running   0          5d4h
+    yunikorn-scheduler-66c9984b6-n9vpg               2/2     Running   0          5d4h
     ```
     - Access the UI
     ```bash
-    kubectl port-forward yunikorn-scheduler-66c9984b6-smq42 9889:9889 -n yunikorn
+    kubectl port-forward yunikorn-scheduler-66c9984b6-n9vpg 9889:9889 -n yunikorn
     ```
     - Run YuniKorn rest API
     ```bash
