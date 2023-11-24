@@ -31,6 +31,12 @@ grand_parent: Data Service
 |Docker registry |Embedded|
 |Install Method |Internet|
 
+## 2. Basic Concept
+
+- Quota management enables you to control how resources are allocated within your CML workspace.
+    - `Object Quota`: Each user can only run 50 Pods in parallel (sessions, jobs, Spark drivers+executors, etc). You can set the OVERRIDE_PODQUOTA environment variable in the project to override the default value.
+    - `User Level Quota`: CML administrators can enable user level quota under Site Administration Page. By default, 8 GiB memory and 2 vCPU cores are configured for each user. The custom quota can override the default quota for the dedicated user.
+    - `Namespace Level Quota`(new feature starting from 1.5.2): Resource Pools are organized in a hierarchical manner by defining nodes in the hierarchy with resource limits, which can then be subdivided as needed to allocate resources for a new namespace. CML has two types of namespace: Infra namespace and User namespace. 1 CML workspace has one infra namespace and many user namespaces. Use namespace is created dynamically when any workload is run (like session, job etc) based on infra namespace name with suffixes of `-user-id`. This means that each user has its own working namespace.
 
 - All you should know about [Namespace level Quota](https://yunikorn.apache.org/docs/1.0.0/user_guide/resource_quota_management/#quota-configuration-and-rules):
     - Each namespace is assigned a resource pool with predefined quota.
