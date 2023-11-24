@@ -39,7 +39,7 @@ grand_parent: Data Service
 
 - RPM (Resouce Pool Manager) is tracking resources across K8s clusters through resource pool objects. Resouce pool objects allow for defining a hierarchical structure for purposes of ownership and quota management.
 
-- Navigate to Cloduera Management Console > Resource Utilization > Quotas, and then add three new pools for Data Services workloads. 
+- Navigate to Cloudera Management Console > Resource Utilization > Quotas, and add three new pools for Data Services workloads. 
     - Note: please keep advanced properties no changed. 
 
 |No.|PATH|quota_cores|quota_memory|validity|distribution|order|queueing|clusterId|namespace|
@@ -163,7 +163,7 @@ statestored-f96f8bc6-85hx4
               yunikorn.apache.org/ignore-application: true
 ```
 
-- All pods in warehouse and log-router namespace use the default k8s scheduler as well.
+- All pods in `warehouse` and `log-router` namespace use the default k8s scheduler as well.
 
 ## 6. Conclusion
 

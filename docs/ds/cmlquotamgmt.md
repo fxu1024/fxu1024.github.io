@@ -152,7 +152,7 @@ $ kubectl describe deploy dp-mlx-control-plane-app -n cdp|grep ENABLE_UMBRA_INTE
 - Log in to CML as user `cml01` and start a new session.
 
 - Turn back to the resource pool UI.
-    - The new pool 'root.default.medium.cml01.user-1' and 'root.default.medium.cml01.user-2' are added.
+    - The new pool 'root.default.medium.cml01.user-1' and 'root.default.medium.cml01.user-2' are added automatically.
     - Note: Although the session container is using 2 cores and 4GB memory, we see that the quota of the user namespace is 15 cores and 24GB memory, indicating that it follows the user level quota specification.
 
 |No.|PATH|quota_cores|quota_memory|validity|distribution|order|queueing|preemption enabled|preemption fencing|priority enabled|priority fencing|tags|clusterId|namespace|
@@ -393,9 +393,9 @@ $ curl http://localhost:9889/ws/v1/partition/default/queues | jq .[] |grep -A24 
 ![](../../assets/images/ds/cmlquota14.png)
 
 - The usage of all children combined can never exceed the quota configured on the parent.
-    - The parent's max Resource = 24000 cores
-    - The parent's allocated Resource = 17225 cores
-    - The parent's available Quota = 24000 - 17225 = 6775 cores
+    - The parent's max Resource = `24000` cores
+    - The parent's allocated Resource = `17225` cores
+    - The parent's available Quota = 24000 - 17225 = `6775` cores
 
 - Let's start a new session using 7 cores and 24GB memory. We see the same warnings "Unschedulable: 0/4 nodes are available: 4 Pod is not ready for scheduling."
 
@@ -453,4 +453,4 @@ $  curl http://localhost:9889/ws/v1/partition/default/nodes| jq 'sort_by(.nodeID
 - Pools are organized in a hierarchical manner by defining each CML namespace with quota as resource limits.
     - Each pool can never use more resources than the quota configured by itself.
     - The usage of all children combined can never exceed the quota configured on the parent.
-- The available resource of k8s node is hard limit if resource request does not go beyond any quotas.
+- The available resource of ECS node is hard limit if resource requests don't go beyond any quotas.
