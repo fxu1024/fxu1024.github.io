@@ -105,7 +105,8 @@ grand_parent: Data Service
 
 - CDW Quota Management is technical preview in 1.5.2 which's generally not ready for production deployment. You should explore this feature in a non production cluster.
 
-- Only 6 pods in hive virtual warehouse use yunikorn scheduler.
+- Only 4 pods in hive virtual warehouse use yunikorn scheduler.
+    - The default k8s scheduler take over when `yunikorn.apache.org/ignore-application` is `true`.
 
 ```bash
 $ for pod in $(kubectl get pod -n compute-hive01 --output=jsonpath={.items..metadata.name}); do echo $pod && kubectl describe pod $pod -n compute-hive01|grep yunikorn.apache.org; done
@@ -136,6 +137,7 @@ usage-monitor-57d5977ccb-plrjt
 ```
 
 - All pods in impala virtual warehouse use the default k8s scheduler.
+    - The default k8s scheduler take over when `yunikorn.apache.org/ignore-application` is `true`.
 
 ```bash
 $ for pod in $(kubectl get pod -n impala-impala01 --output=jsonpath={.items..metadata.name}); do echo $pod && kubectl describe pod $pod -n impala-impala01|grep yunikorn.apache.org; done
