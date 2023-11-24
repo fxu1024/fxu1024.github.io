@@ -393,9 +393,9 @@ $ curl http://localhost:9889/ws/v1/partition/default/queues | jq .[] |grep -A24 
 ![](../../assets/images/ds/cmlquota14.png)
 
 - The usage of all children combined can never exceed the quota configured on the parent.
-    - The parent's max Resource = `24000` cores
-    - The parent's allocated Resource = `17225` cores
-    - The parent's available Quota = 24000 - 17225 = `6775` cores
+    - The parent's max Resource = `24000` = 2.4 cores
+    - The parent's allocated Resource = `17225` = 1.7225 cores
+    - The parent's available Quota = 24000 - 17225 = `6775` = 6.775 cores
 
 - Let's start a new session using 7 cores and 24GB memory. We see the same warnings "Unschedulable: 0/4 nodes are available: 4 Pod is not ready for scheduling."
 
