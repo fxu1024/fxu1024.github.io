@@ -51,9 +51,9 @@ grand_parent: Data Service
 
 - All you should know about the new quota management in CML:
     - You must define tag `key: experience, value: cml` to help CML to identify the resource pool is configured for CML. Tags provide a way to add user-defined name/value pairs as metadata for the resource pools. 
-    - The minimum requirement for a CML workspace is 38 GB of Memory and 22 CPU.
-        - CML reserves 30 GB Memory and 20 CPU for the infra namespace.
-        - CML reserves the user level quota for the user namespace. `Note: The user level quota is enabled automatically once the new quota management is enabled`. 
+    - CML reserves 30 GB Memory and 20 CPU as the infra namespace's quota.
+    - CML inherits the user level quota as the user namespace's quota.
+        - Note: The user level quota is enabled automatically once the new quota management is enabled. 
     - The new quota management cannot be enabled for an existing workspace. you will need to delete the existing workspace, enable the quota management feature, and then rebuild the workspace.
 
 ## 3. Know more about Resouce Pool Manager
