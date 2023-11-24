@@ -36,9 +36,9 @@ grand_parent: Data Service
 - Quota management enables you to control how resources are allocated within your CML workspace.
     - `Object Quota`: Each user can only run 50 Pods in parallel (sessions, jobs, Spark drivers+executors, etc). You can set the OVERRIDE_PODQUOTA environment variable in the project to override the default value.
     - `User Level Quota`: CML administrators can enable user level quota under Site Administration Page. By default, 8 GiB memory and 2 vCPU cores are configured for each user. The custom quota can override the default quota for the dedicated user.
-    - `Namespace Level Quota` (new feature starting from 1.5.2): Resource Pools are organized in a hierarchical manner by defining nodes in the hierarchy with resource limits, which can then be subdivided as needed to allocate resources for a new namespace. CML has two types of namespace: Infra namespace and User namespace. 1 CML workspace has one infra namespace and many user namespaces. Use namespace is created dynamically when any workload is run (like session, job etc) based on infra namespace name with suffixes of `-user-id`. This means that each user has its own working namespace.
+    - `Workspace Level Quota` (Technical preview in 1.5.2): Resource Pools are organized in a hierarchical manner by defining nodes in the hierarchy with resource limits, which can then be subdivided as needed to allocate resources for a new namespace. CML has two types of namespace: Infra namespace and User namespace. 1 CML workspace has one infra namespace and many user namespaces. Use namespace is created dynamically when any workload is run (like session, job etc) based on infra namespace name with suffixes of `-user-id`. This means that each user has its own working namespace.
 
-- All you should know about [Namespace level Quota](https://yunikorn.apache.org/docs/1.0.0/user_guide/resource_quota_management/#quota-configuration-and-rules):
+- All you should know about [Workspace level Quota](https://yunikorn.apache.org/docs/1.0.0/user_guide/resource_quota_management/#quota-configuration-and-rules):
     - Each namespace is assigned a resource pool with predefined quota.
     - The quota is hard limit for resource usage.
         - Each pool can never use more resources than the quota configured by itself.
@@ -51,7 +51,7 @@ grand_parent: Data Service
 
 - All you should know about the new quota management in CML:
     - You must define tag `key: experience, value: cml` to help CML to identify the resource pool is configured for CML. Tags provide a way to add user-defined name/value pairs as metadata for the resource pools. 
-    - The minimum namespace level quota for a CML workspace is 38 GB of Memory and 22 CPU.
+    - The minimum quota for a CML workspace is 38 GB of Memory and 22 CPU.
         - CML reserves 30 GB Memory and 20 CPU for the infra namespace.
         - CML reserves the user level quota for the user namespace. Note: The user level quota is enabled automatically once the new quota management is enabled. 
     - The new quota management cannot be enabled for an existing workspace. you will need to delete the existing workspace, enable the quota management feature, and then rebuild the workspace.
@@ -135,7 +135,7 @@ $ kubectl describe deploy dp-mlx-control-plane-app -n cdp|grep ENABLE_UMBRA_INTE
 |2|root.default.medium.cml01.cml01|20|30GB|NEVER EXPIRES|ELASTIC|FIFO|true|false|false|false|false|createdby:cml|liftie-8wqkf202|cml01|
 
 - Log in to CML as user `admin` and check the user quota under Site Administration Page. 
-    - Note: It's enabled by default after you have enabled the namespace level quota management.
+    - Note: It's enabled by default after you have enabled the workspace level quota management.
     - Note: Do not toggle off this default quota once you have enabled the quota management in cml.
     - Note: Do not edit the gpu resources on the user quota tab under site administration when the workspace is provisioned without any gpu resources gpu resources. We can edit the gpu resources if the workspace is provisioned with gpu resources.
 
@@ -161,8 +161,25 @@ $ kubectl describe deploy dp-mlx-control-plane-app -n cdp|grep ENABLE_UMBRA_INTE
 
 ![](../../assets/images/ds/cmlquota10.png)
 
+## 5. Technical Preview in 1.5.2
 
-## 5. Know more about Yunikorn API
+- Workspace Level Quota Management is technical preview in 1.5.2 which's generally not ready for production deployment. You should explore this feature in a non production cluster.
+
+- We found that all pods in the CML workspace used yunikorn scheduler, so release 1.5.2 is very close to GA.
+
+```
+$ for pod in $(kubectl get pod -n cml01 --output=jsonpath={.items..metadata.name}); do echo $pod && kubectl describe pod $pod -n cml01|grep yunikorn.apache.org; done
+api-67849d85dd-bvbtx
+                      yunikorn.apache.org/allow-preemption: false
+                      yunikorn.apache.org/scheduled-at: 1700455984279153223
+...
+
+web-885854cb7-vptcw
+                      yunikorn.apache.org/allow-preemption: false
+                      yunikorn.apache.org/scheduled-at: 1700455985068707436
+```
+
+## 6. Know more about Yunikorn API
 
 - Let's do a port-forward to localhost to run the YuniKorn rest API.
     - Find YuniKorn scheduler pod
@@ -214,9 +231,11 @@ curl http://localhost:9889/ws/v1/partition/default/nodes
 curl http://localhost:9889/ws/v1/partition/default/queue/root.cdp.default.medium.cml01.user-1.cml01-user-1/applications
 ```
 
-## 6. Test cases for quota management
+## 7. Test cases for quota management
 
-### 6.1 Single Child pool testing
+### 7.1 Single Child pool testing
+
+![](../../assets/images/ds/cmlquota18.png)
 
 - Log in to CML as user `admin` and start a new session using 14 cores and 24GB memory. Unfortunately it's stuck with warnings "Unschedulable: 0/4 nodes are available: 4 Pod is not ready for scheduling."
 
@@ -319,7 +338,9 @@ $ curl http://localhost:9889/ws/v1/partition/default/nodes| jq 'sort_by(.nodeID)
 - Note: The user admin's session was allocated to the node ("feng-ws5.sme-feng.athens.cloudera.com") with the most CPU resources.
 
 
-### 6.2 Two Child pools testing
+### 7.2 Two Child pools testing
+
+![](../../assets/images/ds/cmlquota17.png)
 
 - Please keep the above session running. Currently, the maximum number of available cores on a single node has is `13` ("vcore": 13288).
 
@@ -426,12 +447,10 @@ $  curl http://localhost:9889/ws/v1/partition/default/nodes| jq 'sort_by(.nodeID
 - Note: The user cml01's session was allocated to the node ("feng-ws2.sme-feng.athens.cloudera.com") with the available CPU resources.
 
 
-## 7. Conclusion
+## 8. Conclusion
 
-- Namespace Level Quota Management is new feature starting from PvC 1.5.2.
+- Workspace Level Quota Management is Technical Preview in PvC 1.5.2.
 - Pools are organized in a hierarchical manner by defining each CML namespace with quota as resource limits.
     - Each pool can never use more resources than the quota configured by itself.
     - The usage of all children combined can never exceed the quota configured on the parent.
 - The available resource of k8s node is hard limit if resource request does not go beyond any quotas.
-
-
