@@ -53,12 +53,12 @@ grand_parent: Data Service
     - You must define tag `key: experience, value: cml` to help CML to identify the resource pool is configured for CML. Tags provide a way to add user-defined name/value pairs as metadata for the resource pools. 
     - The minimum quota for a CML workspace is 38 GB of Memory and 22 CPU.
         - CML reserves 30 GB Memory and 20 CPU for the infra namespace.
-        - CML reserves the user level quota for the user namespace. Note: The user level quota is enabled automatically once the new quota management is enabled. 
+        - CML reserves the user level quota for the user namespace. `Note: The user level quota is enabled automatically once the new quota management is enabled`. 
     - The new quota management cannot be enabled for an existing workspace. you will need to delete the existing workspace, enable the quota management feature, and then rebuild the workspace.
 
 ## 3. Know more about Resouce Pool Manager
 
-- RPM (Resouce Pool Manager) is tracking resources across K8s clusters through resource pool objects. Resouce pool objects allow for defining a hierarchical structure for purposes of ownership and quota management.
+- RPM (`Resouce Pool Manager`) is tracking resources across K8s clusters through resource pool objects. Resouce pool objects allow for defining a hierarchical structure for purposes of ownership and quota management.
 
 - Navigate to Cloudera Management Console > Resource Utilization > Quotas, you can see four-level resource pools: root ->  root.default -> root.default.ecstest-c51569f2 -> root.default.ecstest-c51569f2.monitoring-namespace.
 
