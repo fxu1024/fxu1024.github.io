@@ -16,14 +16,14 @@ grand_parent: Data Service
 
 ## 1. Introduction to the test environment
 
-|CDP Runtime version |CDP PvC Base 7.1.7 SP2|
-|CM version |Cloudera Manager 7.11.3.2|
-|ECS version |CDP PvC DataServices 1.5.2|
-|OS version |Centos 7.9|
-|K8S version |RKE 1.25.14|
+|CDP Runtime version |CDP PvC Base 7.1.9|
+|CM version |Cloudera Manager 7.11.3.9|
+|ECS version |CDP PvC DataServices 1.5.4|
+|OS version |Centos 8.4|
+|K8S version |RKE 1.27.10|
 |Whether to enable Kerberos |Yes|
-|Whether to enable TLS |Yes|
-|Auto-TLS |Yes|
+|Whether to enable TLS |No|
+|Auto-TLS |No|
 |Kerberos |FreeIPA|
 |LDAP |FreeIPA|
 |DB Configuration |Embedded|
@@ -54,119 +54,103 @@ grand_parent: Data Service
 ![](../../assets/images/ds/cdwquota05.png)
 
 
-## 4. Enable quota management for CDW
+## 4. Create custom resource templates[Optional]
+
+- A new menu option Resource Templates has been added to the left navigation pane on the CDW web interface. The default resource templates for Hive, Impala, Database Catalog, and Data Visualization pods is listed in [predefined resource templates](https://docs.cloudera.com/data-warehouse/1.5.4/administration/topics/dw-pvc-predefined-list-resource-templates.html).
+- You can configure the customized allocation of Kubernetes resources to the pods for Hive, Data Visualization, and Database Catalog in addition to Impala.
+- Due to limited experimental environment resources, a new `Limited Resources` template is added to reduce the request resource to 1/4 of the original values.
+
+![](../../assets/images/ds/cdwquota28.png)
+
+
+## 5. Enable quota management for CDW
 
 - Log in to CDW as user `admin`. Go to Advanced Configuration and select the Enable quota management option. Click Update.
-    - Note: You must enable this feature before activating an environment in CDW. You cannot enable this feature in existing environments; you will need to deactivate the environment in CDW, enable the quota management feature, and then reactivate the environment.
+    - Note: Starting with CDP Private Cloud Data Services 1.5.4, you can enable or disable the quota management option at any time during the lifecycle of the CDW entities. 
 
-![](../../assets/images/ds/cdwquota01.png)
+![](../../assets/images/ds/cdwquota24.png)
 
 - Activate the environment.
 
-![](../../assets/images/ds/cdwquota06.png)
+![](../../assets/images/ds/cdwquota25.png)
 
-- Select the resource pool `root.default.high`.
+- Select the resource pool `root.default.low`.
     - Note: If you enable the quota management feature, you must select a resource pool while activating the environment.
 
-![](../../assets/images/ds/cdwquota07.png)
+![](../../assets/images/ds/cdwquota26.png)
 
-- Turn back to the resource pool UI. the resource pool `root.default.high` has two new level 4 branches, namely `root.default.high.ecstest-c51569f2-log-router` and `root.default.high.warehouse-ecstest`.
+- Turn back to the resource pool UI. the resource pool `root.default.low` has two new level 4 branches, namely `root.default.low.ecscloud-8f2820fc-log-router` and `root.default.low.warehouse-ecscloud`.
 
-![](../../assets/images/ds/cdwquota13.png)
+![](../../assets/images/ds/cdwquota27.png)
 
 - `ecstest-c51569f2-log-router` and `warehouse-ecstest` are the new namespaces added by the activation environment step.
-    - The pool `root.default.high.ecstest-c51569f2-log-router` consumed 4 cores, 2GB memory.
-    - The pool `root.default.high.warehouse-ecstest`consumed 6 cores, 16GB memory.
-    - Total cpu and memory consumption is below quota, so there are no warnings so far.
+    - The pool `root.default.medium.ecscloud-8f2820fc-log-router` consumed 4 cores, 2GB memory.
+    - The pool `root.default.medium.warehouse-ecscloud`consumed 7 cores, 18GB memory.
 
-![](../../assets/images/ds/cdwquota14.png)
- 
-- Create new virtual warehouse `hive01`.
+- From the Yunikorn UI, the resource pool `root.default.low` allocated 0 CPUs and 0 Memorys.
 
-![](../../assets/images/ds/cdwquota08.png)
+![](../../assets/images/ds/cdwquota29.png)
 
-- The resource pool has only one option `root.default.high`, indicating that it is inherited from environment.
+- All pods in `warehouse-ecscloud` use the default k8s scheduler. This causes Quota management to lose control of resources.
+    - The default k8s scheduler take over when `yunikorn.apache.org/ignore-application` is `true`.
+    
+```bash
+$ for pod in $(kubectl get pod -n warehouse-ecscloud --output=jsonpath={.items..metadata.name}); do echo $pod && kubectl describe pod $pod -n warehouse-ecscloud|grep yunikorn.apache.org; done
+```
 
-![](../../assets/images/ds/cdwquota09.png)
+![](../../assets/images/ds/cdwquota30.png)
 
-- Turn back to the resource pool UI. We can see the new resource pool `root.default.high.compute-hive01`.
 
-![](../../assets/images/ds/cdwquota15.png)
+- Create new virtual warehouse `hive01`. The resource pool has only one option `root.default.low`, indicating that it is inherited from environment.
+
+![](../../assets/images/ds/cdwquota31.png)
+
+- Due to limited resources, hive VW also used the `Limited resource` template.
+    - Note: Cloudera Data Warehouse (CDW) provides an option to enable active-passive configuration for HiveServer2 (HS2) pods in Private Cloud for Hive and Unified Analytics. By selecting this option (available from PvC 1.5.4), two HS2 pods run simultaneouslyone active and the other inactive. When one pod terminates, the inactive pod becomes active--most likey due to a node failure, providing High Availability (HA).
+
+![](../../assets/images/ds/cdwquota32.png)
+
+- Turn back to the resource pool UI. We can see the new resource pool `root.default.low.compute-hive01`.
+
+![](../../assets/images/ds/cdwquota33.png)
 
 - `compute-hive01`is the namespace of hive virtual warehouse.
-    - The pool `root.default.high.compute-hive01` consumed 12 cores, 128GB memory.
+    - The pool `root.default.high.compute-hive01` consumed 5 cores, 36GB memory.
 
-![](../../assets/images/ds/cdwquota16.png)
+![](../../assets/images/ds/cdwquota34.png)
 
-![](../../assets/images/ds/cdwquota10.png)
+- The total resources of the three child pools have exceeded the parent pool `root.default.low`.
+    - The total number of CPU is 16 > 12
+    - The total number of Memory is 56 > 50
+    - However, the hive VW is created successfully.
 
-
-## 5. Technical Preview in 1.5.2
-
-- CDW Quota Management is technical preview in 1.5.2 which's generally not ready for production deployment. You should explore this feature in a non production cluster.
-
-- Only 4 pods in hive virtual warehouse use yunikorn scheduler.
+- The root cause is that only 7 pods in hive virtual warehouse used yunikorn scheduler.
     - The default k8s scheduler take over when `yunikorn.apache.org/ignore-application` is `true`.
 
 ```bash
 $ for pod in $(kubectl get pod -n compute-hive01 --output=jsonpath={.items..metadata.name}); do echo $pod && kubectl describe pod $pod -n compute-hive01|grep yunikorn.apache.org; done
-hiveserver2-0
-              yunikorn.apache.org/ignore-application: true
-hue-huedb-create-job-ggpkn
-              yunikorn.apache.org/ignore-application: true
-huebackend-0
-              yunikorn.apache.org/ignore-application: true
-huefrontend-65b995bdcc-zzrgf
-              yunikorn.apache.org/ignore-application: true
-query-coordinator-0-0
-              yunikorn.apache.org/allow-preemption: true
-              yunikorn.apache.org/scheduled-at: 1700796724189880458
-query-coordinator-0-1
-              yunikorn.apache.org/allow-preemption: true
-              yunikorn.apache.org/scheduled-at: 1700796724222578763
-query-executor-0-0
-              yunikorn.apache.org/allow-preemption: true
-              yunikorn.apache.org/scheduled-at: 1700796724282562442
-query-executor-0-1
-              yunikorn.apache.org/allow-preemption: true
-              yunikorn.apache.org/scheduled-at: 1700796724254507099
-standalone-compute-operator-0
-              yunikorn.apache.org/ignore-application: true
-usage-monitor-57d5977ccb-plrjt
-              yunikorn.apache.org/ignore-application: true
 ```
 
-- All pods in impala virtual warehouse use the default k8s scheduler.
-    - The default k8s scheduler take over when `yunikorn.apache.org/ignore-application` is `true`.
+![](../../assets/images/ds/cdwquota35.png)
 
-```bash
-$ for pod in $(kubectl get pod -n impala-impala01 --output=jsonpath={.items..metadata.name}); do echo $pod && kubectl describe pod $pod -n impala-impala01|grep yunikorn.apache.org; done
-catalogd-0
-              yunikorn.apache.org/ignore-application: true
-catalogd-1
-              yunikorn.apache.org/ignore-application: true
-coordinator-0
-              yunikorn.apache.org/ignore-application: true
-coordinator-1
-              yunikorn.apache.org/ignore-application: true
-hue-huedb-create-job-xq6mz
-              yunikorn.apache.org/ignore-application: true
-huebackend-0
-              yunikorn.apache.org/ignore-application: true
-huefrontend-7d46c4465-8gtrx
-              yunikorn.apache.org/ignore-application: true
-impala-autoscaler-5655fb65c-tc6qz
-              yunikorn.apache.org/ignore-application: true
-impala-executor-000-0
-              yunikorn.apache.org/ignore-application: true
-impala-executor-000-1
-              yunikorn.apache.org/ignore-application: true
-statestored-f96f8bc6-85hx4
-              yunikorn.apache.org/ignore-application: true
-```
+- From the Yunikorn UI, the resource pool `root.default.low` allocated 4100m CPUs and 33.1 GB Memory to 7 pods. 
+    - CPU: 4100m < 12K
+    - Memory: 33.1 < 50
+    - It is still within the limits of the resource pool.
 
-- All pods in `warehouse` and `log-router` namespace use the default k8s scheduler as well.
+![](../../assets/images/ds/cdwquota36.png)
+
+- Create new virtual warehouse `impala01`. The resource pool has only one option `root.default.low`, indicating that it is inherited from environment.
+
+![](../../assets/images/ds/cdwquota37.png)
+
+![](../../assets/images/ds/cdwquota38.png)
+
+- It failed with errors "creating namespace for Virtual Warehouse (cause: non-retriable error: failed to create the resource pool 'root.default.low.impala-impala01', because: 'Request type: 'CreateResourcePool', state: 'FAILED', last updated: '2024-06-05T17:17:42.257+08:00', finished: 'true', error: 'policy violation: child quota larger than parent quota'', request ID: 'rp-req-7ffcb8f1-4732-4239-8661-08e2ca344a05')  Error Code : 4000". This shows that CDW quota management take effect.
+
+![](../../assets/images/ds/cdwquota39.png)
+
 
 ## 6. Conclusion
 
-- CDW Quota Management is Technical Preview in PvC 1.5.2. However, most pods still use the default k8s scheduler, so it is currently not recommended for a production cluster.
+- Enabling quota management does not mean that all new pods of CDW will use the yunikorn scheduler, which brings confusion to resource control. Pods using the k8s scheduler will get unlimited resources.
