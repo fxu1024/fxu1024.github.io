@@ -58,7 +58,7 @@ grand_parent: Data Service
 
 - A new menu option Resource Templates has been added to the left navigation pane on the CDW web interface. The default resource templates for Hive, Impala, Database Catalog, and Data Visualization pods is listed in [predefined resource templates](https://docs.cloudera.com/data-warehouse/1.5.4/administration/topics/dw-pvc-predefined-list-resource-templates.html).
 - You can configure the customized allocation of Kubernetes resources to the pods for Hive, Data Visualization, and Database Catalog in addition to Impala.
-- Due to limited experimental environment resources, a new `Limited Resources` template is added to reduce the request resource to 1/4 of the original values.
+- Due to limited lab environment resources, I add a new `Limited Resources` template to reduce the request resources to 1/4 of the original values.
 
 ![](../../assets/images/ds/cdwquota28.png)
 
@@ -84,8 +84,8 @@ grand_parent: Data Service
 ![](../../assets/images/ds/cdwquota27.png)
 
 - `ecstest-c51569f2-log-router` and `warehouse-ecstest` are the new namespaces added by the activation environment step.
-    - The pool `root.default.medium.ecscloud-8f2820fc-log-router` consumed 4 cores, 2GB memory.
-    - The pool `root.default.medium.warehouse-ecscloud`consumed 7 cores, 18GB memory.
+    - The pool `root.default.low.ecscloud-8f2820fc-log-router` consumed 4 cores, 2GB memory.
+    - The pool `root.default.low.warehouse-ecscloud`consumed 7 cores, 18GB memory.
 
 - From the Yunikorn UI, the resource pool `root.default.low` allocated 0 CPUs and 0 Memorys.
 
@@ -105,7 +105,7 @@ $ for pod in $(kubectl get pod -n warehouse-ecscloud --output=jsonpath={.items..
 
 ![](../../assets/images/ds/cdwquota31.png)
 
-- Due to limited resources, hive VW also used the `Limited resource` template.
+- Due to limited resources, hive VW was dedicated to use the `Limited resource` template.
     - Note: Cloudera Data Warehouse (CDW) provides an option to enable active-passive configuration for HiveServer2 (HS2) pods in Private Cloud for Hive and Unified Analytics. By selecting this option (available from PvC 1.5.4), two HS2 pods run simultaneouslyone active and the other inactive. When one pod terminates, the inactive pod becomes active--most likey due to a node failure, providing High Availability (HA).
 
 ![](../../assets/images/ds/cdwquota32.png)
@@ -115,7 +115,7 @@ $ for pod in $(kubectl get pod -n warehouse-ecscloud --output=jsonpath={.items..
 ![](../../assets/images/ds/cdwquota33.png)
 
 - `compute-hive01`is the namespace of hive virtual warehouse.
-    - The pool `root.default.high.compute-hive01` consumed 5 cores, 36GB memory.
+    - The pool `root.default.low.compute-hive01` consumed 5 cores, 36GB memory.
 
 ![](../../assets/images/ds/cdwquota34.png)
 
@@ -153,4 +153,4 @@ $ for pod in $(kubectl get pod -n compute-hive01 --output=jsonpath={.items..meta
 
 ## 6. Conclusion
 
-- Enabling quota management does not mean that all new pods of CDW will use the yunikorn scheduler, which brings confusion to resource control. Pods using the k8s scheduler will get unlimited resources.
+- Enabling quota management does not mean that all new pods of CDW will use the yunikorn scheduler, which brings confusion to resource control. Pods using the default k8s scheduler can be allocated resources beyond the quota.
