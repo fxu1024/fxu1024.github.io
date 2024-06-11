@@ -667,7 +667,7 @@ curl -H "Authorization: Bearer ${CDE_TOKEN}" -k -X GET "${CDE_JOB_URL}/job-runs?
 
 - Job `example-resources-scheduled` shows scheduling functionality for Spark job in CDE. This example schedules a job to run at 5:04am UTC each day. 
 
-![](../../assets/images/ds/addcde28.png)
+![](../../assets/images/ds/addcde30.png)
 
 - It can be derived from Job `example-resources` as the following steps.
 
