@@ -121,6 +121,7 @@ XAAUDIT.SUMMARY.ENABLE=false
 ```
 
 - Run the enable-trino-plugin.sh script as the root user.
+
 ```bash
 ./enable-trino-plugin.sh
 Custom user is available, using custom user and default group.
