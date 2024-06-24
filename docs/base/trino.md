@@ -45,12 +45,13 @@ grand_parent: CDP Base
 ## 4. Build trino plugin
 
 - The installation of Apache Maven is a simple process of extracting the archive and adding the bin directory with the mvn command to the PATH.
+
 ```bash
 wget https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/3.9.8/binaries/apache-maven-3.9.8-bin.tar.gz --no-check-certificate
 tar -xf apache-maven-3.9.8-bin.tar.gz -C /usr/local/  
 
 vi ~/.bash_profile
-\# adding the following three lines
+# adding the following three lines
 export PATH=$PATH:/usr/local/apache-maven-3.9.8/bin/
 export JAVA_HOME=/usr/lib/jvm/java-11/
 export PATH=$JAVA_HOME/bin:$PATH
@@ -104,13 +105,14 @@ tar xfzv ranger-2.4.0-trino-plugin.tar.gz
 ```
 
 - Update the following entries in the install.properties file.
+
 ```bash
 cd ~/ranger-2.4.0-trino-plugin
 cp install.properties install.properties.orig
 
 vi ~/ranger-2.4.0-trino-plugin/install.properties
-\# modify the following five lines
-\# Note the value of REPOSITORY_NAME as it is needed later.
+# modify the following five lines
+# Note the value of REPOSITORY_NAME as it is needed later.
 POLICY_MGR_URL=http://ccycloud-1.tiger.root.comops.site:6080
 REPOSITORY_NAME=cm_trino
 COMPONENT_INSTALL_DIR_NAME=/opt/trino
@@ -140,7 +142,7 @@ Ranger Plugin for trino has been enabled. Please restart trino to ensure that ch
 ```bash
 vi /opt/trino/etc/access-control.properties
 access-control.name=ranger
-\#add the following two lines
+#add the following two lines
 ranger.principal=trino@TIGER.COM
 ranger.keytab=/opt/trino/connector/hive/trino.keytab
 ```
