@@ -23,7 +23,7 @@ grand_parent: CDP Base
 |OS version |Redhat 8.8|
 |Whether to enable Kerberos |Yes|
 |Whether to enable TLS |No|
-|Kerberos |MITKDC|
+|Kerberos |FreeIPA|
 |Install Method |Internet|
 
 ## 2. Basic Concept
@@ -38,9 +38,9 @@ grand_parent: CDP Base
     - Trino-389 is the last release which supports Java 11, with a minimum required version of 11.0.15. 
 
 - The Hive catalog allows Trino querying data stored in hive tables.
-    - Trino installation: /opt/trino
-    - Ranger plugin: /opt/trino/plugin/ranger 
-    - Ranger policy sync location: /etc/ranger/cm_trino
+    - Trino installation: `/opt/trino`
+    - Ranger plugin: `/opt/trino/plugin/ranger`
+    - Ranger policy sync location: `/etc/ranger/cm_trino`
 
 ## 4. Build trino plugin
 
@@ -50,7 +50,7 @@ wget https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/3.9.8/binaries/ap
 tar -xf apache-maven-3.9.8-bin.tar.gz -C /usr/local/  
 
 vi ~/.bash_profile
-# adding the following three lines
+\# adding the following three lines
 export PATH=$PATH:/usr/local/apache-maven-3.9.8/bin/
 export JAVA_HOME=/usr/lib/jvm/java-11/
 export PATH=$JAVA_HOME/bin:$PATH
@@ -83,7 +83,7 @@ nohup mvn clean package -DskipTests -P ranger-trino-plugin,-linux -am -pl distro
 
 ![](../../assets/images/base/trino01.png)
 
-- You can see the file `ranger-2.4.0-trino-plugin.tar.gz` in the target directory.
+- You can see the package `ranger-2.4.0-trino-plugin.tar.gz` in the `target` directory.
 ```bash
 ls -l ~/ranger-release-ranger-2.4.0/target
 total 57156
@@ -109,8 +109,8 @@ cd ~/ranger-2.4.0-trino-plugin
 cp install.properties install.properties.orig
 
 vi ~/ranger-2.4.0-trino-plugin/install.properties
-# modify the following five lines
-# Note the value of REPOSITORY_NAME as it is needed later.
+\# modify the following five lines
+\# Note the value of REPOSITORY_NAME as it is needed later.
 POLICY_MGR_URL=http://ccycloud-1.tiger.root.comops.site:6080
 REPOSITORY_NAME=cm_trino
 COMPONENT_INSTALL_DIR_NAME=/opt/trino
@@ -140,7 +140,7 @@ Ranger Plugin for trino has been enabled. Please restart trino to ensure that ch
 ```bash
 vi /opt/trino/etc/access-control.properties
 access-control.name=ranger
-#add the following two lines
+\#add the following two lines
 ranger.principal=trino@TIGER.COM
 ranger.keytab=/opt/trino/connector/hive/trino.keytab
 ```
