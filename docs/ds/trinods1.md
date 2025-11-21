@@ -15,6 +15,7 @@ grand_parent: Data Service
 ---
 
 ## 1. Introduction to the test environment
+
 |CDP Runtime version |CDP PvC Base 7.1.9 SP1 - cdh7.1.9.p1064|
 |CM version |Cloudera Manager 7.13.1.501|
 |ECS version |CDP PvC DataServices 1.5.5 SP1|
@@ -209,7 +210,7 @@ SSLVerification=CA
 
 ## 6. Query Monitoring
 
-- Trino Coordinator Web UI provides a lightweight, real-time interface that helps administrators and developers monitor and manage the state of a Trino cluster.
+- Trino Coordinator Web UI (https://trino01.apps.ecscloud.iopscloud.cloudera.com:443/ui/) provides a lightweight, real-time interface that helps administrators and developers monitor and manage the state of a Trino cluster.
     - Monitor Running and Completed Queries
         - Displays all active, queued, and finished queries.
         - Shows query details such as SQL text, execution stages, tasks, memory usage, and performance metrics.
@@ -222,4 +223,4 @@ SSLVerification=CA
         - Provides an overview of cluster-wide memory usage (user memory, system memory, total memory).
         - Shows spill usage and other execution-related metrics.
 
-![](../../assets/images/ds/trinods22.png)
+![](../../assets/images/ds/trinods23.png)
