@@ -198,7 +198,7 @@ export JAVA_HOME=/usr/local/Cellar/openjdk@11/11.0.18/libexec/openjdk.jdk/Conten
 export SPARK_HOME=$HOME/hadoop-clients/spark
 export BEELINE_HOME=$HOME/hadoop-clients/beeline
 export HIVE_CONF_DIR=$HOME/hadoop-clients/conf.cloudera.hive_on_tez
-PATH=$PATH:$BEELINE_HOME/bin:$SPARK_HOME/sbin:$SPARK_HOME/bin
+PATH=$PATH:$BEELINE_HOME/bin:$SPARK_HOME/sbin:$SPARK_HOME/bin:$JAVA_HOME/bin
 export PATH="/Library/Frameworks/Python.framework/Versions/3.8/bin:${PATH}"
 
 source $HOME/.bash_profile
