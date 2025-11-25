@@ -158,13 +158,13 @@ SSLVerification=CA
 create schema  iceberg.test_iceberg;
 
 CREATE TABLE iceberg.test_iceberg.sample_07
-(code varchar,    description varchar, total_emp integer, salary integer)
+(code varchar, description varchar, total_emp integer, salary integer)
 WITH (
     format = 'PARQUET'
 );
 
 CREATE TABLE iceberg.test_iceberg.sample_08
-(code varchar,    description varchar, total_emp integer, salary integer)
+(code varchar, description varchar, total_emp integer, salary integer)
 WITH (
     format = 'PARQUET'
 );
@@ -180,7 +180,7 @@ select * from iceberg.test_iceberg.sample_07 limit 10;
 select * from iceberg.test_iceberg.sample_08 limit 10;
 ```
 
-![](../../assets/images/ds/trinods14.png)
+![](../../assets/images/ds/trinods24.png)
 
 ### 5.2. Using resource-based column masking for Trino
 
