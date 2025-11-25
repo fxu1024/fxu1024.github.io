@@ -72,6 +72,7 @@ grand_parent: Data Service
 
 ![](../../assets/images/ds/trinods05.png)
 
+
 ### 4.2. Submitting queries with Hue
 
 - You can write and edit queries for Trino Virtual Warehouses in the Cloudera Data Warehouse service by using Hue.
@@ -89,13 +90,12 @@ grand_parent: Data Service
 ![](../../assets/images/ds/trinods06.png)
 
 - In the Data Warehouse service Overview page, for the Virtual Warehouse you want to connect to the client, click and select `Copy Trino URL` and `Download Kubenetes cluster certificate`.
-
-![](../../assets/images/ds/trinods07.png)
-
     - Trino URL: https://trino01.apps.ecscloud.iopscloud.cloudera.com:443
     - Kubenetes cluster certificate: truststore.jks
 
-- 
+![](../../assets/images/ds/trinods07.png)
+
+
 ```console
 chmod +x trino-cli-executable.jar
 mv trino-cli-executable.jar trino
@@ -105,9 +105,9 @@ mv trino-cli-executable.jar trino
 ![](../../assets/images/ds/trinods08.png)
 
 
-### 4.4. Submitting queries with cloudbeaver
+### 4.4. Submitting queries with Cloudbeaver
 
-- Build and deploy cloudbeaver
+- Build and deploy Cloudbeaver. Note: please copy the Kubenetes cluster certificate into the docker `conf` directory.
 
 ```console
 docker pull dbeaver/cloudbeaver
@@ -150,7 +150,77 @@ SSLVerification=CA
 ![](../../assets/images/ds/trinods14.png)
 
 
-## 5. Configuring Federation Connectors
+## 5. Ranger authorization for Trino Virtual Warehouses
+
+### 5.1. Create iceberg tables with Hue 
+
+```console
+create schema  iceberg.test_iceberg;
+
+CREATE TABLE iceberg.test_iceberg.sample_07
+(code varchar,    description varchar, total_emp integer, salary integer)
+WITH (
+    format = 'PARQUET'
+);
+
+CREATE TABLE iceberg.test_iceberg.sample_08
+(code varchar,    description varchar, total_emp integer, salary integer)
+WITH (
+    format = 'PARQUET'
+);
+
+insert into iceberg.test_iceberg.sample_07
+select * from hive.default.sample_07;
+
+insert into iceberg.test_iceberg.sample_08
+select * from hive.default.sample_08;
+
+select * from iceberg.test_iceberg.sample_07 limit 10;
+
+select * from iceberg.test_iceberg.sample_08 limit 10;
+```
+
+![](../../assets/images/ds/trinods14.png)
+
+### 5.2. Using resource-based column masking for Trino
+
+- Create a resource-based column masking policy from the Masking tab in the Trino Policies page.
+
+![](../../assets/images/ds/trinods25.png)
+
+- The query results on iceberg table were as expected.
+
+![](../../assets/images/ds/trinods26.png)
+
+
+### 5.3. Using row-level filtering for Trino
+
+- Create a row-level filter policy from the Row Level Filter tab in the Trino Policies page. You can then set filters for specific users, groups, roles, and specify a filter expression. The filter expression must be a valid WHERE clause for the table or view, such as `code='13-0000'`.
+
+![](../../assets/images/ds/trinods27.png)
+
+- The query results on iceberg table were as expected.
+
+![](../../assets/images/ds/trinods28.png)
+
+
+### 5.4. Using tag-based column masking for Trino
+
+- Add the classification `test` to the column `description` of iceberg table `test_iceberg.sample_08` in the Atlas UI.
+
+![](../../assets/images/ds/trinods29.png)
+
+- Create a tag-based column masking policy from the Masking tab in the TAG Policies page.
+
+![](../../assets/images/ds/trinods30.png)
+
+- The masking rule is not working. This is because the current version does not support it.
+
+![](../../assets/images/ds/trinods31.png)
+
+
+
+## 6. Configuring Federation Connectors
 
 - You can use Cloudera Data Warehouse to configure a connector for a data source, enabling a Trino Virtual Warehouse to access the data source. Cloudera enables you to configure connectors for the following data sources:
     - PostgreSQL
@@ -208,9 +278,9 @@ SSLVerification=CA
 ![](../../assets/images/ds/trinods22.png)
 
 
-## 6. Query Monitoring
+## 7. Query Monitoring
 
-- Trino Coordinator Web UI (https://trino01.apps.ecscloud.iopscloud.cloudera.com:443/ui/) provides a lightweight, real-time interface that helps administrators and developers monitor and manage the state of a Trino cluster.
+- Trino Coordinator Web UI `https://trino01.apps.ecscloud.iopscloud.cloudera.com:443/ui/` provides a lightweight, real-time interface that helps administrators and developers monitor and manage the state of a Trino cluster.
     - Monitor Running and Completed Queries
         - Displays all active, queued, and finished queries.
         - Shows query details such as SQL text, execution stages, tasks, memory usage, and performance metrics.
