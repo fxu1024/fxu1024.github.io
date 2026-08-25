@@ -2,6 +2,7 @@
 layout: default
 title: Impala Data Cache Testing
 nav_order: 16
+nav_exclude: true
 parent: Operations
 grand_parent: Data Service
 ---

@@ -2,6 +2,7 @@
 layout: default
 title: Issues
 nav_order: 3
+nav_exclude: true
 has_children: true
 parent: Data Service
 ---

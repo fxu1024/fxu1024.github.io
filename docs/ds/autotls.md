@@ -2,6 +2,7 @@
 layout: default
 title: Sign CSR with AutoTLS Managed CA for ML Workspace
 nav_order: 5
+nav_exclude: true
 parent: Operations
 grand_parent: Data Service
 ---

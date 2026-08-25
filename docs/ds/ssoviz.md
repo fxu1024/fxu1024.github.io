@@ -2,6 +2,7 @@
 layout: default
 title: SSO permission for Cloudera Viz in CDW+CML
 nav_order: 7
+nav_exclude: true
 parent: Operations
 grand_parent: Data Service
 ---

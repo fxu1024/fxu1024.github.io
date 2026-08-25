@@ -2,6 +2,7 @@
 layout: default
 title: Fresh install of ECS 1.4.0 Cluster after migrating postgreSQL to oracle
 nav_order: 2
+nav_exclude: true
 parent: Operations
 grand_parent: Data Service
 ---

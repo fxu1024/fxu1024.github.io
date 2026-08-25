@@ -2,6 +2,7 @@
 layout: default
 title: ECS Server HA Failure Domain Testing
 nav_order: 15
+nav_exclude: true
 parent: Operations
 grand_parent: Data Service
 ---

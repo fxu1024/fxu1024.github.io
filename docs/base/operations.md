@@ -2,6 +2,7 @@
 layout: default
 title: Operations
 nav_order: 2
+nav_exclude: true
 has_children: true
 parent: CDP Base
 ---

@@ -2,6 +2,7 @@
 layout: default
 title: Fresh install of ECS 1.3.4 HA Cluster
 nav_order: 1
+nav_exclude: true
 parent: Operations
 grand_parent: Data Service
 ---

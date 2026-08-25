@@ -2,6 +2,7 @@
 layout: default
 title: Set Up Highly Available HAProxy Servers for ECS Cluster
 nav_order: 4
+nav_exclude: true
 parent: Operations
 grand_parent: Data Service
 ---
