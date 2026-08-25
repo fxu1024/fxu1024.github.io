@@ -2,6 +2,7 @@
 layout: default
 title: Integrate HBase and Ozone
 nav_order: 3
+nav_exclude: true
 parent: Operations
 grand_parent: CDP Base
 ---

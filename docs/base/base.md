@@ -2,6 +2,7 @@
 layout: default
 title: CDP Base
 nav_order: 2
+nav_exclude: true
 has_children: true
 permalink: docs/base
 ---

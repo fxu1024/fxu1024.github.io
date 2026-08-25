@@ -2,6 +2,7 @@
 layout: default
 title: Integrate Trino with Apache Ranger in CDP
 nav_order: 2
+nav_exclude: true
 parent: Operations
 grand_parent: CDP Base
 ---
